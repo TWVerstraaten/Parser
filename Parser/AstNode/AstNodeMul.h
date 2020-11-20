@@ -9,9 +9,9 @@
 
 class AstNodeMul : public AstNode {
   public:
-    AstNodeMul(AstNode* base, AstNode* exponent);
+    AstNodeMul(std::unique_ptr<AstNode>&& left, std::unique_ptr<AstNode>&& right);
 
-    std::string toString() const override;
+    [[nodiscard]] std::string toString() const override;
 
   private:
     std::unique_ptr<AstNode> m_left;

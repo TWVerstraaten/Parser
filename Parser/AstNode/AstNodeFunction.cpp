@@ -4,8 +4,8 @@
 
 #include "AstNodeFunction.h"
 
-AstNodeFunction::AstNodeFunction(const std::string& functionName, AstNode* argument)
-    : AstNode(AstNode::NODE_TYPE::FUNCTION), m_functionName(functionName), m_argument(argument) {
+AstNodeFunction::AstNodeFunction(const std::string& functionName, std::unique_ptr<AstNode>&& argument)
+    : AstNode(AstNode::NODE_TYPE::FUNCTION), m_functionName(functionName), m_argument(std::move(argument)) {
 }
 
 std::string AstNodeFunction::toString() const {

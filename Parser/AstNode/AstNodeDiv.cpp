@@ -4,8 +4,8 @@
 
 #include "AstNodeDiv.h"
 
-AstNodeDiv::AstNodeDiv(AstNode* base, AstNode* exponent)
-    : AstNode(NODE_TYPE::DIV), m_left(base), m_right(exponent) {
+AstNodeDiv::AstNodeDiv(std::unique_ptr<AstNode>&& base, std::unique_ptr<AstNode>&& exponent)
+    : AstNode(NODE_TYPE::DIV), m_left(std::move(base)), m_right(std::move(exponent)) {
 }
 
 std::string AstNodeDiv::toString() const {

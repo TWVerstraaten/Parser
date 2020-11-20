@@ -9,7 +9,7 @@
 
 class AstNodeUnaryMinus : public AstNode {
   public:
-    explicit AstNodeUnaryMinus(AstNode* value);
+    explicit AstNodeUnaryMinus(std::unique_ptr<AstNode>&& value);
 
     [[nodiscard]] std::string toString() const override;
 

@@ -4,8 +4,8 @@
 
 #include "AstNodeAdd.h"
 
-AstNodeAdd::AstNodeAdd(AstNode* left, AstNode* right)
-    : AstNode(NODE_TYPE::ADD), m_leftNode(left), m_rightNode(right) {
+AstNodeAdd::AstNodeAdd(std::unique_ptr<AstNode>&& left, std::unique_ptr<AstNode>&& right)
+    : AstNode(NODE_TYPE::ADD), m_leftNode(std::move(left)), m_rightNode(std::move(right)) {
 }
 
 std::string AstNodeAdd::toString() const {

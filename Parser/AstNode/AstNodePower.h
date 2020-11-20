@@ -9,7 +9,7 @@
 
 class AstNodePower : public AstNode {
   public:
-    AstNodePower(AstNode* base, AstNode* exponent);
+    AstNodePower(std::unique_ptr<AstNode>&& base, std::unique_ptr<AstNode>&& exponent);
 
     [[nodiscard]] std::string toString() const override;
 

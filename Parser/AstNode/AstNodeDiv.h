@@ -9,7 +9,7 @@
 
 class AstNodeDiv : public AstNode {
   public:
-    AstNodeDiv(AstNode* base, AstNode* exponent);
+    AstNodeDiv(std::unique_ptr<AstNode>&& base, std::unique_ptr<AstNode>&& exponent);
 
     [[nodiscard]] std::string toString() const override;
 

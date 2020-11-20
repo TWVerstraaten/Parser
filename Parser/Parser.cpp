@@ -19,6 +19,7 @@
 #include <cassert>
 #include <functional>
 #include <iostream>
+#include <memory>
 #include <utility>
 
 static Tokenizer::TokenList::const_iterator lastBeforeOccurrenceOfType(Tokenizer::TokenList::const_iterator       begin,
@@ -36,34 +37,34 @@ static Tokenizer::TokenList::const_iterator lastBeforeOccurrenceOfType(Tokenizer
     }
 }
 
-AstNode* Parser::parse(std::string string) {
+std::unique_ptr<AstNode> Parser::parse(std::string string) {
     return Parser::parse(Tokenizer(string).tokens());
 }
 
-AstNode* Parser::parse(const Tokenizer::TokenList& tokenList) {
+std::unique_ptr<AstNode> Parser::parse(const Tokenizer::TokenList& tokenList) {
     std::cout << Tokenizer::toString(tokenList) << '\n';
     Parser parser;
     return parser.parseFunctions(tokenList);
 }
 
-AstNode* Parser::parseNoFunctions(Tokenizer::TokenList tokenList) {
+std::unique_ptr<AstNode> Parser::parseNoFunctions(Tokenizer::TokenList tokenList) {
     return parseBrackets(tokenList);
 }
 
-AstNode* Parser::parseValueType(const Tokenizer::Token& token) {
+std::unique_ptr<AstNode> Parser::parseValueType(const Tokenizer::Token& token) {
     switch (token.m_type) {
         case Tokenizer::TOKEN_TYPE::REFERENCE: {
             const auto indexString = token.m_string.substr(1);
             const auto index       = std::stoul(indexString);
             assert(index < m_subTokenLists.size());
-            return m_subTokenLists.at(index);
+            return std::unique_ptr<AstNode>(m_subTokenLists.at(index).release());
         }
         case Tokenizer::TOKEN_TYPE::IDENTIFIER:
-            return new AstNodeVar(token.m_string);
+            return std::unique_ptr<AstNode>(new AstNodeVar(token.m_string));
         case Tokenizer::TOKEN_TYPE::DOUBLE:
-            return new AstNodeDouble(token.m_string);
+            return std::unique_ptr<AstNode>(new AstNodeDouble(token.m_string));
         case Tokenizer::TOKEN_TYPE::INTEGER:
-            return new AstNodeInteger(token.m_string);
+            return std::unique_ptr<AstNode>(new AstNodeInteger(token.m_string));
         default:
             assert(false);
     }
@@ -74,31 +75,31 @@ bool isValueType(const Tokenizer::Token& token) {
            token.m_type == Tokenizer::TOKEN_TYPE::IDENTIFIER || token.m_type == Tokenizer::TOKEN_TYPE::REFERENCE;
 }
 
-AstNode* Parser::parseTerm(Tokenizer::TokenList& tokenList) {
+std::unique_ptr<AstNode> Parser::parseTerm(Tokenizer::TokenList& tokenList) {
     assert(std::find_if(tokenList.begin(), tokenList.end(), [](const Tokenizer::Token& token) {
                return token.m_type == Tokenizer::TOKEN_TYPE::BIN_OP_FAC ||
                       token.m_type == Tokenizer::TOKEN_TYPE::BIN_OP_EXPR;
            }) == tokenList.end());
 
-    AstNode* leadingTerm = parseLeadingValueType(tokenList);
-    AstNode* returnNode  = leadingTerm;
-    if (not tokenList.empty()) {
+    std::unique_ptr<AstNode> leadingTerm = parseLeadingValueType(tokenList);
+    if (tokenList.empty()) {
+        return leadingTerm;
+    } else {
         const auto binOpIt = tokenList.begin();
         assert(binOpIt->m_type == Tokenizer::TOKEN_TYPE::BIN_OP_TERM);
         if (binOpIt->m_string == "+") {
             tokenList.pop_front();
-            returnNode = new AstNodeAdd(leadingTerm, parseTerm(tokenList));
+            return std::unique_ptr<AstNode>(new AstNodeAdd(std::move(leadingTerm), parseTerm(tokenList)));
         } else if (binOpIt->m_string == "-") {
             tokenList.pop_front();
-            returnNode = new AstNodeSubtract(leadingTerm, parseTerm(tokenList));
+            return std::unique_ptr<AstNode>(new AstNodeSubtract(std::move(leadingTerm), parseTerm(tokenList)));
         } else {
-            return new AstNodeError{};
+            return std::unique_ptr<AstNode>(new AstNodeError{});
         }
     }
-    return returnNode;
 }
 
-AstNode* Parser::parseFactor(Tokenizer::TokenList& tokenList) {
+std::unique_ptr<AstNode> Parser::parseFactor(Tokenizer::TokenList& tokenList) {
     assert(not tokenList.empty());
     auto it = lastBeforeOccurrenceOfType(tokenList.begin(), tokenList.end(), Tokenizer::TOKEN_TYPE::BIN_OP_FAC);
     if (it == tokenList.end()) {
@@ -107,16 +108,18 @@ AstNode* Parser::parseFactor(Tokenizer::TokenList& tokenList) {
         it = tokenList.insert(it, freshReferenceToken());
         it = std::next(it);
         if (std::next(it)->m_string == "*") {
-            m_subTokenLists.emplace_back(new AstNodeMul(parseValueType(*it), parseValueType(*std::next(it, 2))));
+            m_subTokenLists.emplace_back(
+                std::unique_ptr<AstNode>(new AstNodeMul(parseValueType(*it), parseValueType(*std::next(it, 2)))));
         } else {
-            m_subTokenLists.emplace_back(new AstNodeDiv(parseValueType(*it), parseValueType(*std::next(it, 2))));
+            m_subTokenLists.emplace_back(
+                std::unique_ptr<AstNode>(new AstNodeDiv(parseValueType(*it), parseValueType(*std::next(it, 2)))));
         }
         tokenList.erase(it, std::next(it, 3));
     }
     return parseFactor(tokenList);
 }
 
-AstNode* Parser::parseExpression(Tokenizer::TokenList& tokenList) {
+std::unique_ptr<AstNode> Parser::parseExpression(Tokenizer::TokenList& tokenList) {
     assert(not tokenList.empty());
     auto it = lastBeforeOccurrenceOfType(tokenList.begin(), tokenList.end(), Tokenizer::TOKEN_TYPE::BIN_OP_EXPR);
     if (it == tokenList.end()) {
@@ -124,13 +127,14 @@ AstNode* Parser::parseExpression(Tokenizer::TokenList& tokenList) {
     } else {
         it = tokenList.insert(it, freshReferenceToken());
         it = std::next(it);
-        m_subTokenLists.emplace_back(new AstNodePower(parseValueType(*it), parseValueType(*std::next(it, 2))));
+        m_subTokenLists.emplace_back(
+            std::unique_ptr<AstNode>(new AstNodePower(parseValueType(*it), parseValueType(*std::next(it, 2)))));
         tokenList.erase(it, std::next(it, 3));
     }
     return parseExpression(tokenList);
 }
 
-AstNode* Parser::parseBrackets(Tokenizer::TokenList& tokenList) {
+std::unique_ptr<AstNode> Parser::parseBrackets(Tokenizer::TokenList& tokenList) {
     auto openBracketIt = std::find_if(tokenList.begin(), tokenList.end(), [](const Tokenizer::Token& token) {
         return token.m_type == Tokenizer::TOKEN_TYPE::LEFT_BR;
     });
@@ -185,12 +189,12 @@ std::string Parser::toString(const Tokenizer::TokenList& tokenList) const {
 Tokenizer::Token Parser::freshReferenceToken() const {
     return Tokenizer::Token{Tokenizer::TOKEN_TYPE::REFERENCE, "$" + std::to_string(m_subTokenLists.size())};
 }
-AstNode* Parser::parseLeadingValueType(Tokenizer::TokenList& tokenList) {
-    AstNode* leadingTerm;
+std::unique_ptr<AstNode> Parser::parseLeadingValueType(Tokenizer::TokenList& tokenList) {
+    std::unique_ptr<AstNode> leadingTerm;
     if (tokenList.begin()->m_type == Tokenizer::TOKEN_TYPE::UNARY_OP) {
         tokenList.pop_front();
         assert(isValueType(tokenList.front()));
-        leadingTerm = new AstNodeUnaryMinus(parseValueType(*tokenList.begin()));
+        leadingTerm = std::make_unique<AstNodeUnaryMinus>(parseValueType(*tokenList.begin()));
         tokenList.pop_front();
     } else {
         assert(isValueType(tokenList.front()));
@@ -200,7 +204,7 @@ AstNode* Parser::parseLeadingValueType(Tokenizer::TokenList& tokenList) {
     return leadingTerm;
 }
 
-AstNode* Parser::parseFunctions(Tokenizer::TokenList tokenList) {
+std::unique_ptr<AstNode> Parser::parseFunctions(Tokenizer::TokenList tokenList) {
     auto functionIdIt = std::find_if(tokenList.begin(), tokenList.end(), [](const Tokenizer::Token& token) {
         return token.m_type == Tokenizer::TOKEN_TYPE::FUNCTION;
     });
@@ -222,7 +226,7 @@ AstNode* Parser::parseFunctions(Tokenizer::TokenList tokenList) {
 
         const size_t indexOfNewExpression = m_subTokenLists.size();
         m_subTokenLists.emplace_back(nullptr);
-        m_subTokenLists[indexOfNewExpression] = new AstNodeFunction(functionName, parse(expressionInBrackets));
+        m_subTokenLists[indexOfNewExpression].reset(new AstNodeFunction(functionName, parse(expressionInBrackets)));
 
         functionIdIt = std::find_if(tokenList.begin(), tokenList.end(), [](const Tokenizer::Token& token) {
             return token.m_type == Tokenizer::TOKEN_TYPE::FUNCTION;

@@ -9,7 +9,7 @@
 class AstNodeAdd : public AstNode {
 
   public:
-    AstNodeAdd(AstNode* left, AstNode* right);
+    AstNodeAdd(std::unique_ptr<AstNode>&& left, std::unique_ptr<AstNode>&& right);
 
     [[nodiscard]] std::string toString() const override;
 

@@ -16,25 +16,25 @@ class Parser {
   public:
     Parser() = default;
 
-    static AstNode* parse(std::string string);
+    static std::unique_ptr<AstNode> parse(std::string string);
 
   private:
     enum class PRECEDENCE_TYPE { EXPRESSION, FACTOR, TERM };
 
-    [[nodiscard]] std::string toString(const Tokenizer::TokenList& tokenList) const;
+    static std::unique_ptr<AstNode> parse(const Tokenizer::TokenList& tokenList);
+    std::unique_ptr<AstNode>        parseFunctions(Tokenizer::TokenList tokenList);
+    std::unique_ptr<AstNode>        parseNoFunctions(Tokenizer::TokenList tokenList);
+    std::unique_ptr<AstNode>        parseValueType(const Tokenizer::Token& token);
+    std::unique_ptr<AstNode>        parseTerm(Tokenizer::TokenList& tokenList);
+    std::unique_ptr<AstNode>        parseLeadingValueType(Tokenizer::TokenList& tokenList);
+    std::unique_ptr<AstNode>        parseFactor(Tokenizer::TokenList& tokenList);
+    std::unique_ptr<AstNode>        parseExpression(Tokenizer::TokenList& tokenList);
+    std::unique_ptr<AstNode>        parseBrackets(Tokenizer::TokenList& tokenList);
 
-    static AstNode* parse(const Tokenizer::TokenList& tokenList);
-    AstNode*        parseFunctions(Tokenizer::TokenList tokenList);
-    AstNode*        parseNoFunctions(Tokenizer::TokenList tokenList);
-    AstNode*        parseValueType(const Tokenizer::Token& token);
-    AstNode*        parseTerm(Tokenizer::TokenList& tokenList);
-    AstNode*        parseLeadingValueType(Tokenizer::TokenList& tokenList);
-    AstNode*        parseFactor(Tokenizer::TokenList& tokenList);
-    AstNode*        parseExpression(Tokenizer::TokenList& tokenList);
-    AstNode*        parseBrackets(Tokenizer::TokenList& tokenList);
+    [[nodiscard]] Tokenizer::Token freshReferenceToken() const;
+    [[nodiscard]] std::string      toString(const Tokenizer::TokenList& tokenList) const;
 
-    Tokenizer::Token      freshReferenceToken() const;
-    std::vector<AstNode*> m_subTokenLists;
+    std::vector<std::unique_ptr<AstNode>> m_subTokenLists;
 };
 
 #endif // PARSER_PARSER_H

@@ -4,7 +4,8 @@
 
 #include "AstNodeUnaryMinus.h"
 
-AstNodeUnaryMinus::AstNodeUnaryMinus(AstNode* value) : AstNode(AstNode::NODE_TYPE::UNARY_MINUS), m_value(value) {
+AstNodeUnaryMinus::AstNodeUnaryMinus(std::unique_ptr<AstNode>&& value)
+    : AstNode(AstNode::NODE_TYPE::UNARY_MINUS), m_value(std::move(value)) {
 }
 
 std::string AstNodeUnaryMinus::toString() const {

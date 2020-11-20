@@ -4,8 +4,8 @@
 
 #include "AstNodeSubtract.h"
 
-AstNodeSubtract::AstNodeSubtract(AstNode* left, AstNode* right)
-    : AstNode(NODE_TYPE::SUB), m_leftNode(left), m_rightNode(right) {
+AstNodeSubtract::AstNodeSubtract(std::unique_ptr<AstNode>&& left, std::unique_ptr<AstNode>&& right)
+    : AstNode(NODE_TYPE::SUB), m_leftNode(std::move(left)), m_rightNode(std::move(right)) {
 }
 
 std::string AstNodeSubtract::toString() const {

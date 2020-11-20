@@ -9,9 +9,9 @@
 
 class AstNodeVar : public AstNode {
   public:
-    AstNodeVar(const std::string& name);
+    explicit AstNodeVar(const std::string& name);
 
-    std::string toString() const override;
+    [[nodiscard]] std::string toString() const override;
 
   private:
     std::string m_varName;

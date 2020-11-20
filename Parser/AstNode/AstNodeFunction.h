@@ -9,7 +9,7 @@
 
 class AstNodeFunction : public AstNode {
   public:
-    AstNodeFunction(const std::string& functionName, AstNode* argument);
+    AstNodeFunction(const std::string& functionName, std::unique_ptr<AstNode>&& argument);
 
     [[nodiscard]] std::string toString() const override;
 
