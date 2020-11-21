@@ -4,6 +4,7 @@
 
 #include "AstNodeAdd.h"
 
+#include "AstNodeDouble.h"
 #include "AstNodeInteger.h"
 
 #include <memory>
@@ -21,30 +22,24 @@ std::unique_ptr<AstNode> AstNodeAdd::copy() const {
 }
 
 std::unique_ptr<AstNode> AstNodeAdd::simplify() const {
-//    auto left  = m_leftNode->simplify();
-//    auto right = m_rightNode->simplify();
-//
-//    if (left->type() == NODE_TYPE::INTEGER && right->type() == NODE_TYPE::INTEGER) {
-//        return std::unique_ptr<AstNode>(new AstNodeInteger(dynamic_cast<AstNodeInteger*>(left.get())->value() +
-//                                                           dynamic_cast<AstNodeInteger*>(right.get())->value()));
-//    }
-
-    //    std::unique_ptr<AstNodeAdd> simplifiedNode =
-    //        std::make_unique<AstNodeAdd>(m_leftNode->simplify(), m_rightNode->simplify());
-
-    //    if (simplifiedNode->m_rightNode->type() == AstNode::NODE_TYPE::INTEGER &&
-    //        simplifiedNode->m_leftNode->type() == AstNode::NODE_TYPE::INTEGER) {
-    //        return std::unique_ptr<AstNode>(new
-    //        AstNodeInteger(dynamic_cast<AstNodeInteger*>(m_rightNode.get())->value() +
-    //                                                           dynamic_cast<AstNodeInteger*>(m_leftNode.get())->value()));
-    //    }
-
-    //    return std::move(simplifiedNode);
-
+    const auto left  = m_leftNode->simplify();
+    const auto right = m_rightNode->simplify();
+    if (left->isNumeric() && right->isNumeric()) {
+        return doBinaryOperation(left, right, std::plus<>(), std::plus<>());
+    }
     AstNode* simplifiedNode = new AstNodeAdd(m_leftNode->simplify(), m_rightNode->simplify());
     return std::unique_ptr<AstNode>(simplifiedNode);
 }
 
 AstNode::NODE_TYPE AstNodeAdd::type() const {
     return NODE_TYPE::ADD;
+}
+
+bool AstNodeAdd::equals(const AstNode& other) const {
+    if (other.type() == AstNode::NODE_TYPE::ADD) {
+        const auto& candidate = dynamic_cast<const AstNodeAdd&>(other);
+        return (*m_leftNode == *candidate.m_leftNode && *m_rightNode == *candidate.m_rightNode) ||
+               (*m_rightNode == *candidate.m_leftNode && *m_leftNode == *candidate.m_rightNode);
+    }
+    return false;
 }

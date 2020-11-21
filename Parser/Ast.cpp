@@ -14,5 +14,5 @@ Ast::Ast(std::string string)
 }
 
 std::string Ast::toString() const {
-    return m_copy->toString();
+    return "Original:\t" + m_rootNode->toString() + "\nSimplified:\t " + m_copy->toString();
 }

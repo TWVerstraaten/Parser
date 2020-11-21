@@ -14,6 +14,9 @@ class AstNodeError : public AstNode {
     [[nodiscard]] std::string              toString() const override;
     [[nodiscard]] std::unique_ptr<AstNode> simplify() const override;
     [[nodiscard]] NODE_TYPE                type() const override;
+
+  protected:
+    [[nodiscard]] bool equals(const AstNode& other) const override;
 };
 
 #endif // PARSER_ASTNODEERROR_H

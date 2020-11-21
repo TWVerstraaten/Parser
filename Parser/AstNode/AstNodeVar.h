@@ -16,8 +16,11 @@ class AstNodeVar : public AstNode {
     [[nodiscard]] std::unique_ptr<AstNode> simplify() const override;
     [[nodiscard]] NODE_TYPE                type() const override;
 
+  protected:
+    [[nodiscard]] bool equals(const AstNode& other) const override;
+
   private:
-    std::string m_varName;
+    std::string m_variableName;
 };
 
 #endif // PARSER_ASTNODEVAR_H

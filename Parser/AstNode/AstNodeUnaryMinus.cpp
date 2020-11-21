@@ -4,6 +4,9 @@
 
 #include "AstNodeUnaryMinus.h"
 
+#include "AstNodeDouble.h"
+#include "AstNodeInteger.h"
+
 AstNodeUnaryMinus::AstNodeUnaryMinus(std::unique_ptr<AstNode>&& value) : m_value(std::move(value)) {
 }
 
@@ -14,10 +17,21 @@ std::string AstNodeUnaryMinus::toString() const {
 std::unique_ptr<AstNode> AstNodeUnaryMinus::copy() const {
     return std::unique_ptr<AstNode>(new AstNodeUnaryMinus(m_value->copy()));
 }
+
 std::unique_ptr<AstNode> AstNodeUnaryMinus::simplify() const {
     AstNode* simplifiedNode = new AstNodeUnaryMinus(m_value->simplify());
     return std::unique_ptr<AstNode>(simplifiedNode);
 }
+
 AstNode::NODE_TYPE AstNodeUnaryMinus::type() const {
     return NODE_TYPE::UNARY_MINUS;
 }
+
+bool AstNodeUnaryMinus::equals(const AstNode& other) const {
+    if (other.type() == AstNode::NODE_TYPE::UNARY_MINUS) {
+        return *m_value == *dynamic_cast<const AstNodeUnaryMinus&>(other).m_value;
+    }
+    return false;
+}
+
+// {* MINUS}

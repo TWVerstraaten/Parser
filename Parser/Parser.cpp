@@ -105,7 +105,11 @@ std::unique_ptr<AstNode> Parser::parseTerm(TokenList& tokenList) {
     auto it = lastBeforeOccurrenceOfType(tokenList.begin(), tokenList.end(), TOKEN_TYPE::BIN_OP_TERM);
     if (it == tokenList.end()) {
         assert(tokenList.size() == 1);
-        return parseValueType(tokenList.front());
+        if (startsWithUnaryMinus) {
+            return std::unique_ptr<AstNode>(new AstNodeUnaryMinus(parseValueType(tokenList.front())));
+        } else {
+            return parseValueType(tokenList.front());
+        }
     } else {
         it = tokenList.insert(it, freshReferenceToken(0));
         it = std::next(it);

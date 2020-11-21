@@ -7,7 +7,7 @@
 AstNodeInteger::AstNodeInteger(const std::string& string) : m_value(stoul(string)) {
 }
 
-AstNodeInteger::AstNodeInteger(size_t val) : m_value(val) {
+AstNodeInteger::AstNodeInteger(long long int val) : m_value(val) {
 }
 
 std::string AstNodeInteger::toString() const {
@@ -26,6 +26,13 @@ AstNode::NODE_TYPE AstNodeInteger::type() const {
     return NODE_TYPE::INTEGER;
 }
 
-size_t AstNodeInteger::value() const {
+long long AstNodeInteger::value() const {
     return m_value;
+}
+
+bool AstNodeInteger::equals(const AstNode& other) const {
+    if (other.type() == AstNode::NODE_TYPE::INTEGER) {
+        return m_value == dynamic_cast<const AstNodeInteger&>(other).m_value;
+    }
+    return false;
 }

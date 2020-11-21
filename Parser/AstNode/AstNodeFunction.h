@@ -16,6 +16,9 @@ class AstNodeFunction : public AstNode {
     [[nodiscard]] std::unique_ptr<AstNode> simplify() const override;
     [[nodiscard]] NODE_TYPE                type() const override;
 
+  protected:
+    [[nodiscard]] bool equals(const AstNode& other) const override;
+
   private:
     std::string              m_functionName;
     std::unique_ptr<AstNode> m_argument;

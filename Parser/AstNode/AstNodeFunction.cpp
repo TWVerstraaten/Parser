@@ -25,3 +25,10 @@ std::unique_ptr<AstNode> AstNodeFunction::simplify() const {
 AstNode::NODE_TYPE AstNodeFunction::type() const {
     return NODE_TYPE::FUNCTION;
 }
+
+bool AstNodeFunction::equals(const AstNode& other) const {
+    if (other.type() == AstNode::NODE_TYPE::FUNCTION) {
+        return *m_argument == *dynamic_cast<const AstNodeFunction&>(other).m_argument;
+    }
+    return false;
+}

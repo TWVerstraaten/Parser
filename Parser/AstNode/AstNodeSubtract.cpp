@@ -4,6 +4,8 @@
 
 #include "AstNodeSubtract.h"
 
+#include "AstNodeInteger.h"
+
 AstNodeSubtract::AstNodeSubtract(std::unique_ptr<AstNode>&& left, std::unique_ptr<AstNode>&& right)
     : m_leftNode(std::move(left)), m_rightNode(std::move(right)) {
 }
@@ -16,10 +18,24 @@ std::unique_ptr<AstNode> AstNodeSubtract::copy() const {
     return std::unique_ptr<AstNode>(new AstNodeSubtract(m_leftNode->copy(), m_rightNode->copy()));
 }
 std::unique_ptr<AstNode> AstNodeSubtract::simplify() const {
+    const auto left  = m_leftNode->simplify();
+    const auto right = m_rightNode->simplify();
+    if (left->isNumeric() && right->isNumeric()) {
+        return doBinaryOperation(left, right, std::minus<>(), std::minus<>());
+    }
+
     AstNode* simplifiedNode = new AstNodeSubtract(m_leftNode->simplify(), m_rightNode->simplify());
     return std::unique_ptr<AstNode>(simplifiedNode);
 }
 
 AstNode::NODE_TYPE AstNodeSubtract::type() const {
     return NODE_TYPE::SUBTRACT;
+}
+
+bool AstNodeSubtract::equals(const AstNode& other) const {
+    if (other.type() == AstNode::NODE_TYPE::SUBTRACT) {
+        const auto& candidate = dynamic_cast<const AstNodeSubtract&>(other);
+        return (*m_leftNode == *candidate.m_leftNode && *m_rightNode == *candidate.m_rightNode);
+    }
+    return false;
 }

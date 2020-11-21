@@ -10,16 +10,19 @@
 class AstNodeInteger : public AstNode {
   public:
     explicit AstNodeInteger(const std::string& string);
-    explicit AstNodeInteger(size_t val);
+    explicit AstNodeInteger(long long int val);
 
     [[nodiscard]] std::string              toString() const override;
     [[nodiscard]] std::unique_ptr<AstNode> copy() const override;
     [[nodiscard]] std::unique_ptr<AstNode> simplify() const override;
     [[nodiscard]] NODE_TYPE                type() const override;
-    [[nodiscard]] size_t value() const;
+    [[nodiscard]] long long                value() const;
+
+  protected:
+    [[nodiscard]] bool equals(const AstNode& other) const override;
 
   private:
-    size_t m_value;
+    long long m_value;
 };
 
 #endif // PARSER_ASTNODEINTEGER_H

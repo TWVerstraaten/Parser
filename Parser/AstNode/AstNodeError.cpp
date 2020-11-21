@@ -19,3 +19,7 @@ std::unique_ptr<AstNode> AstNodeError::simplify() const {
 AstNode::NODE_TYPE AstNodeError::type() const {
     return NODE_TYPE::ERROR;
 }
+
+bool AstNodeError::equals(const AstNode& other) const {
+    return true;
+}
