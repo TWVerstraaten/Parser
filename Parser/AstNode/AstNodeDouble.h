@@ -11,11 +11,15 @@ class AstNodeDouble : public AstNode {
 
   public:
     explicit AstNodeDouble(const std::string& string);
+    explicit AstNodeDouble(double value);
 
-    [[nodiscard]] std::string toString() const override;
+    [[nodiscard]] std::string              toString() const override;
+    [[nodiscard]] std::unique_ptr<AstNode> copy() const override;
+    [[nodiscard]] std::unique_ptr<AstNode> simplify() const override;
+    [[nodiscard]] NODE_TYPE                type() const override;
 
   private:
-    double m_val;
+    double m_value;
 };
 
 #endif // PARSER_ASTNODEDOUBLE_H

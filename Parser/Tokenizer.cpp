@@ -137,11 +137,11 @@ std::string Tokenizer::toString(const TokenList& tokens, bool readable) {
                     break;
                 case TOKEN_TYPE::FUN_OPEN_BR:
                     result += std::string("[") + "_" + token.m_string;
-                    ;
+
                     break;
                 case TOKEN_TYPE::FUN_CLOSE_BR:
                     result += std::string("]") + "_" + token.m_string;
-                    ;
+
                     break;
                 case TOKEN_TYPE::BIN_OP_EXPR:
                     result += token.m_string + "_e";
@@ -171,7 +171,7 @@ std::string Tokenizer::toString(const TokenList& tokens, bool readable) {
     return result;
 }
 
-Tokenizer::TokenList& Tokenizer::tokens() {
+Tokenizer::TokenList& Tokenizer::tokenList() {
     return m_tokens;
 }
 

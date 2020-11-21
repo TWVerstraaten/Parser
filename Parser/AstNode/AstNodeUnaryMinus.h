@@ -11,7 +11,10 @@ class AstNodeUnaryMinus : public AstNode {
   public:
     explicit AstNodeUnaryMinus(std::unique_ptr<AstNode>&& value);
 
-    [[nodiscard]] std::string toString() const override;
+    [[nodiscard]] std::string              toString() const override;
+    [[nodiscard]] std::unique_ptr<AstNode> copy() const override;
+    [[nodiscard]] std::unique_ptr<AstNode> simplify() const override;
+    [[nodiscard]] NODE_TYPE                type() const override;
 
   private:
     std::unique_ptr<AstNode> m_value;

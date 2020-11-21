@@ -9,9 +9,12 @@
 
 class AstNodeFunction : public AstNode {
   public:
-    AstNodeFunction(const std::string& functionName, std::unique_ptr<AstNode>&& argument);
+    AstNodeFunction(std::string functionName, std::unique_ptr<AstNode>&& argument);
 
-    [[nodiscard]] std::string toString() const override;
+    [[nodiscard]] std::string              toString() const override;
+    [[nodiscard]] std::unique_ptr<AstNode> copy() const override;
+    [[nodiscard]] std::unique_ptr<AstNode> simplify() const override;
+    [[nodiscard]] NODE_TYPE                type() const override;
 
   private:
     std::string              m_functionName;

@@ -1,10 +1,9 @@
 #include "Parser/Ast.h"
-#include "Parser/Tokenizer.h"
 
 #include <iostream>
 
 int main() {
-    std::string eq = "cos(1 + sin(x + 4))";
+    std::string eq = "1+4+1-3+2";
     Ast         ast(eq);
     std::cout << "Result = \t" + ast.toString() << '\n';
     return 0;

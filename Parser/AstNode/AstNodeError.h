@@ -9,9 +9,11 @@
 
 class AstNodeError : public AstNode {
   public:
-    AstNodeError();
-
-    [[nodiscard]] std::string toString() const override;
+    AstNodeError() = default;
+    [[nodiscard]] std::unique_ptr<AstNode> copy() const override;
+    [[nodiscard]] std::string              toString() const override;
+    [[nodiscard]] std::unique_ptr<AstNode> simplify() const override;
+    [[nodiscard]] NODE_TYPE                type() const override;
 };
 
 #endif // PARSER_ASTNODEERROR_H

@@ -35,9 +35,9 @@ class Tokenizer {
 
     explicit Tokenizer(const std::string& string);
 
-    TokenList&         tokens();
-    std::string        toString(bool readable = false) const;
-    static std::string toString(const TokenList& tokens, bool readable = false);
+    TokenList&                tokenList();
+    [[nodiscard]] std::string toString(bool readable = false) const;
+    static std::string        toString(const TokenList& tokens, bool readable = false);
 
   private:
     std::string::const_iterator parseValueType(std::string::const_iterator it, std::string::const_iterator end);

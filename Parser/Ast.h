@@ -14,8 +14,9 @@ class Ast {
     [[nodiscard]] std::string toString() const;
 
   private:
-    std::unique_ptr<AstNode> m_rootNode;
-    const std::string        m_string;
+    const std::string                    m_string;
+    const std::unique_ptr<const AstNode> m_rootNode;
+    std::unique_ptr<AstNode>             m_copy;
 };
 
 #endif // PARSER_AST_H

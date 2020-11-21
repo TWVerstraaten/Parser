@@ -6,13 +6,13 @@
 
 #include "Parser.h"
 
+#include <cassert>
 #include <utility>
 
-Ast::Ast(std::string string) : m_string(std::move(string)) {
-    Parser parser{};
-    m_rootNode = std::unique_ptr<AstNode>(parser.parse(m_string));
+Ast::Ast(std::string string)
+    : m_string(std::move(string)), m_rootNode(Parser::parse(m_string)), m_copy(m_rootNode->simplify()) {
 }
 
 std::string Ast::toString() const {
-    return m_rootNode->toString();
+    return m_copy->toString();
 }
