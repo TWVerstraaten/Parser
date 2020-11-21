@@ -6,6 +6,7 @@
 
 #include "AstNodeDouble.h"
 #include "AstNodeInteger.h"
+#include "Pattern/Pattern.h"
 
 #include <cassert>
 
@@ -21,6 +22,13 @@ std::unique_ptr<AstNode> AstNodeUnaryMinus::copy() const {
 }
 
 std::unique_ptr<AstNode> AstNodeUnaryMinus::simplify() const {
+    using TOKEN = Pattern::PATTERN_TOKEN;
+    Pattern doubleMinusPattern({TOKEN::MINUS, TOKEN::CH0, TOKEN::MINUS, TOKEN ::CH0, TOKEN ::NAME_A, TOKEN::CLOSE,
+                                TOKEN::CLOSE, TOKEN::CLOSE});
+    if (doubleMinusPattern.match(this)) {
+        return doubleMinusPattern.node("A")->copy();
+    }
+
     AstNode* simplifiedNode = new AstNodeUnaryMinus(m_value->simplify());
     return std::unique_ptr<AstNode>(simplifiedNode);
 }

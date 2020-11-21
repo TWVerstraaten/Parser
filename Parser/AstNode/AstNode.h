@@ -34,6 +34,8 @@ class AstNode {
     [[nodiscard]] virtual NODE_TYPE                type() const                = 0;
     [[nodiscard]] virtual size_t                   childCount() const          = 0;
     [[nodiscard]] virtual const AstNode*           childAt(size_t index) const = 0;
+    static double                                  doubleValue(const AstNode* node) ;
+    static long long int                           integerValue(const AstNode* node);
 
     friend bool operator==(const AstNode& lhs, const AstNode& rhs);
     friend bool operator<(const AstNode& lhs, const AstNode& rhs);
@@ -43,8 +45,6 @@ class AstNode {
 
     static std::unique_ptr<AstNode> create(long long value);
     static std::unique_ptr<AstNode> create(double value);
-    static double                   doubleValue(const AstNode* node);
-    static long long int            integerValue(const AstNode* node);
 
     static std::unique_ptr<AstNode>
     doBinaryOperation(const std::unique_ptr<AstNode>& left, const std::unique_ptr<AstNode>& right,
