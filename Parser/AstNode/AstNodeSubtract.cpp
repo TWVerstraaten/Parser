@@ -6,6 +6,8 @@
 
 #include "AstNodeInteger.h"
 
+#include <cassert>
+
 AstNodeSubtract::AstNodeSubtract(std::unique_ptr<AstNode>&& left, std::unique_ptr<AstNode>&& right)
     : m_leftNode(std::move(left)), m_rightNode(std::move(right)) {
 }
@@ -38,4 +40,13 @@ bool AstNodeSubtract::equals(const AstNode& other) const {
         return (*m_leftNode == *candidate.m_leftNode && *m_rightNode == *candidate.m_rightNode);
     }
     return false;
+}
+
+size_t AstNodeSubtract::childCount() const {
+    return 2;
+}
+
+const AstNode* AstNodeSubtract::childAt(size_t index) const {
+    assert(index < childCount());
+    return index == 0 ? m_leftNode.get() : m_rightNode.get();
 }

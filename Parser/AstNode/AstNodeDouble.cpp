@@ -4,6 +4,8 @@
 
 #include "AstNodeDouble.h"
 
+#include <cassert>
+
 AstNodeDouble::AstNodeDouble(const std::string& string) : m_value(stod(string)) {
 }
 
@@ -35,4 +37,12 @@ bool AstNodeDouble::equals(const AstNode& other) const {
         return m_value == dynamic_cast<const AstNodeDouble&>(other).m_value;
     }
     return false;
+}
+
+size_t AstNodeDouble::childCount() const {
+    return 0;
+}
+const AstNode* AstNodeDouble::childAt(size_t index) const {
+    assert(false);
+    return nullptr;
 }

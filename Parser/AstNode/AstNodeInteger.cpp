@@ -4,6 +4,8 @@
 
 #include "AstNodeInteger.h"
 
+#include <cassert>
+
 AstNodeInteger::AstNodeInteger(const std::string& string) : m_value(stoul(string)) {
 }
 
@@ -35,4 +37,12 @@ bool AstNodeInteger::equals(const AstNode& other) const {
         return m_value == dynamic_cast<const AstNodeInteger&>(other).m_value;
     }
     return false;
+}
+
+size_t AstNodeInteger::childCount() const {
+    return 0;
+}
+
+const AstNode* AstNodeInteger::childAt(size_t index) const {
+    assert(false);
 }

@@ -7,6 +7,8 @@
 #include "AstNodeDouble.h"
 #include "AstNodeInteger.h"
 
+#include <cassert>
+
 AstNodeUnaryMinus::AstNodeUnaryMinus(std::unique_ptr<AstNode>&& value) : m_value(std::move(value)) {
 }
 
@@ -32,6 +34,15 @@ bool AstNodeUnaryMinus::equals(const AstNode& other) const {
         return *m_value == *dynamic_cast<const AstNodeUnaryMinus&>(other).m_value;
     }
     return false;
+}
+
+size_t AstNodeUnaryMinus::childCount() const {
+    return 1;
+}
+
+const AstNode* AstNodeUnaryMinus::childAt(size_t index) const {
+    assert(index < childCount());
+    return m_value.get();
 }
 
 // {* MINUS}

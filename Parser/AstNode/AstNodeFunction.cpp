@@ -4,6 +4,7 @@
 
 #include "AstNodeFunction.h"
 
+#include <cassert>
 #include <utility>
 
 AstNodeFunction::AstNodeFunction(std::string functionName, std::unique_ptr<AstNode>&& argument)
@@ -31,4 +32,12 @@ bool AstNodeFunction::equals(const AstNode& other) const {
         return *m_argument == *dynamic_cast<const AstNodeFunction&>(other).m_argument;
     }
     return false;
+}
+
+size_t AstNodeFunction::childCount() const {
+    return 1;
+}
+const AstNode* AstNodeFunction::childAt(size_t index) const {
+    assert(index < childCount());
+    return m_argument.get();
 }

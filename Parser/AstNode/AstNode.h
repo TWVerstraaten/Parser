@@ -26,11 +26,14 @@ class AstNode {
     };
     explicit AstNode() = default;
 
-    [[nodiscard]] virtual std::string              toString() const = 0;
-    [[nodiscard]] virtual std::unique_ptr<AstNode> copy() const     = 0;
-    [[nodiscard]] virtual std::unique_ptr<AstNode> simplify() const = 0;
-    [[nodiscard]] bool                             isNumeric() const;
-    [[nodiscard]] virtual NODE_TYPE                type() const = 0;
+    [[nodiscard]] bool isNumeric() const;
+
+    [[nodiscard]] virtual std::string              toString() const            = 0;
+    [[nodiscard]] virtual std::unique_ptr<AstNode> copy() const                = 0;
+    [[nodiscard]] virtual std::unique_ptr<AstNode> simplify() const            = 0;
+    [[nodiscard]] virtual NODE_TYPE                type() const                = 0;
+    [[nodiscard]] virtual size_t                   childCount() const          = 0;
+    [[nodiscard]] virtual const AstNode*           childAt(size_t index) const = 0;
 
     friend bool operator==(const AstNode& lhs, const AstNode& rhs);
     friend bool operator<(const AstNode& lhs, const AstNode& rhs);

@@ -7,6 +7,8 @@
 #include "AstNodeDouble.h"
 #include "AstNodeInteger.h"
 
+#include <cassert>
+
 AstNodeMul::AstNodeMul(std::unique_ptr<AstNode>&& left, std::unique_ptr<AstNode>&& right)
     : m_leftNode(std::move(left)), m_rightNode(std::move(right)) {
 }
@@ -41,4 +43,13 @@ bool AstNodeMul::equals(const AstNode& other) const {
                (*m_rightNode == *candidate.m_leftNode && *m_leftNode == *candidate.m_rightNode);
     }
     return false;
+}
+
+size_t AstNodeMul::childCount() const {
+    return 2;
+}
+
+const AstNode* AstNodeMul::childAt(size_t index) const {
+    assert(index < childCount());
+    return index == 0 ? m_leftNode.get() : m_rightNode.get();
 }

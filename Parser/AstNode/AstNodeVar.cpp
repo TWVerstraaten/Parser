@@ -4,6 +4,7 @@
 
 #include "AstNodeVar.h"
 
+#include <cassert>
 #include <utility>
 
 AstNodeVar::AstNodeVar(std::string value) : m_variableName(std::move(value)) {
@@ -30,4 +31,12 @@ bool AstNodeVar::equals(const AstNode& other) const {
         return m_variableName == dynamic_cast<const AstNodeVar&>(other).m_variableName;
     }
     return false;
+}
+
+size_t AstNodeVar::childCount() const {
+    return 0;
+}
+
+const AstNode* AstNodeVar::childAt(size_t index) const {
+    assert(false);
 }

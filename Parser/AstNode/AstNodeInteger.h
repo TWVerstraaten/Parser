@@ -17,6 +17,8 @@ class AstNodeInteger : public AstNode {
     [[nodiscard]] std::unique_ptr<AstNode> simplify() const override;
     [[nodiscard]] NODE_TYPE                type() const override;
     [[nodiscard]] long long                value() const;
+    [[nodiscard]] size_t                                 childCount() const override;
+    const AstNode*                                       childAt(size_t index) const override;
 
   protected:
     [[nodiscard]] bool equals(const AstNode& other) const override;

@@ -4,6 +4,7 @@
 
 #include "AstNodePower.h"
 
+#include <cassert>
 #include <cmath>
 
 AstNodePower::AstNodePower(std::unique_ptr<AstNode>&& base, std::unique_ptr<AstNode>&& exponent)
@@ -41,4 +42,11 @@ bool AstNodePower::equals(const AstNode& other) const {
         return (*m_base == *candidate.m_base && *m_exponent == *candidate.m_exponent);
     }
     return false;
+}
+size_t AstNodePower::childCount() const {
+    return 2;
+}
+const AstNode* AstNodePower::childAt(size_t index) const {
+    assert(index < childCount());
+    return index == 0 ? m_base.get() : m_exponent.get();
 }

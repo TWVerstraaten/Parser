@@ -4,6 +4,8 @@
 
 #include "AstNodeError.h"
 
+#include <cassert>
+
 std::string AstNodeError::toString() const {
     return "Error";
 }
@@ -22,4 +24,12 @@ AstNode::NODE_TYPE AstNodeError::type() const {
 
 bool AstNodeError::equals(const AstNode& other) const {
     return true;
+}
+
+size_t AstNodeError::childCount() const {
+    return 0;
+}
+
+const AstNode* AstNodeError::childAt(size_t index) const {
+    assert(false);
 }

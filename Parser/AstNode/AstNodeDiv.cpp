@@ -4,6 +4,8 @@
 
 #include "AstNodeDiv.h"
 
+#include <cassert>
+
 AstNodeDiv::AstNodeDiv(std::unique_ptr<AstNode>&& base, std::unique_ptr<AstNode>&& exponent)
     : m_leftNode(std::move(base)), m_rightNode(std::move(exponent)) {
 }
@@ -37,4 +39,13 @@ bool AstNodeDiv::equals(const AstNode& other) const {
         return (*m_leftNode == *candidate.m_leftNode && *m_rightNode == *candidate.m_rightNode);
     }
     return false;
+}
+
+size_t AstNodeDiv::childCount() const {
+    return 2ul;
+}
+
+const AstNode* AstNodeDiv::childAt(size_t index) const {
+    assert(index < childCount());
+    return index == 0 ? m_leftNode.get() : m_rightNode.get();
 }

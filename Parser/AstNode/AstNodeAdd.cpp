@@ -7,6 +7,7 @@
 #include "AstNodeDouble.h"
 #include "AstNodeInteger.h"
 
+#include <cassert>
 #include <memory>
 
 AstNodeAdd::AstNodeAdd(std::unique_ptr<AstNode>&& left, std::unique_ptr<AstNode>&& right)
@@ -42,4 +43,13 @@ bool AstNodeAdd::equals(const AstNode& other) const {
                (*m_rightNode == *candidate.m_leftNode && *m_leftNode == *candidate.m_rightNode);
     }
     return false;
+}
+
+size_t AstNodeAdd::childCount() const {
+    return 2ul;
+}
+
+const AstNode* AstNodeAdd::childAt(size_t index) const {
+    assert(index < childCount());
+    return index == 0 ? m_leftNode.get() : m_rightNode.get();
 }
