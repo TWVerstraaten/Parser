@@ -29,7 +29,7 @@ class Parser {
     std::unique_ptr<AstNode>        parseExpression(Tokenizer::TokenList& tokenList);
     std::unique_ptr<AstNode>        parseBrackets(Tokenizer::TokenList& tokenList);
 
-    [[nodiscard]] Tokenizer::Token freshReferenceToken() const;
+    [[nodiscard]] Tokenizer::Token freshReferenceToken(size_t offset = 0ul) const;
     [[nodiscard]] std::string      toString(const Tokenizer::TokenList& tokenList) const;
 
     std::vector<std::unique_ptr<AstNode>> m_subTokenLists;

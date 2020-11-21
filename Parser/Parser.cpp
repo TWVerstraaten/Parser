@@ -98,22 +98,40 @@ std::unique_ptr<AstNode> Parser::parseTerm(TokenList& tokenList) {
     assert(not containsExpression(tokenList));
     assert(not containsFactor(tokenList));
 
-    std::unique_ptr<AstNode> leadingTerm = parseLeadingValueType(tokenList);
-    if (tokenList.empty()) {
-        return leadingTerm;
-    } else {
-        const auto binOpIt = tokenList.begin();
-        assert(binOpIt->m_type == TOKEN_TYPE::BIN_OP_TERM);
-        if (binOpIt->m_string == "+") {
-            tokenList.pop_front();
-            return std::unique_ptr<AstNode>(new AstNodeAdd(std::move(leadingTerm), parseTerm(tokenList)));
-        } else if (binOpIt->m_string == "-") {
-            tokenList.pop_front();
-            return std::unique_ptr<AstNode>(new AstNodeSubtract(std::move(leadingTerm), parseTerm(tokenList)));
-        } else {
-            return std::unique_ptr<AstNode>(new AstNodeError{});
-        }
+    bool startsWithUnaryMinus = tokenList.begin()->m_type == TOKEN_TYPE::UNARY_OP;
+    if (startsWithUnaryMinus) {
+        tokenList.erase(tokenList.begin());
     }
+    auto it = lastBeforeOccurrenceOfType(tokenList.begin(), tokenList.end(), TOKEN_TYPE::BIN_OP_TERM);
+    if (it == tokenList.end()) {
+        assert(tokenList.size() == 1);
+        return parseValueType(tokenList.front());
+    } else {
+        it = tokenList.insert(it, freshReferenceToken(0));
+        it = std::next(it);
+        if (std::next(it)->m_string == "+") {
+            if (startsWithUnaryMinus) {
+                m_subTokenLists.emplace_back(std::unique_ptr<AstNode>(
+                    new AstNodeAdd(std::unique_ptr<AstNode>(new AstNodeUnaryMinus(parseValueType(*it))),
+                                   parseValueType(*std::next(it, 2)))));
+            } else {
+                m_subTokenLists.emplace_back(
+                    std::unique_ptr<AstNode>(new AstNodeAdd(parseValueType(*it), parseValueType(*std::next(it, 2)))));
+            }
+        } else {
+            if (startsWithUnaryMinus) {
+                m_subTokenLists.emplace_back(std::unique_ptr<AstNode>(
+                    new AstNodeSubtract(std::unique_ptr<AstNode>(new AstNodeUnaryMinus(parseValueType(*it))),
+                                        parseValueType(*std::next(it, 2)))));
+            } else {
+                assert(std::next(it)->m_string == "-");
+                m_subTokenLists.emplace_back(std::unique_ptr<AstNode>(
+                    new AstNodeSubtract(parseValueType(*it), parseValueType(*std::next(it, 2)))));
+            }
+        }
+        tokenList.erase(it, std::next(it, 3));
+    }
+    return parseFactor(tokenList);
 }
 
 std::unique_ptr<AstNode> Parser::parseFactor(TokenList& tokenList) {
@@ -125,12 +143,13 @@ std::unique_ptr<AstNode> Parser::parseFactor(TokenList& tokenList) {
     if (it == tokenList.end()) {
         return parseTerm(tokenList);
     } else {
-        it = tokenList.insert(it, freshReferenceToken());
+        it = tokenList.insert(it, freshReferenceToken(0));
         it = std::next(it);
         if (std::next(it)->m_string == "*") {
             m_subTokenLists.emplace_back(
                 std::unique_ptr<AstNode>(new AstNodeMul(parseValueType(*it), parseValueType(*std::next(it, 2)))));
         } else {
+            assert(std::next(it)->m_string == "/");
             m_subTokenLists.emplace_back(
                 std::unique_ptr<AstNode>(new AstNodeDiv(parseValueType(*it), parseValueType(*std::next(it, 2)))));
         }
@@ -147,7 +166,7 @@ std::unique_ptr<AstNode> Parser::parseExpression(TokenList& tokenList) {
     if (it == tokenList.end()) {
         return parseFactor(tokenList);
     } else {
-        it = tokenList.insert(it, freshReferenceToken());
+        it = tokenList.insert(it, freshReferenceToken(0));
         it = std::next(it);
         m_subTokenLists.emplace_back(
             std::unique_ptr<AstNode>(new AstNodePower(parseValueType(*it), parseValueType(*std::next(it, 2)))));
@@ -166,7 +185,7 @@ std::unique_ptr<AstNode> Parser::parseBrackets(TokenList& tokenList) {
             std::find(openBracketIt, tokenList.end(), Token{TOKEN_TYPE::RIGHT_BR, openBracketIt->m_string});
         assert(closingBracketIt != tokenList.end());
 
-        openBracketIt    = tokenList.insert(openBracketIt, freshReferenceToken());
+        openBracketIt    = tokenList.insert(openBracketIt, freshReferenceToken(0));
         openBracketIt    = tokenList.erase(std::next(openBracketIt));
         closingBracketIt = tokenList.erase(closingBracketIt);
 
@@ -208,8 +227,8 @@ std::string Parser::toString(const TokenList& tokenList) const {
     return result;
 }
 
-Token Parser::freshReferenceToken() const {
-    return Token{TOKEN_TYPE::REFERENCE, "$" + std::to_string(m_subTokenLists.size())};
+Token Parser::freshReferenceToken(size_t offset) const {
+    return Token{TOKEN_TYPE::REFERENCE, "$" + std::to_string(m_subTokenLists.size() - offset)};
 }
 
 std::unique_ptr<AstNode> Parser::parseLeadingValueType(TokenList& tokenList) {
@@ -241,7 +260,7 @@ std::unique_ptr<AstNode> Parser::parseFunctions(TokenList tokenList) {
         functionIdIt     = tokenList.erase(functionIdIt);
         functionIdIt     = tokenList.erase(functionIdIt);
         closingBracketIt = tokenList.erase(closingBracketIt);
-        functionIdIt     = tokenList.insert(functionIdIt, freshReferenceToken());
+        functionIdIt     = tokenList.insert(functionIdIt, freshReferenceToken(0));
 
         TokenList expressionInBrackets;
         expressionInBrackets.splice(expressionInBrackets.begin(), tokenList, std::next(functionIdIt), closingBracketIt);
