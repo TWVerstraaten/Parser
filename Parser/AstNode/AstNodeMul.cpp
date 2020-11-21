@@ -6,6 +6,8 @@
 
 #include "AstNodeDouble.h"
 #include "AstNodeInteger.h"
+#include "AstNodePower.h"
+#include "Pattern/Pattern.h"
 
 #include <cassert>
 
@@ -22,14 +24,30 @@ std::unique_ptr<AstNode> AstNodeMul::copy() const {
 }
 
 std::unique_ptr<AstNode> AstNodeMul::simplify() const {
-    const auto left  = m_leftNode->simplify();
-    const auto right = m_rightNode->simplify();
-    if (left->isNumeric() && right->isNumeric()) {
-        return doBinaryOperation(left, right, std::multiplies<>(), std::multiplies<>());
+    std::unique_ptr<AstNode> simplifiedNode =
+        std::unique_ptr<AstNode>(new AstNodeMul(m_leftNode->simplify(), m_rightNode->simplify()));
+    const auto* node = dynamic_cast<const AstNodeMul*>(simplifiedNode.get());
+
+    if (node->m_leftNode->isNumeric() && node->m_rightNode->isNumeric()) {
+        return doBinaryOperation(node->m_leftNode, m_rightNode, std::multiplies<>(), std::multiplies<>());
     }
 
-    AstNode* simplifiedNode = new AstNodeMul(m_leftNode->simplify(), m_rightNode->simplify());
-    return std::unique_ptr<AstNode>(simplifiedNode);
+    Pattern zeroPattern = Pattern::oneChildIs(Pattern::PATTERN_TOKEN::ZERO, true);
+    if (zeroPattern.match(node)) {
+        return std::unique_ptr<AstNode>(new AstNodeInteger(0));
+    }
+    Pattern onePattern = Pattern::oneChildIs(Pattern::PATTERN_TOKEN::ONE, true);
+    if (onePattern.match(node)) {
+        return onePattern.node("A")->copy();
+    }
+
+    Pattern childrenEqualPattern = Pattern::childrenEqual();
+    if (childrenEqualPattern.match(node)) {
+        return std::unique_ptr<AstNode>(
+            new AstNodePower(childrenEqualPattern.node("A")->copy(), std::unique_ptr<AstNode>(new AstNodeInteger(2))));
+    }
+
+    return simplifiedNode;
 }
 
 AstNode::NODE_TYPE AstNodeMul::type() const {

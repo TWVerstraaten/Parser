@@ -9,6 +9,7 @@
 #include "Pattern/Pattern.h"
 
 #include <cassert>
+#include <iostream>
 
 AstNodeUnaryMinus::AstNodeUnaryMinus(std::unique_ptr<AstNode>&& value) : m_value(std::move(value)) {
 }
@@ -22,11 +23,21 @@ std::unique_ptr<AstNode> AstNodeUnaryMinus::copy() const {
 }
 
 std::unique_ptr<AstNode> AstNodeUnaryMinus::simplify() const {
-    using TOKEN = Pattern::PATTERN_TOKEN;
-    Pattern doubleMinusPattern({TOKEN::MINUS, TOKEN::CH0, TOKEN::MINUS, TOKEN ::CH0, TOKEN ::NAME_A, TOKEN::CLOSE,
-                                TOKEN::CLOSE, TOKEN::CLOSE});
-    if (doubleMinusPattern.match(this)) {
-        return doubleMinusPattern.node("A")->copy();
+    using T = Pattern::PATTERN_TOKEN;
+    Pattern doubleMinusPattern({T::MINUS, T::CH0, T::NAME_A, T::CLOSE, T::CLOSE}, false);
+    if (doubleMinusPattern.match(m_value.get())) {
+        return doubleMinusPattern.node("A")->copy()->simplify();
+    }
+    Pattern childIsNumeric({T::NUM, T::NAME_A, T::CLOSE}, false);
+    if (childIsNumeric.match(m_value.get())) {
+        const AstNode* numericNode = childIsNumeric.node("A");
+        if (numericNode->type() == AstNode::NODE_TYPE::DOUBLE) {
+            return std::unique_ptr<AstNode>(
+                new AstNodeDouble(-dynamic_cast<const AstNodeDouble*>(numericNode)->value()));
+        } else {
+            return std::unique_ptr<AstNode>(
+                new AstNodeInteger(-dynamic_cast<const AstNodeInteger*>(numericNode)->value()));
+        }
     }
 
     AstNode* simplifiedNode = new AstNodeUnaryMinus(m_value->simplify());
