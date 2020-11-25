@@ -5,9 +5,9 @@
 #ifndef PARSER_ASTNODEDOUBLE_H
 #define PARSER_ASTNODEDOUBLE_H
 
-#include "AstNode.h"
+#include "AstNodeNumeric.h"
 
-class AstNodeDouble : public AstNode {
+class AstNodeDouble : public AstNodeNumeric {
 
   public:
     explicit AstNodeDouble(const std::string& string);
@@ -19,12 +19,12 @@ class AstNodeDouble : public AstNode {
     [[nodiscard]] NODE_TYPE                type() const override;
     [[nodiscard]] double                   value() const;
     [[nodiscard]] size_t                   childCount() const override;
-    [[nodiscard]] const AstNode*                         childAt(size_t index) const override;
+    [[nodiscard]] const AstNode*           childAt(size_t index) const override;
 
   protected:
-    [[nodiscard]] bool equals(const AstNode& other) const override;
+    [[nodiscard]] Numeric toNumeric() const override;
+    [[nodiscard]] bool    equals(const AstNode& other) const override;
 
-  private:
     double m_value;
 };
 

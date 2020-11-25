@@ -7,44 +7,46 @@
 #include "AstNodeDouble.h"
 #include "AstNodeInteger.h"
 #include "AstNodePower.h"
-#include "Pattern/Pattern.h"
 
 #include <cassert>
 
-AstNodeMul::AstNodeMul(std::unique_ptr<AstNode>&& left, std::unique_ptr<AstNode>&& right)
-    : m_leftNode(std::move(left)), m_rightNode(std::move(right)) {
+AstNodeMul::AstNodeMul(std::unique_ptr<AstNode>&& left, std::unique_ptr<AstNode>&& right) {
+    m_nodes.emplace_back(std::move(left));
+    m_nodes.emplace_back(std::move(right));
+
+    cleanUp([](const Numeric& lhs, const Numeric& rhs) { return lhs * rhs; },
+            [](const AstNode* node) { return node->isOne(); });
 }
 
 std::string AstNodeMul::toString() const {
-    return "(" + m_leftNode->toString() + " * " + m_rightNode->toString() + ")";
+    std::string result = "(";
+    for (const auto& it : m_nodes) {
+        result += it->toString() + " * ";
+    }
+    result = result.substr(0, result.length() - 3ul);
+    result += ")";
+    return result;
 }
 
 std::unique_ptr<AstNode> AstNodeMul::copy() const {
-    return std::unique_ptr<AstNode>(new AstNodeMul(m_leftNode->copy(), m_rightNode->copy()));
+    auto copy = std::unique_ptr<AstNode>(new AstNodeMul{});
+    for (const auto& it : m_nodes) {
+        copy->addNode(it->copy());
+    }
+    return copy;
 }
 
 std::unique_ptr<AstNode> AstNodeMul::simplify() const {
-    std::unique_ptr<AstNode> simplifiedNode =
-        std::unique_ptr<AstNode>(new AstNodeMul(m_leftNode->simplify(), m_rightNode->simplify()));
-    const auto* node = dynamic_cast<const AstNodeMul*>(simplifiedNode.get());
+    std::unique_ptr<AstNode> simplifiedNode = simplifiedCopy();
+    auto*                    node           = dynamic_cast<AstNodeMul*>(simplifiedNode.get());
 
-    if (node->m_leftNode->isNumeric() && node->m_rightNode->isNumeric()) {
-        return doBinaryOperation(node->m_leftNode, m_rightNode, std::multiplies<>(), std::multiplies<>());
-    }
+    node->cleanUp([](const Numeric& lhs, const Numeric& rhs) { return lhs * rhs; },
+                  [](const AstNode* node) { return node->isZero(); });
 
-    Pattern zeroPattern = Pattern::oneOfTwoChildrenIs(Pattern::PATTERN_TOKEN::ZERO);
-    if (zeroPattern.match(node)) {
-        return std::unique_ptr<AstNode>(new AstNodeInteger(0));
-    }
-    Pattern onePattern = Pattern::oneOfTwoChildrenIs(Pattern::PATTERN_TOKEN::ONE);
-    if (onePattern.match(node)) {
-        return onePattern.node("A")->copy();
-    }
-
-    Pattern childrenEqualPattern = Pattern::childrenEqual();
-    if (childrenEqualPattern.match(node)) {
-        return std::unique_ptr<AstNode>(
-            new AstNodePower(childrenEqualPattern.node("A")->copy(), std::unique_ptr<AstNode>(new AstNodeInteger(2))));
+    if (node->childCount() == 0) {
+        return std::unique_ptr<AstNode>(new AstNodeInteger(1));
+    } else if (node->childCount() == 0) {
+        return std::move(node->m_nodes[0]);
     }
 
     return simplifiedNode;
@@ -54,20 +56,22 @@ AstNode::NODE_TYPE AstNodeMul::type() const {
     return NODE_TYPE::MULTIPLY;
 }
 
-bool AstNodeMul::equals(const AstNode& other) const {
-    if (other.type() == AstNode::NODE_TYPE::MULTIPLY) {
-        const auto& candidate = dynamic_cast<const AstNodeMul&>(other);
-        return (*m_leftNode == *candidate.m_leftNode && *m_rightNode == *candidate.m_rightNode) ||
-               (*m_rightNode == *candidate.m_leftNode && *m_leftNode == *candidate.m_rightNode);
+std::unique_ptr<AstNode> AstNodeMul::copyAllBut(const AstNode* nodeToSkip) const {
+    auto copy = this->copy();
+    copy->removeChild(nodeToSkip);
+
+    return copy;
+}
+
+std::unique_ptr<AstNode> AstNodeMul::simplifiedCopy() const {
+    auto* result = new AstNodeMul{};
+    for (const auto& it : m_nodes) {
+        result->addNode(it->simplify());
     }
-    return false;
+    result->sortMultiplicants();
+    return std::unique_ptr<AstNode>(result);
 }
 
-size_t AstNodeMul::childCount() const {
-    return 2;
-}
-
-const AstNode* AstNodeMul::childAt(size_t index) const {
-    assert(index < childCount());
-    return index == 0 ? m_leftNode.get() : m_rightNode.get();
+void AstNodeMul::sortMultiplicants() {
+    std::sort(m_nodes.begin(), m_nodes.end(), AstNode::compare);
 }

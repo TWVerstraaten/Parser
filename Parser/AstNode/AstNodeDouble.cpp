@@ -46,3 +46,7 @@ const AstNode* AstNodeDouble::childAt(size_t index) const {
     assert(false);
     return nullptr;
 }
+
+Numeric AstNodeDouble::toNumeric() const {
+    return Numeric(m_value);
+}

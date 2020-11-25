@@ -6,7 +6,6 @@
 
 #include "AstNodeDouble.h"
 #include "AstNodeInteger.h"
-#include "Pattern/Pattern.h"
 
 #include <cassert>
 #include <iostream>
@@ -23,23 +22,22 @@ std::unique_ptr<AstNode> AstNodeUnaryMinus::copy() const {
 }
 
 std::unique_ptr<AstNode> AstNodeUnaryMinus::simplify() const {
-    using T = Pattern::PATTERN_TOKEN;
-    Pattern doubleMinusPattern({T::MINUS, T::CH0, T::NAME_A, T::CLOSE, T::CLOSE});
-    if (doubleMinusPattern.match(m_value.get())) {
-        return doubleMinusPattern.node("A")->copy()->simplify();
-    }
-    Pattern childIsNumeric({T::NUM, T::NAME_A, T::CLOSE});
-    if (childIsNumeric.match(m_value.get())) {
-        const AstNode* numericNode = childIsNumeric.node("A");
-        if (numericNode->type() == AstNode::NODE_TYPE::DOUBLE) {
-            return std::unique_ptr<AstNode>(
-                new AstNodeDouble(-dynamic_cast<const AstNodeDouble*>(numericNode)->value()));
-        } else {
-            return std::unique_ptr<AstNode>(
-                new AstNodeInteger(-dynamic_cast<const AstNodeInteger*>(numericNode)->value()));
-        }
-    }
-
+    //    Pattern doubleMinusPattern({T::MINUS, T::CH0, T::NAME_A, T::CLOSE, T::CLOSE});
+    //    if (doubleMinusPattern.match(m_value.get())) {
+    //        return doubleMinusPattern.node("A")->copy()->simplify();
+    //    }
+    //    Pattern childIsNumeric({T::NUM, T::NAME_A, T::CLOSE});
+    //    if (childIsNumeric.match(m_value.get())) {
+    //        const AstNode* numericNode = childIsNumeric.node("A");
+    //        if (numericNode->type() == AstNode::NODE_TYPE::DOUBLE) {
+    //            return std::unique_ptr<AstNode>(
+    //                new AstNodeDouble(-dynamic_cast<const AstNodeDouble*>(numericNode)->value()));
+    //        } else {
+    //            return std::unique_ptr<AstNode>(
+    //                new AstNodeInteger(-dynamic_cast<const AstNodeInteger*>(numericNode)->value()));
+    //        }
+    //    }
+    //
     AstNode* simplifiedNode = new AstNodeUnaryMinus(m_value->simplify());
     return std::unique_ptr<AstNode>(simplifiedNode);
 }

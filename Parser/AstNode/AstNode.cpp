@@ -99,7 +99,7 @@ std::pair<const AstNode*, const AstNode*> AstNode::findViaTypeContainingCopy(Ast
     return {nullptr, nullptr};
 }
 
-std::vector<std::unique_ptr<AstNode>>::iterator AstNode::removeChild(const AstNode*) {
+void AstNode::removeChild(const AstNode*) {
     assert(false);
 }
 
@@ -137,15 +137,19 @@ void AstNode::removeNodeAndNodeWithSameChild(AstNode::NODE_TYPE type) {
     }
 }
 
-void AstNode::addNode(AstNode* node) {
+void AstNode::addNode(std::unique_ptr<AstNode> node) {
     assert(false);
 }
 
 void AstNode::transformNodeAndNodeWithSameChild(NODE_TYPE                                                      type,
                                                 const std::function<AstNode*(const AstNode*, const AstNode*)>& f) {
     const auto a = findViaTypeContainingCopy(AstNode::NODE_TYPE::MULTIPLY);
-    addNode(f(a.first, a.second));
+//    addNode(f(a.first, a.second));
 
     removeChild(a.first);
     removeChild(a.second);
+}
+
+std::unique_ptr<AstNode> AstNode::copyAllBut(const AstNode* nodeToSkip) const {
+    assert(false);
 }

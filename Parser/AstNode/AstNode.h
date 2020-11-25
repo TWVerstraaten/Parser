@@ -26,7 +26,7 @@ class AstNode {
     };
     explicit AstNode() = default;
 
-    virtual void addNode(AstNode* node);
+    virtual void addNode(std::unique_ptr<AstNode> node);
 
     [[nodiscard]] bool           isNumeric() const;
     [[nodiscard]] bool           containsCopyOf(const AstNode* node) const;
@@ -36,11 +36,13 @@ class AstNode {
     [[nodiscard]] bool                                      isZero() const;
     [[nodiscard]] bool                                      isOne() const;
 
-    virtual std::vector<std::unique_ptr<AstNode>>::iterator removeChild(const AstNode* nodeToRemove);
-    void                                                    removeIf(std::function<bool(const AstNode*)> predicate);
-    void                                                    removeNodeAndNodeWithSameChild(NODE_TYPE type);
-    void transformNodeAndNodeWithSameChild(NODE_TYPE type, const std::function<AstNode*(const AstNode*, const AstNode*)>& f);
+    virtual void removeChild(const AstNode* nodeToRemove);
+    void         removeIf(std::function<bool(const AstNode*)> predicate);
+    void         removeNodeAndNodeWithSameChild(NODE_TYPE type);
+    void         transformNodeAndNodeWithSameChild(NODE_TYPE                                                      type,
+                                                   const std::function<AstNode*(const AstNode*, const AstNode*)>& f);
 
+    [[nodiscard]] virtual std::unique_ptr<AstNode> copyAllBut(const AstNode* nodeToSkip) const;
     [[nodiscard]] virtual std::string              toString() const            = 0;
     [[nodiscard]] virtual std::unique_ptr<AstNode> copy() const                = 0;
     [[nodiscard]] virtual std::unique_ptr<AstNode> simplify() const            = 0;

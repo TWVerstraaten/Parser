@@ -46,3 +46,7 @@ size_t AstNodeInteger::childCount() const {
 const AstNode* AstNodeInteger::childAt(size_t index) const {
     assert(false);
 }
+
+Numeric AstNodeInteger::toNumeric() const {
+    return Numeric(m_value);
+}
