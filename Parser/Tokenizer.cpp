@@ -5,7 +5,9 @@
 #include "Tokenizer.h"
 
 #include <algorithm>
+#include <boost/algorithm/string.hpp>
 #include <cassert>
+#include <iostream>
 
 static std::string::const_iterator endOfIdentifier(std::string::const_iterator       begin,
                                                    const std::string::const_iterator end) {
@@ -24,12 +26,14 @@ static std::string::const_iterator endOfNumber(std::string::const_iterator      
 }
 
 Tokenizer::Tokenizer(const std::string& string) {
+
+    auto trimmedString = string;
+    boost::algorithm::trim(trimmedString);
     bool                        minusIsUnary = true;
-    std::string::const_iterator it           = string.cbegin();
+    std::string::const_iterator it           = trimmedString.cbegin();
 
     size_t bracketDepth = 0;
-
-    while (it != string.cend()) {
+    while (it != trimmedString.cend()) {
         switch (*it) {
             case '(':
                 if (m_tokens.back().m_type == TOKEN_TYPE::IDENTIFIER) {
@@ -67,10 +71,10 @@ Tokenizer::Tokenizer(const std::string& string) {
                 if (isspace(*it)) {
                     break;
                 }
-                it = parseValueType(it, string.cend());
+                it = parseValueType(it, trimmedString.cend());
                 break;
         }
-        minusIsUnary = (*it == '(') || isspace(*it);
+        minusIsUnary = (*it == '(');
         ++it;
     }
     findFunctionIdentifiers();

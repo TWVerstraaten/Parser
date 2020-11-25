@@ -32,11 +32,11 @@ std::unique_ptr<AstNode> AstNodeMul::simplify() const {
         return doBinaryOperation(node->m_leftNode, m_rightNode, std::multiplies<>(), std::multiplies<>());
     }
 
-    Pattern zeroPattern = Pattern::oneChildIs(Pattern::PATTERN_TOKEN::ZERO, true);
+    Pattern zeroPattern = Pattern::oneOfTwoChildrenIs(Pattern::PATTERN_TOKEN::ZERO);
     if (zeroPattern.match(node)) {
         return std::unique_ptr<AstNode>(new AstNodeInteger(0));
     }
-    Pattern onePattern = Pattern::oneChildIs(Pattern::PATTERN_TOKEN::ONE, true);
+    Pattern onePattern = Pattern::oneOfTwoChildrenIs(Pattern::PATTERN_TOKEN::ONE);
     if (onePattern.match(node)) {
         return onePattern.node("A")->copy();
     }

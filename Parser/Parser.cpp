@@ -7,18 +7,15 @@
 #include "AstNode/AstNodeAdd.h"
 #include "AstNode/AstNodeDiv.h"
 #include "AstNode/AstNodeDouble.h"
-#include "AstNode/AstNodeError.h"
 #include "AstNode/AstNodeFunction.h"
 #include "AstNode/AstNodeInteger.h"
 #include "AstNode/AstNodeMul.h"
 #include "AstNode/AstNodePower.h"
-#include "AstNode/AstNodeSubtract.h"
 #include "AstNode/AstNodeUnaryMinus.h"
 #include "AstNode/AstNodeVar.h"
 
 #include <cassert>
 #include <functional>
-#include <iostream>
 #include <memory>
 #include <utility>
 
@@ -124,13 +121,14 @@ std::unique_ptr<AstNode> Parser::parseTerm(TokenList& tokenList) {
             }
         } else {
             if (startsWithUnaryMinus) {
-                m_subTokenLists.emplace_back(std::unique_ptr<AstNode>(
-                    new AstNodeSubtract(std::unique_ptr<AstNode>(new AstNodeUnaryMinus(parseValueType(*it))),
-                                        parseValueType(*std::next(it, 2)))));
+                m_subTokenLists.emplace_back(std::unique_ptr<AstNode>(new AstNodeAdd(
+                    std::unique_ptr<AstNode>(new AstNodeUnaryMinus(parseValueType(*it))),
+                    std::unique_ptr<AstNode>(new AstNodeUnaryMinus(parseValueType(*std::next(it, 2)))))));
             } else {
                 assert(std::next(it)->m_string == "-");
-                m_subTokenLists.emplace_back(std::unique_ptr<AstNode>(
-                    new AstNodeSubtract(parseValueType(*it), parseValueType(*std::next(it, 2)))));
+                m_subTokenLists.emplace_back(std::unique_ptr<AstNode>(new AstNodeAdd(
+                    parseValueType(*it),
+                    std::unique_ptr<AstNode>(new AstNodeUnaryMinus(parseValueType(*std::next(it, 2)))))));
             }
         }
         tokenList.erase(it, std::next(it, 3));

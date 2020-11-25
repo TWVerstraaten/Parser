@@ -12,8 +12,8 @@
 class AstNode {
   public:
     enum class NODE_TYPE {
-        DOUBLE,
         INTEGER,
+        DOUBLE,
         UNARY_MINUS,
         VARIABLE,
         ADD,
@@ -26,7 +26,20 @@ class AstNode {
     };
     explicit AstNode() = default;
 
-    [[nodiscard]] bool isNumeric() const;
+    virtual void addNode(AstNode* node);
+
+    [[nodiscard]] bool           isNumeric() const;
+    [[nodiscard]] bool           containsCopyOf(const AstNode* node) const;
+    [[nodiscard]] size_t         indexOfCopy(const AstNode* node) const;
+    [[nodiscard]] const AstNode* findViaTypeAndChild(NODE_TYPE type, const AstNode* node) const;
+    [[nodiscard]] std::pair<const AstNode*, const AstNode*> findViaTypeContainingCopy(NODE_TYPE type) const;
+    [[nodiscard]] bool                                      isZero() const;
+    [[nodiscard]] bool                                      isOne() const;
+
+    virtual std::vector<std::unique_ptr<AstNode>>::iterator removeChild(const AstNode* nodeToRemove);
+    void                                                    removeIf(std::function<bool(const AstNode*)> predicate);
+    void                                                    removeNodeAndNodeWithSameChild(NODE_TYPE type);
+    void transformNodeAndNodeWithSameChild(NODE_TYPE type, const std::function<AstNode*(const AstNode*, const AstNode*)>& f);
 
     [[nodiscard]] virtual std::string              toString() const            = 0;
     [[nodiscard]] virtual std::unique_ptr<AstNode> copy() const                = 0;
@@ -34,11 +47,12 @@ class AstNode {
     [[nodiscard]] virtual NODE_TYPE                type() const                = 0;
     [[nodiscard]] virtual size_t                   childCount() const          = 0;
     [[nodiscard]] virtual const AstNode*           childAt(size_t index) const = 0;
-    static double                                  doubleValue(const AstNode* node) ;
-    static long long int                           integerValue(const AstNode* node);
 
-    friend bool operator==(const AstNode& lhs, const AstNode& rhs);
-    friend bool operator<(const AstNode& lhs, const AstNode& rhs);
+    static double        doubleValue(const AstNode* node);
+    static long long int integerValue(const AstNode* node);
+
+    bool        operator==(const AstNode& rhs) const;
+    static bool compare(const std::unique_ptr<AstNode>& lhs, const std::unique_ptr<AstNode>& rhs);
 
   protected:
     [[nodiscard]] virtual bool equals(const AstNode& other) const = 0;

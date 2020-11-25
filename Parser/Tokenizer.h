@@ -33,7 +33,7 @@ class Tokenizer {
 
     typedef std::list<Token> TokenList;
 
-    explicit Tokenizer(const std::string& string);
+    explicit Tokenizer(const std::string& trimmedString);
 
     TokenList&                tokenList();
     [[nodiscard]] std::string toString(bool readable = false) const;
