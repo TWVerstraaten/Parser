@@ -9,13 +9,14 @@
 
 class AstNodeDiv : public AstNode {
   public:
-    AstNodeDiv(std::unique_ptr<AstNode>&& base, std::unique_ptr<AstNode>&& exponent);
+    AstNodeDiv(u_ptr_AstNode&& base, u_ptr_AstNode&& exponent);
 
     [[nodiscard]] std::string              toString() const override;
-    [[nodiscard]] std::unique_ptr<AstNode> copy() const override;
-    [[nodiscard]] std::unique_ptr<AstNode> simplify() const override;
+    [[nodiscard]] u_ptr_AstNode copy() const override;
+    [[nodiscard]] u_ptr_AstNode simplify() const override;
     [[nodiscard]] NODE_TYPE                type() const override;
     [[nodiscard]] const AstNode*                         childAt(size_t index) const override;
+    bool                                                 compareEqualType(const AstNode* rhs) const override;
 
   protected:
     [[nodiscard]] bool equals(const AstNode& other) const override;
@@ -24,8 +25,8 @@ class AstNodeDiv : public AstNode {
     [[nodiscard]] size_t childCount() const override;
 
   private:
-    std::unique_ptr<AstNode> m_leftNode;
-    std::unique_ptr<AstNode> m_rightNode;
+    u_ptr_AstNode m_leftNode;
+    u_ptr_AstNode m_rightNode;
 };
 
 #endif // PARSER_ASTNODEDIV_H

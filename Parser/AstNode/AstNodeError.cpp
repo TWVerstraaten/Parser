@@ -10,11 +10,11 @@ std::string AstNodeError::toString() const {
     return "Error";
 }
 
-std::unique_ptr<AstNode> AstNodeError::copy() const {
-    return std::unique_ptr<AstNode>(new AstNodeError{});
+u_ptr_AstNode AstNodeError::copy() const {
+    return u_ptr_AstNode(new AstNodeError{});
 }
 
-std::unique_ptr<AstNode> AstNodeError::simplify() const {
+u_ptr_AstNode AstNodeError::simplify() const {
     return copy();
 }
 
@@ -32,4 +32,9 @@ size_t AstNodeError::childCount() const {
 
 const AstNode* AstNodeError::childAt(size_t index) const {
     assert(false);
+}
+
+bool AstNodeError::compareEqualType(const AstNode* rhs) const {
+    assert(rhs->type() == type());
+    return false;
 }

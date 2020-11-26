@@ -7,7 +7,7 @@
 #include <cassert>
 #include <utility>
 
-AstNodeFunction::AstNodeFunction(std::string functionName, std::unique_ptr<AstNode>&& argument)
+AstNodeFunction::AstNodeFunction(std::string functionName, u_ptr_AstNode&& argument)
     : m_functionName(std::move(functionName)), m_argument(std::move(argument)) {
 }
 
@@ -15,12 +15,12 @@ std::string AstNodeFunction::toString() const {
     return m_functionName + "(" + m_argument->toString() + ")";
 }
 
-std::unique_ptr<AstNode> AstNodeFunction::copy() const {
-    return std::unique_ptr<AstNode>(new AstNodeFunction(m_functionName, m_argument->copy()));
+u_ptr_AstNode AstNodeFunction::copy() const {
+    return u_ptr_AstNode(new AstNodeFunction(m_functionName, m_argument->copy()));
 }
-std::unique_ptr<AstNode> AstNodeFunction::simplify() const {
+u_ptr_AstNode AstNodeFunction::simplify() const {
     AstNode* simplifiedNode = new AstNodeFunction(m_functionName, m_argument->simplify());
-    return std::unique_ptr<AstNode>(simplifiedNode);
+    return u_ptr_AstNode(simplifiedNode);
 }
 
 AstNode::NODE_TYPE AstNodeFunction::type() const {
@@ -40,4 +40,13 @@ size_t AstNodeFunction::childCount() const {
 const AstNode* AstNodeFunction::childAt(size_t index) const {
     assert(index < childCount());
     return m_argument.get();
+}
+bool AstNodeFunction::compareEqualType(const AstNode* rhs) const {
+    assert(rhs->type() == type());
+    const auto* rightSide = dynamic_cast<const AstNodeFunction*>(rhs);
+    if (m_functionName != rightSide->m_functionName) {
+        return m_functionName < rightSide->m_functionName;
+    } else {
+        return compare_u_ptr(m_argument, rightSide->m_argument);
+    }
 }

@@ -14,11 +14,11 @@ std::string AstNodeVar::toString() const {
     return m_variableName;
 }
 
-std::unique_ptr<AstNode> AstNodeVar::copy() const {
-    return std::unique_ptr<AstNode>(new AstNodeVar(m_variableName));
+u_ptr_AstNode AstNodeVar::copy() const {
+    return u_ptr_AstNode(new AstNodeVar(m_variableName));
 }
 
-std::unique_ptr<AstNode> AstNodeVar::simplify() const {
+u_ptr_AstNode AstNodeVar::simplify() const {
     return copy();
 }
 
@@ -39,4 +39,9 @@ size_t AstNodeVar::childCount() const {
 
 const AstNode* AstNodeVar::childAt(size_t index) const {
     assert(false);
+}
+
+bool AstNodeVar::compareEqualType(const AstNode* rhs) const {
+    assert(rhs->type() == type());
+    return m_variableName < dynamic_cast<const AstNodeVar*>(rhs)->m_variableName;
 }

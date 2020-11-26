@@ -6,7 +6,7 @@
 
 #include <cassert>
 
-AstNodeInteger::AstNodeInteger(const std::string& string) : m_value(stoul(string)) {
+AstNodeInteger::AstNodeInteger(const std::string& string) : m_value(stoll(string)) {
 }
 
 AstNodeInteger::AstNodeInteger(long long int val) : m_value(val) {
@@ -16,11 +16,11 @@ std::string AstNodeInteger::toString() const {
     return std::to_string(m_value);
 }
 
-std::unique_ptr<AstNode> AstNodeInteger::copy() const {
-    return std::unique_ptr<AstNode>(new AstNodeInteger(m_value));
+u_ptr_AstNode AstNodeInteger::copy() const {
+    return u_ptr_AstNode(new AstNodeInteger(m_value));
 }
 
-std::unique_ptr<AstNode> AstNodeInteger::simplify() const {
+u_ptr_AstNode AstNodeInteger::simplify() const {
     return copy();
 }
 
@@ -49,4 +49,9 @@ const AstNode* AstNodeInteger::childAt(size_t index) const {
 
 Numeric AstNodeInteger::toNumeric() const {
     return Numeric(m_value);
+}
+
+bool AstNodeInteger::compareEqualType(const AstNode* rhs) const {
+    assert(rhs->type() == type());
+    return m_value < dynamic_cast<const AstNodeInteger*>(rhs)->m_value;
 }

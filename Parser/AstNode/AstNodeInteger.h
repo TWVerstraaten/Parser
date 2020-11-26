@@ -13,13 +13,14 @@ class AstNodeInteger : public AstNodeNumeric {
     explicit AstNodeInteger(long long int val);
 
   public:
-    [[nodiscard]] std::string              toString() const override;
-    [[nodiscard]] std::unique_ptr<AstNode> copy() const override;
-    [[nodiscard]] std::unique_ptr<AstNode> simplify() const override;
-    [[nodiscard]] NODE_TYPE                type() const override;
-    [[nodiscard]] long long                value() const;
-    [[nodiscard]] size_t                   childCount() const override;
-    [[nodiscard]] const AstNode*           childAt(size_t index) const override;
+    [[nodiscard]] std::string    toString() const override;
+    [[nodiscard]] u_ptr_AstNode  copy() const override;
+    [[nodiscard]] u_ptr_AstNode  simplify() const override;
+    [[nodiscard]] NODE_TYPE      type() const override;
+    [[nodiscard]] long long      value() const;
+    [[nodiscard]] size_t         childCount() const override;
+    [[nodiscard]] const AstNode* childAt(size_t index) const override;
+    bool                         compareEqualType(const AstNode* rhs) const override;
 
   protected:
     [[nodiscard]] Numeric toNumeric() const override;

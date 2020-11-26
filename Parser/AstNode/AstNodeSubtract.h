@@ -10,21 +10,22 @@
 class AstNodeSubtract : public AstNode {
 
   public:
-    AstNodeSubtract(std::unique_ptr<AstNode>&& left, std::unique_ptr<AstNode>&& right);
+    AstNodeSubtract(u_ptr_AstNode&& left, u_ptr_AstNode&& right);
 
-    [[nodiscard]] std::string              toString() const override;
-    [[nodiscard]] std::unique_ptr<AstNode> copy() const override;
-    [[nodiscard]] std::unique_ptr<AstNode> simplify() const override;
-    [[nodiscard]] NODE_TYPE                type() const override;
-    [[nodiscard]] size_t                   childCount() const override;
-    [[nodiscard]] const AstNode*           childAt(size_t index) const override;
+    [[nodiscard]] size_t         childCount() const override;
+    [[nodiscard]] NODE_TYPE      type() const override;
+    [[nodiscard]] std::string    toString() const override;
+    [[nodiscard]] const AstNode* childAt(size_t index) const override;
+    [[nodiscard]] u_ptr_AstNode  copy() const override;
+    [[nodiscard]] u_ptr_AstNode  simplify() const override;
 
   protected:
+    [[nodiscard]] bool compareEqualType(const AstNode* rhs) const override;
     [[nodiscard]] bool equals(const AstNode& other) const override;
 
   private:
-    std::unique_ptr<AstNode> m_leftNode;
-    std::unique_ptr<AstNode> m_rightNode;
+    u_ptr_AstNode m_leftNode;
+    u_ptr_AstNode m_rightNode;
 };
 
 #endif // PARSER_ASTNODESUBTRACT_H

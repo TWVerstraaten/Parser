@@ -4,42 +4,23 @@
 
 #include "AstNodeUnaryMinus.h"
 
-#include "AstNodeDouble.h"
-#include "AstNodeInteger.h"
-
 #include <cassert>
 #include <iostream>
 
-AstNodeUnaryMinus::AstNodeUnaryMinus(std::unique_ptr<AstNode>&& value) : m_value(std::move(value)) {
+AstNodeUnaryMinus::AstNodeUnaryMinus(u_ptr_AstNode&& value) : m_value(std::move(value)) {
 }
 
 std::string AstNodeUnaryMinus::toString() const {
     return "(-" + m_value->toString() + ")";
 }
 
-std::unique_ptr<AstNode> AstNodeUnaryMinus::copy() const {
-    return std::unique_ptr<AstNode>(new AstNodeUnaryMinus(m_value->copy()));
+u_ptr_AstNode AstNodeUnaryMinus::copy() const {
+    return u_ptr_AstNode(new AstNodeUnaryMinus(m_value->copy()));
 }
 
-std::unique_ptr<AstNode> AstNodeUnaryMinus::simplify() const {
-    //    Pattern doubleMinusPattern({T::MINUS, T::CH0, T::NAME_A, T::CLOSE, T::CLOSE});
-    //    if (doubleMinusPattern.match(m_value.get())) {
-    //        return doubleMinusPattern.node("A")->copy()->simplify();
-    //    }
-    //    Pattern childIsNumeric({T::NUM, T::NAME_A, T::CLOSE});
-    //    if (childIsNumeric.match(m_value.get())) {
-    //        const AstNode* numericNode = childIsNumeric.node("A");
-    //        if (numericNode->type() == AstNode::NODE_TYPE::DOUBLE) {
-    //            return std::unique_ptr<AstNode>(
-    //                new AstNodeDouble(-dynamic_cast<const AstNodeDouble*>(numericNode)->value()));
-    //        } else {
-    //            return std::unique_ptr<AstNode>(
-    //                new AstNodeInteger(-dynamic_cast<const AstNodeInteger*>(numericNode)->value()));
-    //        }
-    //    }
-    //
+u_ptr_AstNode AstNodeUnaryMinus::simplify() const {
     AstNode* simplifiedNode = new AstNodeUnaryMinus(m_value->simplify());
-    return std::unique_ptr<AstNode>(simplifiedNode);
+    return u_ptr_AstNode(simplifiedNode);
 }
 
 AstNode::NODE_TYPE AstNodeUnaryMinus::type() const {
@@ -62,4 +43,7 @@ const AstNode* AstNodeUnaryMinus::childAt(size_t index) const {
     return m_value.get();
 }
 
-// {* MINUS}
+bool AstNodeUnaryMinus::compareEqualType(const AstNode* rhs) const {
+    assert(rhs->type() == type());
+    return compare_u_ptr(m_value, dynamic_cast<const AstNodeUnaryMinus*>(rhs)->m_value);
+}

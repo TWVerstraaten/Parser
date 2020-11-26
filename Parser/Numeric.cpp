@@ -8,6 +8,7 @@
 #include "AstNode/AstNodeInteger.h"
 
 #include <iostream>
+#include <tgmath.h>
 
 Numeric::Numeric(double value) : m_dataType(DATA_TYPE::DOUBLE), m_doubleValue(value) {
 }
@@ -69,6 +70,16 @@ Numeric& Numeric::operator/=(const Numeric& other) {
     return *this;
 }
 
+Numeric& Numeric::operator^=(const Numeric& other) {
+    if (m_dataType == DATA_TYPE::INTEGER && other.m_dataType == DATA_TYPE::INTEGER) {
+        m_integerValue = std::pow(m_integerValue, other.m_integerValue);
+    } else {
+        m_doubleValue = std::pow(doubleValue(), other.doubleValue());
+        m_dataType    = DATA_TYPE::DOUBLE;
+    }
+    return *this;
+}
+
 double Numeric::doubleValue() const {
     return (m_dataType == DATA_TYPE::DOUBLE) ? m_doubleValue : static_cast<double>(m_integerValue);
 }
@@ -88,8 +99,26 @@ Numeric operator+(const Numeric& lhs, const Numeric& rhs) {
     return result;
 }
 
+Numeric operator-(const Numeric& lhs, const Numeric& rhs) {
+    Numeric result{lhs};
+    result -= rhs;
+    return result;
+}
+
 Numeric operator*(const Numeric& lhs, const Numeric& rhs) {
     Numeric result{lhs};
     result *= rhs;
+    return result;
+}
+
+Numeric operator/(const Numeric& lhs, const Numeric& rhs) {
+    Numeric result{lhs};
+    result /= rhs;
+    return result;
+}
+
+Numeric operator^(const Numeric& lhs, const Numeric& rhs) {
+    Numeric result{lhs};
+    result ^= rhs;
     return result;
 }

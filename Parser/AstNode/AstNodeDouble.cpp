@@ -16,11 +16,11 @@ std::string AstNodeDouble::toString() const {
     return std::to_string(m_value);
 }
 
-std::unique_ptr<AstNode> AstNodeDouble::copy() const {
-    return std::unique_ptr<AstNode>(new AstNodeDouble(m_value));
+u_ptr_AstNode AstNodeDouble::copy() const {
+    return u_ptr_AstNode(new AstNodeDouble(m_value));
 }
 
-std::unique_ptr<AstNode> AstNodeDouble::simplify() const {
+u_ptr_AstNode AstNodeDouble::simplify() const {
     return copy();
 }
 
@@ -49,4 +49,9 @@ const AstNode* AstNodeDouble::childAt(size_t index) const {
 
 Numeric AstNodeDouble::toNumeric() const {
     return Numeric(m_value);
+}
+
+bool AstNodeDouble::compareEqualType(const AstNode* rhs) const {
+    assert(rhs->type() == type());
+    return m_value < dynamic_cast<const AstNodeDouble*>(rhs)->m_value;
 }

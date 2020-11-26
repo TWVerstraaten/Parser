@@ -8,7 +8,7 @@
 
 #include <cassert>
 
-AstNodeSubtract::AstNodeSubtract(std::unique_ptr<AstNode>&& left, std::unique_ptr<AstNode>&& right)
+AstNodeSubtract::AstNodeSubtract(u_ptr_AstNode&& left, u_ptr_AstNode&& right)
     : m_leftNode(std::move(left)), m_rightNode(std::move(right)) {
 }
 
@@ -16,18 +16,19 @@ std::string AstNodeSubtract::toString() const {
     return "(" + m_leftNode->toString() + " - " + m_rightNode->toString() + ")";
 }
 
-std::unique_ptr<AstNode> AstNodeSubtract::copy() const {
-    return std::unique_ptr<AstNode>(new AstNodeSubtract(m_leftNode->copy(), m_rightNode->copy()));
+u_ptr_AstNode AstNodeSubtract::copy() const {
+    return u_ptr_AstNode(new AstNodeSubtract(m_leftNode->copy(), m_rightNode->copy()));
 }
-std::unique_ptr<AstNode> AstNodeSubtract::simplify() const {
+
+u_ptr_AstNode AstNodeSubtract::simplify() const {
     const auto left  = m_leftNode->simplify();
     const auto right = m_rightNode->simplify();
     if (left->isNumeric() && right->isNumeric()) {
-        return doBinaryOperation(left, right, std::minus<>(), std::minus<>());
+        return (NUMERIC_CAST(left.get()) - NUMERIC_CAST(right.get())).toNode();
     }
 
     AstNode* simplifiedNode = new AstNodeSubtract(m_leftNode->simplify(), m_rightNode->simplify());
-    return std::unique_ptr<AstNode>(simplifiedNode);
+    return u_ptr_AstNode(simplifiedNode);
 }
 
 AstNode::NODE_TYPE AstNodeSubtract::type() const {
@@ -49,4 +50,13 @@ size_t AstNodeSubtract::childCount() const {
 const AstNode* AstNodeSubtract::childAt(size_t index) const {
     assert(index < childCount());
     return index == 0 ? m_leftNode.get() : m_rightNode.get();
+}
+bool AstNodeSubtract::compareEqualType(const AstNode* rhs) const {
+    assert(rhs->type() == type());
+    const auto* rightSide = dynamic_cast<const AstNodeSubtract*>(rhs);
+    if (*m_leftNode == *rightSide->m_leftNode) {
+        return compare_u_ptr(m_rightNode, rightSide->m_rightNode);
+    } else {
+        return compare_u_ptr(m_leftNode, rightSide->m_leftNode);
+    }
 }

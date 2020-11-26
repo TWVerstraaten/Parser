@@ -13,20 +13,30 @@
 
 class AstNodeCommutative : public AstNode {
 
+  public:
+    void                                                    addNode(u_ptr_AstNode node);
+    void                                                    removeChild(const AstNode* nodeToRemove);
+    void                                                    removeNodeAndNodeWithSameChild(AstNode::NODE_TYPE type);
+    [[nodiscard]] std::pair<const AstNode*, const AstNode*> findViaTypeContainingCopy(NODE_TYPE type) const;
+
   protected:
+    AstNodeCommutative(std::function<Numeric(const Numeric&, const Numeric&)> accumulator,
+                       std::function<bool(u_ptr_AstNode&)>                    removePredicate);
+
     void sortNodes();
     void mergeNodes();
-    void cleanUp(const std::function<Numeric(const Numeric&, const Numeric&)>& accumulator,
-                 const std::function<bool(const AstNode*)>&                           removePredicate);
-    void accumulateNumeric(const std::function<Numeric(const Numeric&, const Numeric&)>& f);
+    void cleanUp();
+    void accumulateNumeric();
 
-    void                         removeChild(const AstNode* nodeToRemove) final;
-    void                         addNode(std::unique_ptr<AstNode> node) final;
     [[nodiscard]] bool           equals(const AstNode& other) const final;
+    [[nodiscard]] bool           compareEqualType(const AstNode* rhs) const final;
     [[nodiscard]] size_t         childCount() const final;
     [[nodiscard]] const AstNode* childAt(size_t index) const final;
 
-    std::vector<std::unique_ptr<AstNode>> m_nodes;
+  protected:
+    const std::function<Numeric(const Numeric&, const Numeric&)> m_accumulator;
+    const std::function<bool(u_ptr_AstNode&)>                    m_removePredicate;
+    std::vector<u_ptr_AstNode>                                   m_nodes;
 };
 
 #endif // PARSER_ASTNODECOMMUTATIVE_H

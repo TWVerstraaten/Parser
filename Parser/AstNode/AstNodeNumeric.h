@@ -8,6 +8,10 @@
 #include "../Numeric.h"
 #include "AstNode.h"
 
+class AstNodeNumeric;
+
+#define NUMERIC_CAST(node) dynamic_cast<const AstNodeNumeric*>(node)->toNumeric()
+
 class AstNodeNumeric : public AstNode {
 
   public:

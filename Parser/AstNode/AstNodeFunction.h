@@ -9,21 +9,22 @@
 
 class AstNodeFunction : public AstNode {
   public:
-    AstNodeFunction(std::string functionName, std::unique_ptr<AstNode>&& argument);
+    AstNodeFunction(std::string functionName, u_ptr_AstNode&& argument);
 
-    [[nodiscard]] std::string              toString() const override;
-    [[nodiscard]] std::unique_ptr<AstNode> copy() const override;
-    [[nodiscard]] std::unique_ptr<AstNode> simplify() const override;
-    [[nodiscard]] NODE_TYPE                type() const override;
-    [[nodiscard]] size_t                                 childCount() const override;
-    [[nodiscard]] const AstNode*                                       childAt(size_t index) const override;
+    [[nodiscard]] std::string    toString() const override;
+    [[nodiscard]] u_ptr_AstNode  copy() const override;
+    [[nodiscard]] u_ptr_AstNode  simplify() const override;
+    [[nodiscard]] NODE_TYPE      type() const override;
+    [[nodiscard]] size_t         childCount() const override;
+    [[nodiscard]] const AstNode* childAt(size_t index) const override;
+    bool                         compareEqualType(const AstNode* rhs) const override;
 
   protected:
     [[nodiscard]] bool equals(const AstNode& other) const override;
 
   private:
-    std::string              m_functionName;
-    std::unique_ptr<AstNode> m_argument;
+    std::string   m_functionName;
+    u_ptr_AstNode m_argument;
 };
 
 #endif // PARSER_ASTNODEFUNCTION_H

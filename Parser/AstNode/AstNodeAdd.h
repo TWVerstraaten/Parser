@@ -13,17 +13,16 @@
 class AstNodeAdd : public AstNodeCommutative {
 
   public:
-    AstNodeAdd(std::unique_ptr<AstNode>&& left, std::unique_ptr<AstNode>&& right);
+    AstNodeAdd(u_ptr_AstNode&& left, u_ptr_AstNode&& right);
 
-    [[nodiscard]] std::string              toString() const override;
-    [[nodiscard]] std::unique_ptr<AstNode> copy() const override;
-    [[nodiscard]] std::unique_ptr<AstNode> simplify() const override;
-    [[nodiscard]] NODE_TYPE                type() const override;
+    [[nodiscard]] std::string   toString() const override;
+    [[nodiscard]] u_ptr_AstNode copy() const override;
+    [[nodiscard]] u_ptr_AstNode simplify() const override;
+    [[nodiscard]] NODE_TYPE     type() const override;
 
   private:
-    AstNodeAdd() = default;
-    [[nodiscard]] std::unique_ptr<AstNode> simplifiedCopy() const;
-    void                                   addNumbers();
+    AstNodeAdd();
+    [[nodiscard]] u_ptr_AstNode simplifiedCopy() const;
 };
 
 #endif // PARSER_ASTNODEADD_H
