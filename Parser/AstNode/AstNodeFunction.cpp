@@ -5,7 +5,6 @@
 #include "AstNodeFunction.h"
 
 #include <cassert>
-#include <utility>
 
 AstNodeFunction::AstNodeFunction(std::string functionName, u_ptr_AstNode&& argument)
     : m_functionName(std::move(functionName)), m_argument(std::move(argument)) {
@@ -29,7 +28,7 @@ AstNode::NODE_TYPE AstNodeFunction::type() const {
 
 bool AstNodeFunction::equals(const AstNode& other) const {
     if (other.type() == AstNode::NODE_TYPE::FUNCTION) {
-        return *m_argument == *dynamic_cast<const AstNodeFunction&>(other).m_argument;
+        return *m_argument == *other.childAt(0);
     }
     return false;
 }
@@ -37,16 +36,18 @@ bool AstNodeFunction::equals(const AstNode& other) const {
 size_t AstNodeFunction::childCount() const {
     return 1;
 }
+
 const AstNode* AstNodeFunction::childAt(size_t index) const {
     assert(index < childCount());
     return m_argument.get();
 }
+
 bool AstNodeFunction::compareEqualType(const AstNode* rhs) const {
     assert(rhs->type() == type());
-    const auto* rightSide = dynamic_cast<const AstNodeFunction*>(rhs);
-    if (m_functionName != rightSide->m_functionName) {
-        return m_functionName < rightSide->m_functionName;
+    const auto rightFunctionName = dynamic_cast<const AstNodeFunction*>(rhs)->m_functionName;
+    if (m_functionName != rightFunctionName) {
+        return m_functionName < rightFunctionName;
     } else {
-        return compare_u_ptr(m_argument, rightSide->m_argument);
+        return compare(m_argument.get(), rhs->childAt(0));
     }
 }

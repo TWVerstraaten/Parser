@@ -14,7 +14,7 @@ AstNodePower::AstNodePower(u_ptr_AstNode&& base, u_ptr_AstNode&& exponent)
 }
 
 std::string AstNodePower::toString() const {
-    return "(" + m_base->toString() + " ^ " + m_exponent->toString() + ")";
+    return m_base->toString() + " ^ " + m_exponent->toString();
 }
 
 u_ptr_AstNode AstNodePower::copy() const {
@@ -38,8 +38,7 @@ AstNode::NODE_TYPE AstNodePower::type() const {
 
 bool AstNodePower::equals(const AstNode& other) const {
     if (other.type() == AstNode::NODE_TYPE::POWER) {
-        const auto& candidate = dynamic_cast<const AstNodePower&>(other);
-        return (*m_base == *candidate.m_base && *m_exponent == *candidate.m_exponent);
+        return (*m_base == *other.childAt(0) && *m_exponent == *other.childAt(1));
     }
     return false;
 }
@@ -55,10 +54,9 @@ const AstNode* AstNodePower::childAt(size_t index) const {
 
 bool AstNodePower::compareEqualType(const AstNode* rhs) const {
     assert(rhs->type() == type());
-    const auto* rightSide = dynamic_cast<const AstNodePower*>(rhs);
-    if (*m_base == *rightSide->m_base) {
-        return compare_u_ptr(m_exponent, rightSide->m_exponent);
+    if (*m_base == *rhs->childAt(0)) {
+        return compare(m_exponent.get(), rhs->childAt(1));
     } else {
-        return compare_u_ptr(m_base, rightSide->m_base);
+        return compare(m_base.get(), rhs->childAt(0));
     }
 }

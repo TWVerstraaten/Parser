@@ -5,7 +5,6 @@
 #include "AstNodeMul.h"
 
 #include "AstNodeInteger.h"
-#include "AstNodePower.h"
 
 AstNodeMul::AstNodeMul()
     : AstNodeCommutative([](const Numeric& lhs, const Numeric& rhs) { return lhs * rhs; },
@@ -21,6 +20,12 @@ AstNodeMul::AstNodeMul(u_ptr_AstNode&& left, u_ptr_AstNode&& right)
     cleanUp();
 }
 
+AstNodeMul::AstNodeMul(std::vector<u_ptr_AstNode>&& nodes)
+    : AstNodeCommutative(
+          std::move(nodes), [](const Numeric& lhs, const Numeric& rhs) { return lhs * rhs; },
+          [](const u_ptr_AstNode& node) { return node->isOne(); }) {
+}
+
 std::string AstNodeMul::toString() const {
     std::string result = "(";
     for (const auto& it : m_nodes) {
@@ -34,7 +39,7 @@ std::string AstNodeMul::toString() const {
 u_ptr_AstNode AstNodeMul::copy() const {
     auto copy = u_ptr_AstNode(new AstNodeMul{});
     for (const auto& it : m_nodes) {
-        dynamic_cast<AstNodeCommutative*>(copy.get())->addNode(it->copy());
+        COMMUTATIVE_CAST(copy.get())->addNode(it->copy());
     }
     return copy;
 }
@@ -56,7 +61,6 @@ u_ptr_AstNode AstNodeMul::simplify() const {
 AstNode::NODE_TYPE AstNodeMul::type() const {
     return NODE_TYPE::MULTIPLY;
 }
-
 u_ptr_AstNode AstNodeMul::simplifiedCopy() const {
     auto* result = new AstNodeMul{};
     for (const auto& it : m_nodes) {

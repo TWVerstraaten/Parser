@@ -5,7 +5,6 @@
 #ifndef PARSER_NUMERIC_H
 #define PARSER_NUMERIC_H
 
-#include <cstddef>
 #include <memory>
 #include <ostream>
 
@@ -22,7 +21,7 @@ class Numeric {
     Numeric(int value);
     Numeric(const Numeric& other) = default;
 
-    [[nodiscard]] double doubleValue() const;
+    [[nodiscard]] double                   doubleValue() const;
     [[nodiscard]] std::unique_ptr<AstNode> toNode() const;
 
     Numeric& operator+=(const Numeric& other);
@@ -36,6 +35,7 @@ class Numeric {
     friend Numeric       operator*(const Numeric& lhs, const Numeric& rhs);
     friend Numeric       operator/(const Numeric& lhs, const Numeric& rhs);
     friend Numeric       operator^(const Numeric& lhs, const Numeric& rhs);
+    friend size_t        gcd(const Numeric& lhs, const Numeric& rhs);
     friend std::ostream& operator<<(std::ostream& os, const Numeric& numeric);
 
   private:

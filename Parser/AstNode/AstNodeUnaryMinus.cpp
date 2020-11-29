@@ -28,10 +28,7 @@ AstNode::NODE_TYPE AstNodeUnaryMinus::type() const {
 }
 
 bool AstNodeUnaryMinus::equals(const AstNode& other) const {
-    if (other.type() == AstNode::NODE_TYPE::UNARY_MINUS) {
-        return *m_value == *dynamic_cast<const AstNodeUnaryMinus&>(other).m_value;
-    }
-    return false;
+    return other.type() == AstNode::NODE_TYPE::UNARY_MINUS && *m_value == *other.childAt(0);
 }
 
 size_t AstNodeUnaryMinus::childCount() const {
@@ -45,5 +42,5 @@ const AstNode* AstNodeUnaryMinus::childAt(size_t index) const {
 
 bool AstNodeUnaryMinus::compareEqualType(const AstNode* rhs) const {
     assert(rhs->type() == type());
-    return compare_u_ptr(m_value, dynamic_cast<const AstNodeUnaryMinus*>(rhs)->m_value);
+    return compare(m_value.get(), rhs->childAt(0));
 }

@@ -7,8 +7,10 @@
 #include "AstNode/AstNodeDouble.h"
 #include "AstNode/AstNodeInteger.h"
 
+#include <cassert>
+#include <cmath>
 #include <iostream>
-#include <tgmath.h>
+#include <numeric>
 
 Numeric::Numeric(double value) : m_dataType(DATA_TYPE::DOUBLE), m_doubleValue(value) {
 }
@@ -121,4 +123,9 @@ Numeric operator^(const Numeric& lhs, const Numeric& rhs) {
     Numeric result{lhs};
     result ^= rhs;
     return result;
+}
+
+size_t gcd(const Numeric& lhs, const Numeric& rhs) {
+    assert(lhs.m_dataType == Numeric::DATA_TYPE::INTEGER && rhs.m_dataType == Numeric::DATA_TYPE::INTEGER);
+    return std::gcd(lhs.m_integerValue, rhs.m_integerValue);
 }

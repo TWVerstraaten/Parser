@@ -17,7 +17,7 @@ class AstNodePower : public AstNode {
     [[nodiscard]] NODE_TYPE      type() const override;
     [[nodiscard]] size_t         childCount() const override;
     [[nodiscard]] const AstNode* childAt(size_t index) const override;
-    bool                         compareEqualType(const AstNode* rhs) const override;
+    [[nodiscard]] bool           compareEqualType(const AstNode* rhs) const override;
 
   protected:
     [[nodiscard]] bool equals(const AstNode& other) const override;

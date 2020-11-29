@@ -4,7 +4,7 @@
 
 #include "AstNodeSubtract.h"
 
-#include "AstNodeInteger.h"
+#include "AstNodeNumeric.h"
 
 #include <cassert>
 
@@ -36,11 +36,8 @@ AstNode::NODE_TYPE AstNodeSubtract::type() const {
 }
 
 bool AstNodeSubtract::equals(const AstNode& other) const {
-    if (other.type() == AstNode::NODE_TYPE::SUBTRACT) {
-        const auto& candidate = dynamic_cast<const AstNodeSubtract&>(other);
-        return (*m_leftNode == *candidate.m_leftNode && *m_rightNode == *candidate.m_rightNode);
-    }
-    return false;
+    return other.type() == AstNode::NODE_TYPE::SUBTRACT && *m_leftNode == *other.childAt(0) &&
+         *m_rightNode == *other.childAt(1);
 }
 
 size_t AstNodeSubtract::childCount() const {
@@ -51,12 +48,12 @@ const AstNode* AstNodeSubtract::childAt(size_t index) const {
     assert(index < childCount());
     return index == 0 ? m_leftNode.get() : m_rightNode.get();
 }
+
 bool AstNodeSubtract::compareEqualType(const AstNode* rhs) const {
     assert(rhs->type() == type());
-    const auto* rightSide = dynamic_cast<const AstNodeSubtract*>(rhs);
-    if (*m_leftNode == *rightSide->m_leftNode) {
-        return compare_u_ptr(m_rightNode, rightSide->m_rightNode);
+    if (*m_leftNode == *rhs->childAt(0)) {
+        return compare(m_rightNode.get(), rhs->childAt(1));
     } else {
-        return compare_u_ptr(m_leftNode, rightSide->m_leftNode);
+        return compare(m_leftNode.get(), rhs->childAt(0));
     }
 }

@@ -3,13 +3,11 @@
 #include <iostream>
 
 int main() {
+    std::string eq1 = " -x + y - z";
+    Ast         ast1(eq1);
+    auto*       copyNode1 = ast1.m_copy.get();
 
-    std::string eq = " (b*c*a) + b*a  - a * b";
-    Ast         ast(eq);
-    auto*       rootNode = ast.m_rootNode.get();
-    auto*       copyNode = ast.m_copy.get();
-    std::cout << rootNode->toString() << '\n';
-    std::cout << copyNode->toString() << '\n';
+    std::cout << "Simplified:\t" << *copyNode1 << '\n';
 
     return 0;
 }

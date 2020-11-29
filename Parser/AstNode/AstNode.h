@@ -5,12 +5,13 @@
 #ifndef PARSER_ASTNODE_H
 #define PARSER_ASTNODE_H
 
-#include <functional>
+#include <iostream>
 #include <memory>
 #include <string>
 
 class AstNode;
-typedef std::unique_ptr<AstNode> u_ptr_AstNode;
+typedef std::unique_ptr<AstNode>       u_ptr_AstNode;
+typedef std::unique_ptr<const AstNode> u_ptr_c_AstNode;
 
 class AstNode {
   public:
@@ -41,17 +42,28 @@ class AstNode {
     [[nodiscard]] virtual u_ptr_AstNode  simplify() const            = 0;
     [[nodiscard]] virtual u_ptr_AstNode  copy() const                = 0;
 
-    bool operator==(const AstNode& rhs) const;
+    static bool compare(const AstNode* lhs, const AstNode* rhs);
+
+    friend std::ostream& operator<<(std::ostream& out, const AstNode& node);
+    friend bool          operator==(const AstNode& lhs, const AstNode& rhs);
+    friend bool          operator<(const AstNode& lhs, const AstNode& rhs);
+    friend u_ptr_AstNode operator+(const AstNode& lhs, const AstNode& rhs);
+    friend u_ptr_AstNode operator+(u_ptr_AstNode&& lhs, u_ptr_AstNode&& rhs);
+    friend u_ptr_AstNode operator*(const AstNode& lhs, const AstNode& rhs);
+    friend u_ptr_AstNode operator*(u_ptr_AstNode&& lhs, u_ptr_AstNode&& rhs);
+    friend u_ptr_AstNode operator-(const AstNode& lhs, const AstNode& rhs);
+    friend u_ptr_AstNode operator-(u_ptr_AstNode&& lhs, u_ptr_AstNode&& rhs);
+    friend u_ptr_AstNode operator/(const AstNode& lhs, const AstNode& rhs);
+    friend u_ptr_AstNode operator/(u_ptr_AstNode&& lhs, u_ptr_AstNode&& rhs);
+    friend u_ptr_AstNode operator^(const AstNode& lhs, const AstNode& rhs);
+    friend u_ptr_AstNode operator^(u_ptr_AstNode&& lhs, u_ptr_AstNode&& rhs);
+    friend u_ptr_AstNode operator-(u_ptr_AstNode&& lhs);
 
   protected:
-    [[nodiscard]] size_t         indexOfCopy(const AstNode* node) const;
-    [[nodiscard]] const AstNode* findViaTypeAndChild(NODE_TYPE type, const AstNode* node) const;
-
     [[nodiscard]] virtual bool compareEqualType(const AstNode* rhs) const = 0;
     [[nodiscard]] virtual bool equals(const AstNode& other) const         = 0;
 
     static bool compare_u_ptr(const u_ptr_AstNode& lhs, const u_ptr_AstNode& rhs);
-    static bool compare(const AstNode* lhs, const AstNode* rhs);
 };
 
 #endif // PARSER_ASTNODE_H

@@ -5,19 +5,20 @@
 #ifndef PARSER_ASTNODEMUL_H
 #define PARSER_ASTNODEMUL_H
 
-#include "AstNode.h"
 #include "AstNodeCommutative.h"
 
 class AstNodeMul : public AstNodeCommutative {
   public:
     AstNodeMul(u_ptr_AstNode&& left, u_ptr_AstNode&& right);
+    explicit AstNodeMul(std::vector<u_ptr_AstNode>&& nodes);
 
+    [[nodiscard]] NODE_TYPE     type() const override;
     [[nodiscard]] std::string   toString() const override;
     [[nodiscard]] u_ptr_AstNode copy() const override;
     [[nodiscard]] u_ptr_AstNode simplify() const override;
-    [[nodiscard]] NODE_TYPE     type() const override;
 
   private:
+    friend class AstNodeAdd;
     AstNodeMul();
     [[nodiscard]] u_ptr_AstNode simplifiedCopy() const;
 };

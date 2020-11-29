@@ -28,10 +28,6 @@ AstNode::NODE_TYPE AstNodeInteger::type() const {
     return NODE_TYPE::INTEGER;
 }
 
-long long AstNodeInteger::value() const {
-    return m_value;
-}
-
 bool AstNodeInteger::equals(const AstNode& other) const {
     if (other.type() == AstNode::NODE_TYPE::INTEGER) {
         return m_value == dynamic_cast<const AstNodeInteger&>(other).m_value;

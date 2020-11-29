@@ -28,13 +28,9 @@ AstNode::NODE_TYPE AstNodeDouble::type() const {
     return NODE_TYPE::DOUBLE;
 }
 
-double AstNodeDouble::value() const {
-    return m_value;
-}
-
 bool AstNodeDouble::equals(const AstNode& other) const {
     if (other.type() == AstNode::NODE_TYPE::DOUBLE) {
-        return m_value == dynamic_cast<const AstNodeDouble&>(other).m_value;
+        return m_value == NUMERIC_CAST(&other).doubleValue();
     }
     return false;
 }
@@ -53,5 +49,5 @@ Numeric AstNodeDouble::toNumeric() const {
 
 bool AstNodeDouble::compareEqualType(const AstNode* rhs) const {
     assert(rhs->type() == type());
-    return m_value < dynamic_cast<const AstNodeDouble*>(rhs)->m_value;
+    return m_value < NUMERIC_CAST(rhs).doubleValue();
 }
