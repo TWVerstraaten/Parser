@@ -6,7 +6,6 @@
 
 #include "Parser.h"
 
-#include <cassert>
 #include <utility>
 
 Ast::Ast(std::string string)

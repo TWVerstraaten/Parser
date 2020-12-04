@@ -11,7 +11,7 @@ class AstNodeAdd : public AstNodeCommutative {
 
   public:
     AstNodeAdd(u_ptr_AstNode&& left, u_ptr_AstNode&& right);
-    AstNodeAdd(std::vector<u_ptr_AstNode>&& nodes);
+    explicit AstNodeAdd(std::vector<u_ptr_AstNode>&& nodes);
 
     [[nodiscard]] std::string   toString() const override;
     [[nodiscard]] u_ptr_AstNode copy() const override;
@@ -21,8 +21,11 @@ class AstNodeAdd : public AstNodeCommutative {
   private:
     AstNodeAdd();
 
-    bool gatherOverLappingMultiplies();
-    bool gatherTermsAndMultiplies();
+    void               makeSingleUnaryMinus();
+    [[nodiscard]] bool hasUnaryMinusAddend() const;
+    bool               gatherOverLappingMultiplies();
+    bool               gatherTermsAndMultiplies();
+    bool               gatherFactorsAndMultiplies();
 
     [[nodiscard]] u_ptr_AstNode simplifiedCopy() const;
 };

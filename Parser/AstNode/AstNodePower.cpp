@@ -4,6 +4,7 @@
 
 #include "AstNodePower.h"
 
+#include "AstNodeInteger.h"
 #include "AstNodeNumeric.h"
 
 #include <cassert>
@@ -22,10 +23,15 @@ u_ptr_AstNode AstNodePower::copy() const {
 }
 
 u_ptr_AstNode AstNodePower::simplify() const {
-    const auto base     = m_base->simplify();
+    auto       base     = m_base->simplify();
     const auto exponent = m_exponent->simplify();
     if (base->isNumeric() && exponent->isNumeric()) {
         return (NUMERIC_CAST(base.get()) ^ NUMERIC_CAST(exponent.get())).toNode();
+    }
+    if (exponent->isOne()) {
+        return base;
+    } else if (exponent->isZero()) {
+        return u_ptr_AstNode(new AstNodeInteger(1));
     }
 
     AstNode* simplifiedNode = new AstNodePower(m_base->simplify(), m_exponent->simplify());

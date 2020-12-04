@@ -24,6 +24,9 @@ AstNodeMul::AstNodeMul(std::vector<u_ptr_AstNode>&& nodes)
     : AstNodeCommutative(
           std::move(nodes), [](const Numeric& lhs, const Numeric& rhs) { return lhs * rhs; },
           [](const u_ptr_AstNode& node) { return node->isOne(); }) {
+    if (m_nodes.empty()) {
+        m_nodes.emplace_back(std::make_unique<AstNodeInteger>(1));
+    }
 }
 
 std::string AstNodeMul::toString() const {

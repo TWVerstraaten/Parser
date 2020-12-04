@@ -4,13 +4,15 @@
 
 #include "AstNodeDiv.h"
 
+#include "../../Algorithm/Algorithm.h"
+#include "AstNodeCommutative.h"
 #include "AstNodeInteger.h"
 #include "AstNodeNumeric.h"
 
 #include <cassert>
 
-AstNodeDiv::AstNodeDiv(u_ptr_AstNode&& base, u_ptr_AstNode&& exponent)
-    : m_numerator(std::move(base)), m_denominator(std::move(exponent)) {
+AstNodeDiv::AstNodeDiv(u_ptr_AstNode&& numerator, u_ptr_AstNode&& denominator)
+    : m_numerator(std::move(numerator)), m_denominator(std::move(denominator)) {
 }
 
 std::string AstNodeDiv::toString() const {
@@ -40,7 +42,15 @@ u_ptr_AstNode AstNodeDiv::simplify() const {
             return (NUMERIC_CAST(numerator.get()) / NUMERIC_CAST(denominator.get())).toNode();
         }
     }
-    AstNode* simplifiedNode = new AstNodeDiv(m_numerator->simplify(), m_denominator->simplify());
+
+    auto commonFactorStruct = intersect(m_numerator.get(), m_denominator.get());
+    if (commonFactorStruct.m_common != nullptr) {
+        return u_ptr_AstNode(new AstNodeDiv(commonFactorStruct.firstOr(std::make_unique<AstNodeInteger>(1)),
+                                            commonFactorStruct.secondOr(std::make_unique<AstNodeInteger>(1))))
+            ->simplify();
+    }
+
+    AstNode* simplifiedNode = new AstNodeDiv(std::move(numerator), std::move(denominator));
     return u_ptr_AstNode(simplifiedNode);
 }
 

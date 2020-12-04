@@ -8,7 +8,7 @@
 #include <cassert>
 
 Decomposition alg::decomposeSorted(const std::vector<const AstNode*>& A, const std::vector<const AstNode*>& B,
-                                   std::function<u_ptr_AstNode(const AstNode*)> transform) {
+                                   const std::function<u_ptr_AstNode(const AstNode*)>& transform) {
     assert(std::is_sorted(A.begin(), A.end(), AstNode::compare));
     assert(std::is_sorted(B.begin(), B.end(), AstNode::compare));
 

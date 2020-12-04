@@ -4,9 +4,7 @@
 
 #include "AstNodeCommutative.h"
 
-#include "../../Algorithm/Algorithm.h"
 #include "AstNodeAdd.h"
-#include "AstNodeMul.h"
 #include "AstNodeNumeric.h"
 
 #include <cassert>
@@ -123,25 +121,7 @@ void AstNodeCommutative::removeNodeAndNodeWithSameChild(AstNode::NODE_TYPE type)
     }
 }
 
-size_t AstNodeCommutative::indexOfCopy(const AstNode* node) const {
-    for (size_t i = 0; i != childCount(); ++i) {
-        if (*childAt(i) == *node) {
-            return i;
-        }
-    }
-    return std::numeric_limits<size_t>::max();
-}
-
-const AstNode* AstNodeCommutative::findViaTypeAndChild(AstNode::NODE_TYPE type, const AstNode* node) const {
-    for (size_t i = 0; i != childCount(); ++i) {
-        if (childAt(i)->type() == type && childAt(i)->containsCopyOf(node)) {
-            return childAt(i);
-        }
-    }
-    return nullptr;
-}
-
-Decomposition decompose(const AstNodeCommutative* A, const AstNodeCommutative* B) {
+Decomposition AstNodeCommutative::decompose(const AstNodeCommutative* A, const AstNodeCommutative* B) {
     assert(A != B);
     std::vector<const AstNode*> aCopy;
     std::vector<const AstNode*> bCopy;
@@ -153,17 +133,34 @@ Decomposition decompose(const AstNodeCommutative* A, const AstNodeCommutative* B
     std::sort(bCopy.begin(), bCopy.end(), AstNode::compare);
 
     return alg::decomposeSorted(aCopy, bCopy, [](const AstNode* node) { return node->copy(); });
-
-    //    const auto* simplified =
-    //        new AstNodeMul(u_ptr_AstNode(new AstNodeAdd(u_ptr_AstNode(new AstNodeMul(std::move(aMinusB))),
-    //                                                    u_ptr_AstNode(new AstNodeMul(std::move(bMinusA))))),
-    //                       u_ptr_AstNode(new AstNodeMul(std::move(aCapB))));
-    //
-    //    std::cout << *simplified << '\n';
-    //
-    //    return std::tuple<u_ptr_vec, u_ptr_vec, u_ptr_vec>();
 }
 
 AstNode& AstNodeCommutative::operator[](size_t index) {
     return *m_nodes[index];
+}
+
+std::vector<u_ptr_AstNode>::const_iterator AstNodeCommutative::mulBegin() const {
+    return std::find_if(m_nodes.begin(), m_nodes.end(),
+                        [](const auto& node) { return node->type() == AstNode::NODE_TYPE::MULTIPLY; });
+}
+
+std::vector<u_ptr_AstNode>::const_iterator AstNodeCommutative::mulEnd() const {
+    auto it = mulBegin();
+    while (it != m_nodes.end() && (*it)->type() == AstNode::NODE_TYPE::MULTIPLY) {
+        ++it;
+    }
+    return it;
+}
+
+std::vector<u_ptr_AstNode>::const_iterator AstNodeCommutative::addBegin() const {
+    return std::find_if(m_nodes.begin(), m_nodes.end(),
+                        [](const auto& node) { return node->type() == AstNode::NODE_TYPE::ADD; });
+}
+
+std::vector<u_ptr_AstNode>::const_iterator AstNodeCommutative::addEnd() const {
+    auto it = mulBegin();
+    while (it != m_nodes.end() && (*it)->type() == AstNode::NODE_TYPE::ADD) {
+        ++it;
+    }
+    return it;
 }

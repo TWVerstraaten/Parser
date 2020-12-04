@@ -5,7 +5,6 @@
 #include "AstNodeVar.h"
 
 #include <cassert>
-#include <utility>
 
 AstNodeVar::AstNodeVar(std::string value) : m_variableName(std::move(value)) {
 }

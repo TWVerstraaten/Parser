@@ -125,7 +125,7 @@ Numeric operator^(const Numeric& lhs, const Numeric& rhs) {
     return result;
 }
 
-size_t gcd(const Numeric& lhs, const Numeric& rhs) {
+long long gcd(const Numeric& lhs, const Numeric& rhs) {
     assert(lhs.m_dataType == Numeric::DATA_TYPE::INTEGER && rhs.m_dataType == Numeric::DATA_TYPE::INTEGER);
     return std::gcd(lhs.m_integerValue, rhs.m_integerValue);
 }

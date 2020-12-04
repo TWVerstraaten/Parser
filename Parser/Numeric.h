@@ -35,7 +35,7 @@ class Numeric {
     friend Numeric       operator*(const Numeric& lhs, const Numeric& rhs);
     friend Numeric       operator/(const Numeric& lhs, const Numeric& rhs);
     friend Numeric       operator^(const Numeric& lhs, const Numeric& rhs);
-    friend size_t        gcd(const Numeric& lhs, const Numeric& rhs);
+    friend long long     gcd(const Numeric& lhs, const Numeric& rhs);
     friend std::ostream& operator<<(std::ostream& os, const Numeric& numeric);
 
   private:
