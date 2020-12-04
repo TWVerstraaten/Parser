@@ -9,7 +9,6 @@
 AstNodeAdd::AstNodeAdd()
     : AstNodeCommutative([](const Numeric& lhs, const Numeric& rhs) { return lhs + rhs; },
                          [](const u_ptr_AstNode& node) { return node->isZero(); }) {
-    cleanUp();
 }
 
 AstNodeAdd::AstNodeAdd(std::vector<u_ptr_AstNode>&& nodes)
@@ -19,7 +18,7 @@ AstNodeAdd::AstNodeAdd(std::vector<u_ptr_AstNode>&& nodes)
     if (m_nodes.empty()) {
         m_nodes.emplace_back(AstNode::zero());
     }
-    cleanUp();
+    mergeNodes();
 }
 
 AstNodeAdd::AstNodeAdd(u_ptr_AstNode&& left, u_ptr_AstNode&& right)
@@ -27,7 +26,7 @@ AstNodeAdd::AstNodeAdd(u_ptr_AstNode&& left, u_ptr_AstNode&& right)
                          [](u_ptr_AstNode& node) { return node->isZero(); }) {
     m_nodes.emplace_back(std::move(left));
     m_nodes.emplace_back(std::move(right));
-    cleanUp();
+    mergeNodes();
 }
 
 std::string AstNodeAdd::toString() const {

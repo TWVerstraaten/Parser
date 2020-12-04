@@ -4,6 +4,8 @@
 
 #include "AstNodeMul.h"
 
+#include "AstNodeAdd.h"
+
 #include <cassert>
 
 AstNodeMul::AstNodeMul()
@@ -17,7 +19,7 @@ AstNodeMul::AstNodeMul(u_ptr_AstNode&& left, u_ptr_AstNode&& right)
     m_nodes.emplace_back(std::move(left));
     m_nodes.emplace_back(std::move(right));
 
-    cleanUp();
+    mergeNodes();
 }
 
 AstNodeMul::AstNodeMul(std::vector<u_ptr_AstNode>&& nodes)
@@ -27,7 +29,7 @@ AstNodeMul::AstNodeMul(std::vector<u_ptr_AstNode>&& nodes)
     if (m_nodes.empty()) {
         m_nodes.emplace_back(AstNode::one());
     }
-    cleanUp();
+    mergeNodes();
 }
 
 std::string AstNodeMul::toString() const {
@@ -91,4 +93,30 @@ bool AstNodeMul::gatherDuplicates() {
         }
     }
     return false;
+}
+
+u_ptr_AstNode AstNodeMul::distributeMultiplication() const {
+    const auto addIt = std::find_if(m_nodes.begin(), m_nodes.end(),
+                                    [](const u_ptr_AstNode& node) { return node->type() == AstNode::NODE_TYPE::ADD; });
+    if (addIt == m_nodes.end()) {
+        return copy();
+    }
+    size_t addends = (*addIt)->childCount();
+
+    auto copyOfCurrentNode = copy();
+    assert(*this == *copyOfCurrentNode);
+    COMMUTATIVE_CAST(copyOfCurrentNode.get())->removeNode((*addIt).get());
+
+    auto* result = new AstNodeAdd{};
+    for (size_t i = 0; i != addends; ++i) {
+        result->m_nodes.emplace_back((*addIt)->childAt(i)->copy() * copyOfCurrentNode->copy());
+    }
+
+    return u_ptr_AstNode(result);
+}
+
+bool AstNodeMul::containsAdditionNode() const {
+    return std::find_if(m_nodes.begin(), m_nodes.end(), [](const u_ptr_AstNode& node) {
+               return node->type() == AstNode::NODE_TYPE::ADD;
+           }) != m_nodes.end();
 }

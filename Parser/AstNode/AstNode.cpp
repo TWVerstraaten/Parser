@@ -164,7 +164,6 @@ IntersectStruct AstNode::intersect(const AstNode* first, const AstNode* second) 
         auto factor = intersect(second, first);
         return {std::move(factor.m_common), std::move(factor.m_secondRemainder), std::move(factor.m_firstRemainder)};
     }
-
     return {nullptr, nullptr, nullptr};
 }
 

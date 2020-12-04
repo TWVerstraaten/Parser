@@ -19,6 +19,8 @@ class AstNodeAdd : public AstNodeCommutative {
     [[nodiscard]] NODE_TYPE     type() const override;
 
   private:
+    friend class AstNodeMul;
+
     AstNodeAdd();
 
     bool gatherOverLappingNodes();

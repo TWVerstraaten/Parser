@@ -29,6 +29,7 @@ class AstNode {
         FUNCTION,
         ERROR
     };
+    enum class SIMPLIFY_RULES { NONE = 0, DIST_MUL_OVER_ADD = 1 };
     explicit AstNode() = default;
 
     [[nodiscard]] bool isNumeric() const;
