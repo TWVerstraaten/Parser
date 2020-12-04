@@ -21,11 +21,9 @@ class AstNodeAdd : public AstNodeCommutative {
   private:
     AstNodeAdd();
 
-    void               makeSingleUnaryMinus();
-    [[nodiscard]] bool hasUnaryMinusAddend() const;
-    bool               gatherOverLappingMultiplies();
-    bool               gatherTermsAndMultiplies();
-    bool               gatherFactorsAndMultiplies();
+    bool gatherOverLappingNodes();
+    bool gatherDuplicates();
+    bool cancelTerms();
 
     [[nodiscard]] u_ptr_AstNode simplifiedCopy() const;
 };

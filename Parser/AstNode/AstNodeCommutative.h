@@ -20,9 +20,11 @@ class AstNodeCommutative;
 class AstNodeCommutative : public AstNode {
 
   public:
-    void addNode(u_ptr_AstNode node);
-    void removeNode(const AstNode* nodeToRemove);
-    void removeNodeAndNodeWithSameChild(AstNode::NODE_TYPE type);
+    void   addNode(u_ptr_AstNode node);
+    void   removeNode(const AstNode* nodeToRemove);
+    void   removeAllCopiesOfNode(const AstNode* nodeToRemove);
+    void   removeNodeAndNodeWithSameChild(AstNode::NODE_TYPE type);
+    size_t countCopies(const AstNode* nodeToCompare) const;
 
     static Decomposition decompose(const AstNodeCommutative* A, const AstNodeCommutative* B);
 
@@ -56,6 +58,7 @@ class AstNodeCommutative : public AstNode {
     friend class AstNodeAdd;
     friend class AstNode;
 
+    void                                                         removeNullptrs();
     const std::function<Numeric(const Numeric&, const Numeric&)> m_accumulator;
     const std::function<bool(u_ptr_AstNode&)>                    m_removePredicate;
     std::vector<u_ptr_AstNode>                                   m_nodes;

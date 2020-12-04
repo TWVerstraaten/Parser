@@ -29,7 +29,7 @@ AstNode::NODE_TYPE AstNodeDouble::type() const {
 }
 
 bool AstNodeDouble::equals(const AstNode& other) const {
-    if (other.type() == AstNode::NODE_TYPE::DOUBLE) {
+    if (other.isNumeric()) {
         return m_value == NUMERIC_CAST(&other).doubleValue();
     }
     return false;

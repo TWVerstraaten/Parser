@@ -5,11 +5,9 @@
 #include "Numeric.h"
 
 #include "AstNode/AstNodeDouble.h"
-#include "AstNode/AstNodeInteger.h"
 
 #include <cassert>
 #include <cmath>
-#include <iostream>
 #include <numeric>
 
 Numeric::Numeric(double value) : m_dataType(DATA_TYPE::DOUBLE), m_doubleValue(value) {
@@ -26,7 +24,7 @@ Numeric::Numeric(int value) : m_integerValue(value) {
 
 std::unique_ptr<AstNode> Numeric::toNode() const {
     if (m_dataType == DATA_TYPE::INTEGER) {
-        return std::unique_ptr<AstNode>(new AstNodeInteger(m_integerValue));
+        return AstNode::makeInteger(m_integerValue);
     } else {
         return std::unique_ptr<AstNode>(new AstNodeDouble(m_doubleValue));
     }

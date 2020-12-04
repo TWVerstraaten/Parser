@@ -4,11 +4,9 @@
 
 #include "AstNodeCommutative.h"
 
-#include "AstNodeAdd.h"
 #include "AstNodeNumeric.h"
 
 #include <cassert>
-#include <utility>
 
 AstNodeCommutative::AstNodeCommutative(std::function<Numeric(const Numeric&, const Numeric&)> accumulator,
                                        std::function<bool(u_ptr_AstNode&)>                    removePredicate)
@@ -26,6 +24,16 @@ void AstNodeCommutative::removeNode(const AstNode* nodeToRemove) {
                         [&](const u_ptr_AstNode& node) { return *node.get() == *nodeToRemove; }) != m_nodes.end());
     m_nodes.erase(std::find_if(m_nodes.begin(), m_nodes.end(),
                                [&](const u_ptr_AstNode& node) { return *node.get() == *nodeToRemove; }));
+}
+
+void AstNodeCommutative::removeAllCopiesOfNode(const AstNode* nodeToRemove) {
+    while (std::find_if(m_nodes.begin(), m_nodes.end(),
+                        [&](const u_ptr_AstNode& node) { return *node.get() == *nodeToRemove; }) != m_nodes.end()) {
+        removeNode(nodeToRemove);
+        if (m_nodes.empty()) {
+            return;
+        }
+    }
 }
 
 size_t AstNodeCommutative::childCount() const {
@@ -163,4 +171,13 @@ std::vector<u_ptr_AstNode>::const_iterator AstNodeCommutative::addEnd() const {
         ++it;
     }
     return it;
+}
+
+size_t AstNodeCommutative::countCopies(const AstNode* nodeToCompare) const {
+    return std::count_if(m_nodes.begin(), m_nodes.end(), [&](const auto& node) { return *node == *nodeToCompare; });
+}
+
+void AstNodeCommutative::removeNullptrs() {
+    m_nodes.erase(std::remove_if(m_nodes.begin(), m_nodes.end(), [](const auto& node) { return node == nullptr; }),
+                  end(m_nodes));
 }

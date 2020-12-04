@@ -4,7 +4,7 @@
 
 #include "AstNodeMul.h"
 
-#include "AstNodeInteger.h"
+#include <cassert>
 
 AstNodeMul::AstNodeMul()
     : AstNodeCommutative([](const Numeric& lhs, const Numeric& rhs) { return lhs * rhs; },
@@ -25,8 +25,9 @@ AstNodeMul::AstNodeMul(std::vector<u_ptr_AstNode>&& nodes)
           std::move(nodes), [](const Numeric& lhs, const Numeric& rhs) { return lhs * rhs; },
           [](const u_ptr_AstNode& node) { return node->isOne(); }) {
     if (m_nodes.empty()) {
-        m_nodes.emplace_back(std::make_unique<AstNodeInteger>(1));
+        m_nodes.emplace_back(AstNode::one());
     }
+    cleanUp();
 }
 
 std::string AstNodeMul::toString() const {
@@ -53,9 +54,13 @@ u_ptr_AstNode AstNodeMul::simplify() const {
     node->cleanUp();
 
     if (node->childCount() == 0) {
-        return u_ptr_AstNode(new AstNodeInteger(1));
+        return AstNode::one();
     } else if (node->childCount() == 1) {
         return std::move(node->m_nodes[0]);
+    }
+
+    if (node->gatherDuplicates()) {
+        return node->simplify();
     }
 
     return simplifiedNode;
@@ -64,6 +69,7 @@ u_ptr_AstNode AstNodeMul::simplify() const {
 AstNode::NODE_TYPE AstNodeMul::type() const {
     return NODE_TYPE::MULTIPLY;
 }
+
 u_ptr_AstNode AstNodeMul::simplifiedCopy() const {
     auto* result = new AstNodeMul{};
     for (const auto& it : m_nodes) {
@@ -71,4 +77,18 @@ u_ptr_AstNode AstNodeMul::simplifiedCopy() const {
     }
 
     return u_ptr_AstNode(result);
+}
+
+bool AstNodeMul::gatherDuplicates() {
+    assert(std::is_sorted(m_nodes.begin(), m_nodes.end(), AstNode::compare_u_ptr));
+    for (auto it = m_nodes.begin(); it != m_nodes.end(); ++it) {
+        const auto count = countCopies(it->get());
+        if (count > 1ul) {
+            auto copy = (*it)->copy();
+            m_nodes.erase(it + 1, it + count);
+            *it = std::move(*it) ^ AstNode::makeInteger(static_cast<long long>(count));
+            return true;
+        }
+    }
+    return false;
 }

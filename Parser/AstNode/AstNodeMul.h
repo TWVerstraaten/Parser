@@ -18,8 +18,9 @@ class AstNodeMul : public AstNodeCommutative {
     [[nodiscard]] u_ptr_AstNode simplify() const override;
 
   private:
-    friend class AstNodeAdd;
     AstNodeMul();
+
+    bool                        gatherDuplicates();
     [[nodiscard]] u_ptr_AstNode simplifiedCopy() const;
 };
 

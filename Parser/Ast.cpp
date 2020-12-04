@@ -6,8 +6,6 @@
 
 #include "Parser.h"
 
-#include <utility>
-
 Ast::Ast(std::string string)
     : m_string(std::move(string)), m_rootNode(Parser::parse(m_string)), m_copy(m_rootNode->simplify()) {
 }

@@ -5,19 +5,12 @@
 #include "Parser.h"
 
 #include "AstNode/AstNodeAdd.h"
-#include "AstNode/AstNodeDiv.h"
 #include "AstNode/AstNodeDouble.h"
 #include "AstNode/AstNodeFunction.h"
 #include "AstNode/AstNodeInteger.h"
-#include "AstNode/AstNodeMul.h"
-#include "AstNode/AstNodePower.h"
-#include "AstNode/AstNodeUnaryMinus.h"
 #include "AstNode/AstNodeVar.h"
 
 #include <cassert>
-#include <functional>
-#include <memory>
-#include <utility>
 
 using TokenList  = Tokenizer::TokenList;
 using Token      = Tokenizer::Token;

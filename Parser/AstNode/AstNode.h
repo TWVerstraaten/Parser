@@ -12,18 +12,7 @@
 class AstNode;
 typedef std::unique_ptr<AstNode> u_ptr_AstNode;
 
-struct IntersectStruct {
-    u_ptr_AstNode m_common;
-    u_ptr_AstNode m_firstRemainder;
-    u_ptr_AstNode m_secondRemainder;
-
-    u_ptr_AstNode&& firstOr(u_ptr_AstNode&& alternative) {
-        return m_firstRemainder ? std::move(m_firstRemainder) : std::move(alternative);
-    }
-    u_ptr_AstNode&& secondOr(u_ptr_AstNode&& alternative) {
-        return m_secondRemainder ? std::move(m_secondRemainder) : std::move(alternative);
-    }
-};
+struct IntersectStruct;
 
 class AstNode {
   public:
@@ -50,6 +39,9 @@ class AstNode {
 
     static IntersectStruct intersect(const AstNode* first, const AstNode* second);
     static IntersectStruct factorNodeAndMultiply(const AstNode* first, const AstNode* second);
+    static u_ptr_AstNode   zero();
+    static u_ptr_AstNode   one();
+    static u_ptr_AstNode   makeInteger(long long val);
 
     [[nodiscard]] virtual size_t         childCount() const          = 0;
     [[nodiscard]] virtual NODE_TYPE      type() const                = 0;
@@ -57,9 +49,9 @@ class AstNode {
     [[nodiscard]] virtual const AstNode* childAt(size_t index) const = 0;
     [[nodiscard]] virtual u_ptr_AstNode  simplify() const            = 0;
     [[nodiscard]] virtual u_ptr_AstNode  copy() const                = 0;
-    [[nodiscard]] virtual u_ptr_AstNode  stealNode(size_t index);
 
     static bool          compare(const AstNode* lhs, const AstNode* rhs);
+    static bool          expandedEquals(const AstNode& lhs, const AstNode& rhs);
     static u_ptr_AstNode copy(const u_ptr_AstNode& node);
     static u_ptr_AstNode simplify(const u_ptr_AstNode& node);
 
@@ -84,6 +76,19 @@ class AstNode {
     [[nodiscard]] virtual bool equals(const AstNode& other) const         = 0;
 
     static bool compare_u_ptr(const u_ptr_AstNode& lhs, const u_ptr_AstNode& rhs);
+};
+
+struct IntersectStruct {
+    u_ptr_AstNode m_common;
+    u_ptr_AstNode m_firstRemainder;
+    u_ptr_AstNode m_secondRemainder;
+
+    u_ptr_AstNode&& firstOr(u_ptr_AstNode&& alternative) {
+        return m_firstRemainder ? std::move(m_firstRemainder) : std::move(alternative);
+    }
+    u_ptr_AstNode&& secondOr(u_ptr_AstNode&& alternative) {
+        return m_secondRemainder ? std::move(m_secondRemainder) : std::move(alternative);
+    }
 };
 
 #endif // PARSER_ASTNODE_H

@@ -7,7 +7,6 @@
 #include "../../Algorithm/Algorithm.h"
 #include "AstNodeCommutative.h"
 #include "AstNodeInteger.h"
-#include "AstNodeNumeric.h"
 
 #include <cassert>
 
@@ -20,38 +19,27 @@ std::string AstNodeDiv::toString() const {
 }
 
 u_ptr_AstNode AstNodeDiv::copy() const {
-    return u_ptr_AstNode(new AstNodeDiv(m_numerator->copy(), m_denominator->copy()));
+    return std::make_unique<AstNodeDiv>(m_numerator->copy(), m_denominator->copy());
 }
 
 u_ptr_AstNode AstNodeDiv::simplify() const {
-    auto numerator   = m_numerator->simplify();
-    auto denominator = m_denominator->simplify();
-    if (denominator->isOne()) {
-        return numerator;
+    auto node = std::make_unique<AstNodeDiv>(m_numerator->simplify(), m_denominator->simplify());
+
+    if (node->m_denominator->isOne()) {
+        return std::move(node->m_numerator);
     }
-    if (numerator->isNumeric() && denominator->isNumeric()) {
-        if (numerator->type() == AstNode::NODE_TYPE::INTEGER && denominator->type() == AstNode::NODE_TYPE::INTEGER) {
-            const long long divisor = gcd(NUMERIC_CAST(numerator.get()), NUMERIC_CAST(denominator.get()));
-            if (divisor == 1) {
-                return u_ptr_AstNode(new AstNodeDiv(std::move(numerator), std::move(denominator)));
-            }
-            return u_ptr_AstNode(new AstNodeDiv((NUMERIC_CAST(numerator.get()) / divisor).toNode(),
-                                                (NUMERIC_CAST(denominator.get()) / divisor).toNode()))
-                ->simplify();
-        } else {
-            return (NUMERIC_CAST(numerator.get()) / NUMERIC_CAST(denominator.get())).toNode();
-        }
+    if (node->m_numerator->isNumeric() && node->m_denominator->isNumeric()) {
+        return node->simplifiedNumeric();
     }
 
     auto commonFactorStruct = intersect(m_numerator.get(), m_denominator.get());
     if (commonFactorStruct.m_common != nullptr) {
-        return u_ptr_AstNode(new AstNodeDiv(commonFactorStruct.firstOr(std::make_unique<AstNodeInteger>(1)),
-                                            commonFactorStruct.secondOr(std::make_unique<AstNodeInteger>(1))))
+        return std::make_unique<AstNodeDiv>(commonFactorStruct.firstOr(AstNode::one()),
+                                            commonFactorStruct.secondOr(AstNode::one()))
             ->simplify();
     }
 
-    AstNode* simplifiedNode = new AstNodeDiv(std::move(numerator), std::move(denominator));
-    return u_ptr_AstNode(simplifiedNode);
+    return node;
 }
 
 AstNode::NODE_TYPE AstNodeDiv::type() const {
@@ -82,4 +70,18 @@ bool AstNodeDiv::compareEqualType(const AstNode* rhs) const {
     } else {
         return compare(m_numerator.get(), childAt(0));
     }
+}
+
+u_ptr_AstNode AstNodeDiv::simplifiedNumeric() const {
+    assert(m_denominator->isNumeric() && m_numerator->isNumeric());
+    if (m_numerator->type() == AstNode::NODE_TYPE::INTEGER && m_denominator->type() == AstNode::NODE_TYPE::INTEGER) {
+        const long long divisor = gcd(NUMERIC_CAST(m_numerator.get()), NUMERIC_CAST(m_denominator.get()));
+        if (divisor == 1) {
+            return std::make_unique<AstNodeDiv>(m_numerator->copy(), m_denominator->copy());
+        }
+        return std::make_unique<AstNodeDiv>((NUMERIC_CAST(m_numerator.get()) / divisor).toNode(),
+                                            (NUMERIC_CAST(m_denominator.get()) / divisor).toNode())
+            ->simplify();
+    }
+    return (NUMERIC_CAST(m_numerator.get()) / NUMERIC_CAST(m_denominator.get())).toNode();
 }

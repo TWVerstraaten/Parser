@@ -5,11 +5,9 @@
 #include "AstNode.h"
 
 #include "AstNodeAdd.h"
-#include "AstNodeCommutative.h"
 #include "AstNodeDiv.h"
 #include "AstNodeInteger.h"
 #include "AstNodeMul.h"
-#include "AstNodeNumeric.h"
 #include "AstNodePower.h"
 #include "AstNodeSubtract.h"
 #include "AstNodeUnaryMinus.h"
@@ -127,11 +125,6 @@ u_ptr_AstNode AstNode::simplify(const u_ptr_AstNode& node) {
     return node->simplify();
 }
 
-u_ptr_AstNode AstNode::stealNode(size_t index) {
-    assert(false);
-    return nullptr;
-}
-
 IntersectStruct factorMultiplies(const AstNode* first, const AstNode* second) {
     assert(first->type() == AstNode::NODE_TYPE::MULTIPLY && second->type() == AstNode::NODE_TYPE::MULTIPLY);
     auto decomposition = AstNodeCommutative::decompose(COMMUTATIVE_C_CAST(first), COMMUTATIVE_C_CAST(second));
@@ -152,7 +145,7 @@ IntersectStruct AstNode::factorNodeAndMultiply(const AstNode* first, const AstNo
                      [&first](const u_ptr_AstNode& node) { return *node == *first; }) != secondNodes.end()) {
         auto secondCopy = second->copy();
         COMMUTATIVE_CAST(secondCopy.get())->removeNode(first);
-        return {first->copy(), std::make_unique<AstNodeInteger>(1), std::move(secondCopy)};
+        return {first->copy(), AstNode::one(), std::move(secondCopy)};
     } else {
         return {nullptr, nullptr, nullptr};
     }
@@ -161,19 +154,36 @@ IntersectStruct AstNode::factorNodeAndMultiply(const AstNode* first, const AstNo
 IntersectStruct AstNode::intersect(const AstNode* first, const AstNode* second) {
     if (*first == *second) {
         return {first->copy(), nullptr, nullptr};
-    }
-    if (first->type() == NODE_TYPE::MULTIPLY && second->type() == NODE_TYPE::MULTIPLY) {
+    } else if (first->type() == NODE_TYPE::MULTIPLY && second->type() == NODE_TYPE::MULTIPLY) {
         return factorMultiplies(first, second);
-    }
-    if (second->type() == NODE_TYPE::MULTIPLY) {
+    } else if (second->type() == NODE_TYPE::MULTIPLY) {
         assert(first->type() != NODE_TYPE::MULTIPLY);
         return factorNodeAndMultiply(first, second);
-    }
-    if (first->type() == NODE_TYPE::MULTIPLY) {
+    } else if (first->type() == NODE_TYPE::MULTIPLY) {
         assert(second->type() != NODE_TYPE::MULTIPLY);
         auto factor = intersect(second, first);
         return {std::move(factor.m_common), std::move(factor.m_secondRemainder), std::move(factor.m_firstRemainder)};
     }
 
     return {nullptr, nullptr, nullptr};
+}
+
+u_ptr_AstNode AstNode::zero() {
+    return makeInteger(0);
+}
+
+u_ptr_AstNode AstNode::one() {
+    return makeInteger(1);
+}
+
+u_ptr_AstNode AstNode::makeInteger(long long val) {
+    return std::make_unique<AstNodeInteger>(val);
+}
+
+bool AstNode::expandedEquals(const AstNode& lhs, const AstNode& rhs) {
+    if (lhs.type() > rhs.type()) {
+        return expandedEquals(rhs, lhs);
+    }
+
+    return false;
 }

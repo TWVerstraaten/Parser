@@ -5,7 +5,6 @@
 #include "AstNodePower.h"
 
 #include "AstNodeInteger.h"
-#include "AstNodeNumeric.h"
 
 #include <cassert>
 #include <cmath>
@@ -31,7 +30,7 @@ u_ptr_AstNode AstNodePower::simplify() const {
     if (exponent->isOne()) {
         return base;
     } else if (exponent->isZero()) {
-        return u_ptr_AstNode(new AstNodeInteger(1));
+        return AstNode::one();
     }
 
     AstNode* simplifiedNode = new AstNodePower(m_base->simplify(), m_exponent->simplify());

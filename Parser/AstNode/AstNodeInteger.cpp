@@ -29,8 +29,8 @@ AstNode::NODE_TYPE AstNodeInteger::type() const {
 }
 
 bool AstNodeInteger::equals(const AstNode& other) const {
-    if (other.type() == AstNode::NODE_TYPE::INTEGER) {
-        return m_value == dynamic_cast<const AstNodeInteger&>(other).m_value;
+    if (other.isNumeric()) {
+        return m_value == NUMERIC_CAST(&other).doubleValue();
     }
     return false;
 }

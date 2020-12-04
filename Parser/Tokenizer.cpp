@@ -6,7 +6,6 @@
 
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
-#include <cassert>
 #include <iostream>
 
 static std::string::const_iterator endOfIdentifier(std::string::const_iterator       begin,

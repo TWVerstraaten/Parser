@@ -7,7 +7,6 @@
 #include "AstNodeNumeric.h"
 
 #include <cassert>
-#include <iostream>
 
 AstNodeUnaryMinus::AstNodeUnaryMinus(u_ptr_AstNode&& value) : m_value(std::move(value)) {
 }
@@ -54,8 +53,4 @@ const AstNode* AstNodeUnaryMinus::childAt(size_t index) const {
 bool AstNodeUnaryMinus::compareEqualType(const AstNode* rhs) const {
     assert(rhs->type() == type());
     return compare(m_value.get(), rhs->childAt(0));
-}
-
-u_ptr_AstNode AstNodeUnaryMinus::stealNode(size_t index) {
-    return std::move(m_value);
 }
