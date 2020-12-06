@@ -38,10 +38,10 @@ class AstNodeCommutative : public AstNode {
                        std::function<Numeric(const Numeric&, const Numeric&)> accumulator,
                        std::function<bool(u_ptr_AstNode&)>                    removePredicate);
 
-    void sortNodes();
-    void mergeNodes();
-    void cleanUp();
-    void accumulateNumeric();
+    bool sortNodes();
+    bool mergeNodes();
+    bool cleanUp();
+    bool accumulateNumeric();
 
     AstNode& operator[](size_t index);
 

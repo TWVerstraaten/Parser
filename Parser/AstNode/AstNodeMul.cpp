@@ -61,9 +61,9 @@ u_ptr_AstNode AstNodeMul::simplify() const {
         return std::move(node->m_nodes[0]);
     }
 
-    if (node->gatherDuplicates()) {
-        return node->simplify();
-    }
+    //    if (node->gatherDuplicates()) {
+    //        return node->simplify();
+    //    }
 
     return simplifiedNode;
 }

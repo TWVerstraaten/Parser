@@ -27,7 +27,7 @@ class AstNodeAdd : public AstNodeCommutative {
     bool gatherDuplicates();
     bool cancelTerms();
 
-    [[nodiscard]] u_ptr_AstNode simplifiedCopy() const;
+    [[nodiscard]] std::unique_ptr<AstNodeAdd> simplifiedCopy() const;
 };
 
 #endif // PARSER_ASTNODEADD_H

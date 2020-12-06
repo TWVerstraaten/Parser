@@ -21,7 +21,7 @@ class AstNodeMul : public AstNodeCommutative {
     AstNodeMul();
 
     bool                        gatherDuplicates();
-    bool                        containsAdditionNode() const;
+    [[nodiscard]] bool          containsAdditionNode() const;
     [[nodiscard]] u_ptr_AstNode simplifiedCopy() const;
     [[nodiscard]] u_ptr_AstNode distributeMultiplication() const;
 };

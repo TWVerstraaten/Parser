@@ -29,7 +29,6 @@ class AstNode {
         FUNCTION,
         ERROR
     };
-    enum class SIMPLIFY_RULES { NONE = 0, DIST_MUL_OVER_ADD = 1 };
     explicit AstNode() = default;
 
     [[nodiscard]] bool isNumeric() const;
@@ -40,6 +39,8 @@ class AstNode {
 
     static IntersectStruct intersect(const AstNode* first, const AstNode* second);
     static IntersectStruct factorNodeAndMultiply(const AstNode* first, const AstNode* second);
+//    static IntersectStruct factorPowerAndMultiply(const AstNode* power, const AstNode* multNode);
+//    static IntersectStruct factorPowers(const AstNode* power, const AstNode* mult);
     static u_ptr_AstNode   zero();
     static u_ptr_AstNode   one();
     static u_ptr_AstNode   makeInteger(long long val);
@@ -52,7 +53,6 @@ class AstNode {
     [[nodiscard]] virtual u_ptr_AstNode  copy() const                = 0;
 
     static bool          compare(const AstNode* lhs, const AstNode* rhs);
-    static bool          expandedEquals(const AstNode& lhs, const AstNode& rhs);
     static u_ptr_AstNode copy(const u_ptr_AstNode& node);
     static u_ptr_AstNode simplify(const u_ptr_AstNode& node);
 

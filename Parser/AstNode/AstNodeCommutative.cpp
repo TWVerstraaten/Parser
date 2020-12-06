@@ -49,20 +49,25 @@ void AstNodeCommutative::addNode(u_ptr_AstNode node) {
     m_nodes.emplace_back(std::move(node));
 }
 
-void AstNodeCommutative::sortNodes() {
+bool AstNodeCommutative::sortNodes() {
+    if (std::is_sorted(m_nodes.begin(), m_nodes.end(), AstNode::compare_u_ptr)) {
+        return false;
+    }
     std::sort(m_nodes.begin(), m_nodes.end(), AstNode::compare_u_ptr);
+    return true;
 }
 
-void AstNodeCommutative::mergeNodes() {
+bool AstNodeCommutative::mergeNodes() {
     for (auto it = m_nodes.begin(); it != m_nodes.end(); ++it) {
         if ((*it)->type() == type()) {
             auto* childNode = COMMUTATIVE_CAST(it->release());
-            it              = m_nodes.erase(it);
+            m_nodes.erase(it);
             std::move(childNode->m_nodes.begin(), childNode->m_nodes.end(), std::back_inserter(m_nodes));
             mergeNodes();
-            return;
+            return true;
         }
     }
+    return false;
 }
 
 bool AstNodeCommutative::equals(const AstNode& other) const {
@@ -80,11 +85,15 @@ bool AstNodeCommutative::equals(const AstNode& other) const {
     return true;
 }
 
-void AstNodeCommutative::accumulateNumeric() {
+bool AstNodeCommutative::accumulateNumeric() {
     if (m_nodes.size() < 2) {
-        return;
+        return false;
     }
+    assert(std::is_sorted(m_nodes.begin(), m_nodes.end(), AstNode::compare_u_ptr));
     auto it = std::next(m_nodes.begin());
+    if (not(*it)->isNumeric()) {
+        return false;
+    }
     while (it != m_nodes.end() && (*it)->isNumeric()) {
         const Numeric num1 = NUMERIC_CAST((it - 1)->get());
         const Numeric num2 = NUMERIC_CAST(it->get());
@@ -92,13 +101,16 @@ void AstNodeCommutative::accumulateNumeric() {
         *it                = m_accumulator(num1, num2).toNode();
         ++it;
     }
+    return true;
 }
-void AstNodeCommutative::cleanUp() {
-    mergeNodes();
-    sortNodes();
-    m_nodes.erase(std::remove_if(m_nodes.begin(), m_nodes.end(), m_removePredicate), m_nodes.end());
-    accumulateNumeric();
-    m_nodes.erase(std::remove_if(m_nodes.begin(), m_nodes.end(), m_removePredicate), m_nodes.end());
+
+bool AstNodeCommutative::cleanUp() {
+    bool isChanged = mergeNodes() || sortNodes() || accumulateNumeric();
+    if (std::find_if(m_nodes.begin(), m_nodes.end(), m_removePredicate) != m_nodes.end()) {
+        isChanged = true;
+        m_nodes.erase(std::remove_if(m_nodes.begin(), m_nodes.end(), m_removePredicate), m_nodes.end());
+    }
+    return isChanged;
 }
 
 bool AstNodeCommutative::compareEqualType(const AstNode* rhs) const {

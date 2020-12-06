@@ -131,9 +131,9 @@ IntersectStruct factorMultiplies(const AstNode* first, const AstNode* second) {
     if (decomposition.m_aCapB.empty()) {
         return {nullptr, nullptr, nullptr};
     } else {
-        return {u_ptr_AstNode(new AstNodeMul(std::move(decomposition.m_aCapB))),
-                u_ptr_AstNode(new AstNodeMul(std::move(decomposition.m_aMinusB))),
-                u_ptr_AstNode(new AstNodeMul(std::move(decomposition.m_bMinusA)))};
+        return {u_ptr_AstNode(new AstNodeMul(std::move(decomposition.m_aCapB)))->simplify(),
+                u_ptr_AstNode(new AstNodeMul(std::move(decomposition.m_aMinusB)))->simplify(),
+                u_ptr_AstNode(new AstNodeMul(std::move(decomposition.m_bMinusA)))->simplify()};
     }
 }
 
@@ -151,18 +151,61 @@ IntersectStruct AstNode::factorNodeAndMultiply(const AstNode* first, const AstNo
     }
 }
 
+u_ptr_AstNode expandPower(const AstNode* power) {
+    assert(power->childAt(1)->type() == AstNode::NODE_TYPE::INTEGER);
+    assert(NUMERIC_CAST(power->childAt(1)).doubleValue() > 0);
+    size_t                     exponent = static_cast<size_t>(NUMERIC_CAST(power->childAt(1)).doubleValue());
+    std::vector<u_ptr_AstNode> copiedNodes;
+    for (size_t i = 0; i != exponent; ++i) {
+        copiedNodes.emplace_back(power->childAt(0)->copy());
+    }
+    return std::make_unique<AstNodeMul>(std::move(copiedNodes));
+}
+
+static IntersectStruct factorPowerAndMultiply(const AstNode* power, const AstNode* multNode) {
+    assert(power->type() == AstNode::NODE_TYPE::POWER);
+    assert(multNode->type() == AstNode::NODE_TYPE::MULTIPLY);
+    if (power->childAt(1)->type() == AstNode::NODE_TYPE::INTEGER) {
+        if (NUMERIC_CAST(power->childAt(1)).doubleValue() > 0) {
+            const auto expandedPower = expandPower(power);
+            return factorMultiplies(expandedPower.get(), multNode);
+        }
+    }
+    return {nullptr, nullptr, nullptr};
+}
+
+static IntersectStruct factorPowers(const AstNode* power1, const AstNode* power2) {
+    assert(power1->type() == AstNode::NODE_TYPE::POWER);
+    assert(power2->type() == AstNode::NODE_TYPE::POWER);
+
+    if (NUMERIC_CAST(power1->childAt(1)).doubleValue() > 0 && NUMERIC_CAST(power2->childAt(1)).doubleValue() > 0) {
+        const auto expandedPower1 = expandPower(power1);
+        const auto expandedPower2 = expandPower(power2);
+        return factorMultiplies(expandedPower1.get(), expandedPower2.get());
+    }
+
+    return {nullptr, nullptr, nullptr};
+}
+
 IntersectStruct AstNode::intersect(const AstNode* first, const AstNode* second) {
     if (*first == *second) {
         return {first->copy(), nullptr, nullptr};
     } else if (first->type() == NODE_TYPE::MULTIPLY && second->type() == NODE_TYPE::MULTIPLY) {
         return factorMultiplies(first, second);
-    } else if (second->type() == NODE_TYPE::MULTIPLY) {
-        assert(first->type() != NODE_TYPE::MULTIPLY);
-        return factorNodeAndMultiply(first, second);
     } else if (first->type() == NODE_TYPE::MULTIPLY) {
         assert(second->type() != NODE_TYPE::MULTIPLY);
         auto factor = intersect(second, first);
         return {std::move(factor.m_common), std::move(factor.m_secondRemainder), std::move(factor.m_firstRemainder)};
+    } else if (first->type() == NODE_TYPE::POWER && second->type() == NODE_TYPE::MULTIPLY) {
+        return factorPowerAndMultiply(first, second);
+    } else if (first->type() == NODE_TYPE::MULTIPLY && second->type() == NODE_TYPE::POWER) {
+        auto factor = intersect(second, first);
+        return {std::move(factor.m_common), std::move(factor.m_secondRemainder), std::move(factor.m_firstRemainder)};
+    } else if (second->type() == NODE_TYPE::MULTIPLY) {
+        assert(first->type() != NODE_TYPE::MULTIPLY);
+        return factorNodeAndMultiply(first, second);
+    } else if (first->type() == NODE_TYPE::POWER && second->type() == NODE_TYPE::POWER) {
+        return factorPowers(first, second);
     }
     return {nullptr, nullptr, nullptr};
 }
@@ -177,12 +220,4 @@ u_ptr_AstNode AstNode::one() {
 
 u_ptr_AstNode AstNode::makeInteger(long long val) {
     return std::make_unique<AstNodeInteger>(val);
-}
-
-bool AstNode::expandedEquals(const AstNode& lhs, const AstNode& rhs) {
-    if (lhs.type() > rhs.type()) {
-        return expandedEquals(rhs, lhs);
-    }
-
-    return false;
 }

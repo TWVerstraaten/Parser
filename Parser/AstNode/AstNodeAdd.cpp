@@ -48,33 +48,35 @@ u_ptr_AstNode AstNodeAdd::copy() const {
 }
 
 u_ptr_AstNode AstNodeAdd::simplify() const {
-    u_ptr_AstNode simplifiedNode = simplifiedCopy();
-    auto*         node           = dynamic_cast<AstNodeAdd*>(simplifiedNode.get());
-    node->cleanUp();
-    node->cancelTerms();
-    if (node->childCount() == 0) {
-        return AstNode::zero();
-    } else if (node->childCount() == 1) {
-        return std::move(node->m_nodes[0]);
-    }
+    std::unique_ptr<AstNodeAdd> simplifiedNode = simplifiedCopy();
 
-    if (node->gatherDuplicates() || node->gatherOverLappingNodes()) {
-        return node->simplify();
+    bool ready;
+    while (true) {
+        ready      = true;
+        auto* node = dynamic_cast<AstNodeAdd*>(simplifiedNode.get());
+        ready &= not(node->cleanUp() || node->cancelTerms());
+        if (node->childCount() == 0) {
+            return AstNode::zero();
+        } else if (node->childCount() == 1) {
+            return std::move(node->m_nodes[0]);
+        }
+        ready &= not(node->gatherDuplicates() || node->gatherOverLappingNodes());
+        if (ready) {
+            return simplifiedNode;
+        }
+        simplifiedNode = node->simplifiedCopy();
     }
-
-    return simplifiedNode;
 }
 
 AstNode::NODE_TYPE AstNodeAdd::type() const {
     return NODE_TYPE::ADD;
 }
 
-u_ptr_AstNode AstNodeAdd::simplifiedCopy() const {
-    auto copy = u_ptr_AstNode(new AstNodeAdd{});
-    COMMUTATIVE_CAST(copy.get())->m_nodes.reserve(m_nodes.size());
-    std::transform(m_nodes.begin(), m_nodes.end(), std::back_inserter(COMMUTATIVE_CAST(copy.get())->m_nodes),
+std::unique_ptr<AstNodeAdd> AstNodeAdd::simplifiedCopy() const {
+    auto copy = std::unique_ptr<AstNodeAdd>(new AstNodeAdd{});
+    copy->m_nodes.reserve(m_nodes.size());
+    std::transform(m_nodes.begin(), m_nodes.end(), std::back_inserter(copy->m_nodes),
                    [](const auto& node) { return node->simplify(); });
-    COMMUTATIVE_CAST(copy.get())->cleanUp();
     return copy;
 }
 
