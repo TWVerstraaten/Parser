@@ -22,8 +22,8 @@ u_ptr_AstNode AstNodeDiv::copy() const {
     return std::make_unique<AstNodeDiv>(m_numerator->copy(), m_denominator->copy());
 }
 
-u_ptr_AstNode AstNodeDiv::simplify() const {
-    auto node = std::make_unique<AstNodeDiv>(m_numerator->simplify(), m_denominator->simplify());
+u_ptr_AstNode AstNodeDiv::simplify(SIMPLIFY_RULES simplifyRules) const {
+    auto node = std::make_unique<AstNodeDiv>(m_numerator-> simplify(SIMPLIFY_RULES::NONE), m_denominator-> simplify(SIMPLIFY_RULES::NONE));
 
     if (node->m_denominator->isOne()) {
         return std::move(node->m_numerator);
@@ -36,7 +36,7 @@ u_ptr_AstNode AstNodeDiv::simplify() const {
     if (commonFactorStruct.m_common != nullptr) {
         return std::make_unique<AstNodeDiv>(commonFactorStruct.firstOr(AstNode::one()),
                                             commonFactorStruct.secondOr(AstNode::one()))
-            ->simplify();
+            -> simplify(SIMPLIFY_RULES::NONE);
     }
 
     return node;
@@ -81,7 +81,7 @@ u_ptr_AstNode AstNodeDiv::simplifiedNumeric() const {
         }
         return std::make_unique<AstNodeDiv>((NUMERIC_CAST(m_numerator.get()) / divisor).toNode(),
                                             (NUMERIC_CAST(m_denominator.get()) / divisor).toNode())
-            ->simplify();
+            -> simplify(SIMPLIFY_RULES::NONE);
     }
     return (NUMERIC_CAST(m_numerator.get()) / NUMERIC_CAST(m_denominator.get())).toNode();
 }

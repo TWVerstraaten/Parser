@@ -4,6 +4,8 @@
 
 #include "AstNodeAdd.h"
 
+#include "AstNodeMul.h"
+
 #include <cassert>
 
 AstNodeAdd::AstNodeAdd()
@@ -47,24 +49,19 @@ u_ptr_AstNode AstNodeAdd::copy() const {
     return copy;
 }
 
-u_ptr_AstNode AstNodeAdd::simplify() const {
-    std::unique_ptr<AstNodeAdd> simplifiedNode = simplifiedCopy();
-
-    bool ready;
+u_ptr_AstNode AstNodeAdd::simplify(SIMPLIFY_RULES simplifyRules) const {
+    std::unique_ptr<AstNodeAdd> simplifiedNode = simplifiedCopy(AstNode::SIMPLIFY_RULES::DISTRIBUTE_MULTIPLICATION);
     while (true) {
-        ready      = true;
-        auto* node = dynamic_cast<AstNodeAdd*>(simplifiedNode.get());
-        ready &= not(node->cleanUp() || node->cancelTerms());
-        if (node->childCount() == 0) {
+        bool ready = not(simplifiedNode->cleanUp() || simplifiedNode->cancelTerms() ||
+                         simplifiedNode->gatherDuplicates() || simplifiedNode->gatherOverLappingNodes());
+        if (simplifiedNode->childCount() == 0) {
             return AstNode::zero();
-        } else if (node->childCount() == 1) {
-            return std::move(node->m_nodes[0]);
-        }
-        ready &= not(node->gatherDuplicates() || node->gatherOverLappingNodes());
-        if (ready) {
+        } else if (simplifiedNode->childCount() == 1) {
+            return std::move(simplifiedNode->m_nodes[0]);
+        } else if (ready) {
             return simplifiedNode;
         }
-        simplifiedNode = node->simplifiedCopy();
+        simplifiedNode = simplifiedNode->simplifiedCopy(AstNode::SIMPLIFY_RULES::NONE);
     }
 }
 
@@ -72,11 +69,11 @@ AstNode::NODE_TYPE AstNodeAdd::type() const {
     return NODE_TYPE::ADD;
 }
 
-std::unique_ptr<AstNodeAdd> AstNodeAdd::simplifiedCopy() const {
+std::unique_ptr<AstNodeAdd> AstNodeAdd::simplifiedCopy(SIMPLIFY_RULES simplifyRules) const {
     auto copy = std::unique_ptr<AstNodeAdd>(new AstNodeAdd{});
     copy->m_nodes.reserve(m_nodes.size());
     std::transform(m_nodes.begin(), m_nodes.end(), std::back_inserter(copy->m_nodes),
-                   [](const auto& node) { return node->simplify(); });
+                   [simplifyRules](const u_ptr_AstNode& node) { return node->simplify(simplifyRules); });
     return copy;
 }
 
@@ -89,7 +86,7 @@ bool AstNodeAdd::gatherOverLappingNodes() {
                 m_nodes.erase(it1);
                 m_nodes.emplace_back(
                     (commonFactorStruct.firstOr(AstNode::one()) + commonFactorStruct.secondOr(AstNode::one()))
-                        ->simplify() *
+                        ->simplify(SIMPLIFY_RULES::NONE) *
                     std::move(commonFactorStruct.m_common));
                 return true;
             }

@@ -5,6 +5,7 @@
 #include "AstNodeMul.h"
 
 #include "AstNodeAdd.h"
+#include "AstNodeUnaryMinus.h"
 
 #include <cassert>
 
@@ -50,35 +51,37 @@ u_ptr_AstNode AstNodeMul::copy() const {
     return copy;
 }
 
-u_ptr_AstNode AstNodeMul::simplify() const {
-    u_ptr_AstNode simplifiedNode = simplifiedCopy();
-    auto*         node           = dynamic_cast<AstNodeMul*>(simplifiedNode.get());
-    node->cleanUp();
+static u_ptr_AstNode potentiallyNegative(u_ptr_AstNode&& node, bool makeNegative) {
+    return makeNegative ? std::make_unique<AstNodeUnaryMinus>(std::move(node)) : std::move(node);
+}
 
-    if (node->childCount() == 0) {
-        return AstNode::one();
-    } else if (node->childCount() == 1) {
-        return std::move(node->m_nodes[0]);
+u_ptr_AstNode AstNodeMul::simplify(SIMPLIFY_RULES simplifyRules) const {
+    auto simplifiedNode = simplifiedCopy(simplifyRules);
+    bool minusParity    = simplifiedNode->stripUnaryMinuses();
+    while (true) {
+        minusParity ^= simplifiedNode->stripUnaryMinuses();
+        bool ready = not(simplifiedNode->cleanUp() || simplifiedNode->gatherDuplicates());
+        if (simplifiedNode->childCount() == 0) {
+            return potentiallyNegative(AstNode::one(), minusParity);
+        } else if (simplifiedNode->childCount() == 1) {
+            return potentiallyNegative(std::move(simplifiedNode->m_nodes[0]), minusParity);
+        } else if (ready) {
+            return potentiallyNegative(std::move(simplifiedNode), minusParity);
+        }
+        simplifiedNode = simplifiedNode->simplifiedCopy(AstNode::SIMPLIFY_RULES::NONE);
     }
-
-    //    if (node->gatherDuplicates()) {
-    //        return node->simplify();
-    //    }
-
-    return simplifiedNode;
 }
 
 AstNode::NODE_TYPE AstNodeMul::type() const {
     return NODE_TYPE::MULTIPLY;
 }
 
-u_ptr_AstNode AstNodeMul::simplifiedCopy() const {
-    auto* result = new AstNodeMul{};
-    for (const auto& it : m_nodes) {
-        result->addNode(it->simplify());
-    }
-
-    return u_ptr_AstNode(result);
+std::unique_ptr<AstNodeMul> AstNodeMul::simplifiedCopy(SIMPLIFY_RULES simplifyRules) const {
+    auto copy = std::unique_ptr<AstNodeMul>(new AstNodeMul{});
+    copy->m_nodes.reserve(m_nodes.size());
+    std::transform(m_nodes.begin(), m_nodes.end(), std::back_inserter(copy->m_nodes),
+                   [simplifyRules](const u_ptr_AstNode& node) { return node->simplify(simplifyRules); });
+    return copy;
 }
 
 bool AstNodeMul::gatherDuplicates() {
@@ -109,7 +112,9 @@ u_ptr_AstNode AstNodeMul::distributeMultiplication() const {
 
     auto* result = new AstNodeAdd{};
     for (size_t i = 0; i != addends; ++i) {
-        result->m_nodes.emplace_back((*addIt)->childAt(i)->copy() * copyOfCurrentNode->copy());
+        result->m_nodes.emplace_back(
+            dynamic_cast<AstNodeMul*>(((*addIt)->childAt(i)->copy() * copyOfCurrentNode->copy()).get())
+                ->distributeMultiplication());
     }
 
     return u_ptr_AstNode(result);
@@ -119,4 +124,19 @@ bool AstNodeMul::containsAdditionNode() const {
     return std::find_if(m_nodes.begin(), m_nodes.end(), [](const u_ptr_AstNode& node) {
                return node->type() == AstNode::NODE_TYPE::ADD;
            }) != m_nodes.end();
+}
+
+bool AstNodeMul::stripUnaryMinuses() {
+    bool minusParity = false;
+    auto it          = std::find_if(m_nodes.begin(), m_nodes.end(),
+                           [](const u_ptr_AstNode& node) { return node->type() == AstNode::NODE_TYPE::UNARY_MINUS; });
+
+    while (it != m_nodes.end()) {
+        minusParity = not minusParity;
+        assert((*it)->type() == AstNode::NODE_TYPE::UNARY_MINUS);
+        *it = (*it)->childAt(0)->copy();
+        it  = std::find_if(m_nodes.begin(), m_nodes.end(),
+                          [](const u_ptr_AstNode& node) { return node->type() == AstNode::NODE_TYPE::UNARY_MINUS; });
+    }
+    return minusParity;
 }

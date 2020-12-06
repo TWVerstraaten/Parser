@@ -17,7 +17,7 @@ u_ptr_AstNode AstNodeVar::copy() const {
     return u_ptr_AstNode(new AstNodeVar(m_variableName));
 }
 
-u_ptr_AstNode AstNodeVar::simplify() const {
+u_ptr_AstNode AstNodeVar::simplify(SIMPLIFY_RULES simplifyRules) const {
     return copy();
 }
 

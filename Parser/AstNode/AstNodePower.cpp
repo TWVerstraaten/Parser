@@ -21,9 +21,9 @@ u_ptr_AstNode AstNodePower::copy() const {
     return u_ptr_AstNode(new AstNodePower(m_base->copy(), m_exponent->copy()));
 }
 
-u_ptr_AstNode AstNodePower::simplify() const {
-    auto       base     = m_base->simplify();
-    const auto exponent = m_exponent->simplify();
+u_ptr_AstNode AstNodePower::simplify(SIMPLIFY_RULES simplifyRules) const {
+    auto       base     = m_base-> simplify(SIMPLIFY_RULES::NONE);
+    const auto exponent = m_exponent-> simplify(SIMPLIFY_RULES::NONE);
     if (base->isNumeric() && exponent->isNumeric()) {
         return (NUMERIC_CAST(base.get()) ^ NUMERIC_CAST(exponent.get())).toNode();
     }
@@ -33,7 +33,7 @@ u_ptr_AstNode AstNodePower::simplify() const {
         return AstNode::one();
     }
 
-    AstNode* simplifiedNode = new AstNodePower(m_base->simplify(), m_exponent->simplify());
+    AstNode* simplifiedNode = new AstNodePower(m_base-> simplify(SIMPLIFY_RULES::NONE), m_exponent-> simplify(SIMPLIFY_RULES::NONE));
     return u_ptr_AstNode(simplifiedNode);
 }
 

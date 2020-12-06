@@ -15,15 +15,17 @@ class AstNodeMul : public AstNodeCommutative {
     [[nodiscard]] NODE_TYPE     type() const override;
     [[nodiscard]] std::string   toString() const override;
     [[nodiscard]] u_ptr_AstNode copy() const override;
-    [[nodiscard]] u_ptr_AstNode simplify() const override;
+    [[nodiscard]] u_ptr_AstNode simplify(SIMPLIFY_RULES simplifyRules) const override;
 
   private:
-    AstNodeMul();
+    friend class AstNodeAdd;
 
-    bool                        gatherDuplicates();
-    [[nodiscard]] bool          containsAdditionNode() const;
-    [[nodiscard]] u_ptr_AstNode simplifiedCopy() const;
-    [[nodiscard]] u_ptr_AstNode distributeMultiplication() const;
+    AstNodeMul();
+    bool                                      stripUnaryMinuses();
+    bool                                      gatherDuplicates();
+    [[nodiscard]] bool                        containsAdditionNode() const;
+    [[nodiscard]] std::unique_ptr<AstNodeMul> simplifiedCopy(SIMPLIFY_RULES simplifyRules) const;
+    [[nodiscard]] u_ptr_AstNode               distributeMultiplication() const;
 };
 
 #endif // PARSER_ASTNODEMUL_H

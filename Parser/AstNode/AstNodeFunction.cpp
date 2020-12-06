@@ -17,8 +17,8 @@ std::string AstNodeFunction::toString() const {
 u_ptr_AstNode AstNodeFunction::copy() const {
     return u_ptr_AstNode(new AstNodeFunction(m_functionName, m_argument->copy()));
 }
-u_ptr_AstNode AstNodeFunction::simplify() const {
-    AstNode* simplifiedNode = new AstNodeFunction(m_functionName, m_argument->simplify());
+u_ptr_AstNode AstNodeFunction::simplify(SIMPLIFY_RULES simplifyRules) const {
+    AstNode* simplifiedNode = new AstNodeFunction(m_functionName, m_argument-> simplify(SIMPLIFY_RULES::NONE));
     return u_ptr_AstNode(simplifiedNode);
 }
 

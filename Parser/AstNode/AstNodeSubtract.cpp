@@ -20,14 +20,15 @@ u_ptr_AstNode AstNodeSubtract::copy() const {
     return u_ptr_AstNode(new AstNodeSubtract(m_leftNode->copy(), m_rightNode->copy()));
 }
 
-u_ptr_AstNode AstNodeSubtract::simplify() const {
-    const auto left  = m_leftNode->simplify();
-    const auto right = m_rightNode->simplify();
+u_ptr_AstNode AstNodeSubtract::simplify(SIMPLIFY_RULES simplifyRules) const {
+    const auto left  = m_leftNode->simplify(SIMPLIFY_RULES::NONE);
+    const auto right = m_rightNode->simplify(SIMPLIFY_RULES::NONE);
     if (left->isNumeric() && right->isNumeric()) {
         return (NUMERIC_CAST(left.get()) - NUMERIC_CAST(right.get())).toNode();
     }
 
-    AstNode* simplifiedNode = new AstNodeSubtract(m_leftNode->simplify(), m_rightNode->simplify());
+    AstNode* simplifiedNode =
+        new AstNodeSubtract(m_leftNode->simplify(SIMPLIFY_RULES::NONE), m_rightNode->simplify(SIMPLIFY_RULES::NONE));
     return u_ptr_AstNode(simplifiedNode);
 }
 

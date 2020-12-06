@@ -39,18 +39,20 @@ class AstNode {
 
     static IntersectStruct intersect(const AstNode* first, const AstNode* second);
     static IntersectStruct factorNodeAndMultiply(const AstNode* first, const AstNode* second);
-//    static IntersectStruct factorPowerAndMultiply(const AstNode* power, const AstNode* multNode);
-//    static IntersectStruct factorPowers(const AstNode* power, const AstNode* mult);
-    static u_ptr_AstNode   zero();
-    static u_ptr_AstNode   one();
-    static u_ptr_AstNode   makeInteger(long long val);
+    //    static IntersectStruct factorPowerAndMultiply(const AstNode* power, const AstNode* multNode);
+    //    static IntersectStruct factorPowers(const AstNode* power, const AstNode* mult);
+    static u_ptr_AstNode zero();
+    static u_ptr_AstNode one();
+    static u_ptr_AstNode makeInteger(long long val);
 
-    [[nodiscard]] virtual size_t         childCount() const          = 0;
-    [[nodiscard]] virtual NODE_TYPE      type() const                = 0;
-    [[nodiscard]] virtual std::string    toString() const            = 0;
-    [[nodiscard]] virtual const AstNode* childAt(size_t index) const = 0;
-    [[nodiscard]] virtual u_ptr_AstNode  simplify() const            = 0;
-    [[nodiscard]] virtual u_ptr_AstNode  copy() const                = 0;
+    enum class SIMPLIFY_RULES { NONE, DISTRIBUTE_MULTIPLICATION };
+
+    [[nodiscard]] virtual size_t         childCount() const                           = 0;
+    [[nodiscard]] virtual NODE_TYPE      type() const                                 = 0;
+    [[nodiscard]] virtual std::string    toString() const                             = 0;
+    [[nodiscard]] virtual const AstNode* childAt(size_t index) const                  = 0;
+    [[nodiscard]] virtual u_ptr_AstNode  simplify(SIMPLIFY_RULES simplifyRules) const = 0;
+    [[nodiscard]] virtual u_ptr_AstNode  copy() const                                 = 0;
 
     static bool          compare(const AstNode* lhs, const AstNode* rhs);
     static u_ptr_AstNode copy(const u_ptr_AstNode& node);

@@ -14,7 +14,7 @@ u_ptr_AstNode AstNodeError::copy() const {
     return u_ptr_AstNode(new AstNodeError{});
 }
 
-u_ptr_AstNode AstNodeError::simplify() const {
+u_ptr_AstNode AstNodeError::simplify(SIMPLIFY_RULES simplifyRules) const {
     return copy();
 }
 

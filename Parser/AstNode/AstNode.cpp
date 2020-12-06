@@ -122,7 +122,7 @@ u_ptr_AstNode AstNode::copy(const u_ptr_AstNode& node) {
 }
 
 u_ptr_AstNode AstNode::simplify(const u_ptr_AstNode& node) {
-    return node->simplify();
+    return node-> simplify(SIMPLIFY_RULES::NONE);
 }
 
 IntersectStruct factorMultiplies(const AstNode* first, const AstNode* second) {
@@ -131,9 +131,9 @@ IntersectStruct factorMultiplies(const AstNode* first, const AstNode* second) {
     if (decomposition.m_aCapB.empty()) {
         return {nullptr, nullptr, nullptr};
     } else {
-        return {u_ptr_AstNode(new AstNodeMul(std::move(decomposition.m_aCapB)))->simplify(),
-                u_ptr_AstNode(new AstNodeMul(std::move(decomposition.m_aMinusB)))->simplify(),
-                u_ptr_AstNode(new AstNodeMul(std::move(decomposition.m_bMinusA)))->simplify()};
+        return {u_ptr_AstNode(new AstNodeMul(std::move(decomposition.m_aCapB)))-> simplify(AstNode::SIMPLIFY_RULES::NONE),
+                u_ptr_AstNode(new AstNodeMul(std::move(decomposition.m_aMinusB)))-> simplify(AstNode::SIMPLIFY_RULES::NONE),
+                u_ptr_AstNode(new AstNodeMul(std::move(decomposition.m_bMinusA)))-> simplify(AstNode::SIMPLIFY_RULES::NONE)};
     }
 }
 

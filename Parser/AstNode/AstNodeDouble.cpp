@@ -20,7 +20,7 @@ u_ptr_AstNode AstNodeDouble::copy() const {
     return u_ptr_AstNode(new AstNodeDouble(m_value));
 }
 
-u_ptr_AstNode AstNodeDouble::simplify() const {
+u_ptr_AstNode AstNodeDouble::simplify(SIMPLIFY_RULES simplifyRules) const {
     return copy();
 }
 

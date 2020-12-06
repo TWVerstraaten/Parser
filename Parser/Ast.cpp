@@ -7,7 +7,8 @@
 #include "Parser.h"
 
 Ast::Ast(std::string string)
-    : m_string(std::move(string)), m_rootNode(Parser::parse(m_string)), m_copy(m_rootNode->simplify()) {
+    : m_string(std::move(string)), m_rootNode(Parser::parse(m_string)),
+      m_copy(m_rootNode->simplify(AstNode::SIMPLIFY_RULES::NONE)) {
 }
 
 std::string Ast::toString() const {

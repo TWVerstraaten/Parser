@@ -19,14 +19,14 @@ u_ptr_AstNode AstNodeUnaryMinus::copy() const {
     return u_ptr_AstNode(new AstNodeUnaryMinus(m_value->copy()));
 }
 
-u_ptr_AstNode AstNodeUnaryMinus::simplify() const {
+u_ptr_AstNode AstNodeUnaryMinus::simplify(SIMPLIFY_RULES simplifyRules) const {
     if (m_value->type() == AstNode::NODE_TYPE::UNARY_MINUS) {
-        return m_value->childAt(0)->simplify();
+        return m_value->childAt(0)-> simplify(SIMPLIFY_RULES::NONE);
     }
     if (m_value->isNumeric()) {
         return (NUMERIC_CAST(m_value.get()) * -1).toNode();
     }
-    AstNode* simplifiedNode = new AstNodeUnaryMinus(m_value->simplify());
+    AstNode* simplifiedNode = new AstNodeUnaryMinus(m_value-> simplify(SIMPLIFY_RULES::NONE));
     return u_ptr_AstNode(simplifiedNode);
 }
 
