@@ -6,8 +6,18 @@
 
 #include <cassert>
 
+AstNodeError::AstNodeError(AstNodeError::ERROR_TYPE errorType) : m_errorType(errorType) {
+}
+
 std::string AstNodeError::toString() const {
-    return "Error";
+    switch (m_errorType) {
+        case ERROR_TYPE::DEFAULT:
+            return "Error";
+        case ERROR_TYPE::DIVISION_BY_ZERO:
+            return "Division by zero!";
+        default:
+            assert(false);
+    }
 }
 
 u_ptr_AstNode AstNodeError::copy() const {

@@ -5,6 +5,7 @@
 #include "AstNodeAdd.h"
 
 #include "AstNodeMul.h"
+#include "IntersectStruct.h"
 
 #include <cassert>
 

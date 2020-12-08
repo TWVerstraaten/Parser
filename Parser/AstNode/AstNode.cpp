@@ -11,6 +11,7 @@
 #include "AstNodePower.h"
 #include "AstNodeSubtract.h"
 #include "AstNodeUnaryMinus.h"
+#include "IntersectStruct.h"
 
 #include <cassert>
 

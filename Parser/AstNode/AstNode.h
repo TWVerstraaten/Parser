@@ -87,17 +87,5 @@ class AstNode {
     static bool compare_u_ptr(const u_ptr_AstNode& lhs, const u_ptr_AstNode& rhs);
 };
 
-struct IntersectStruct {
-    u_ptr_AstNode m_common;
-    u_ptr_AstNode m_firstRemainder;
-    u_ptr_AstNode m_secondRemainder;
-
-    u_ptr_AstNode&& firstOr(u_ptr_AstNode&& alternative) {
-        return m_firstRemainder ? std::move(m_firstRemainder) : std::move(alternative);
-    }
-    u_ptr_AstNode&& secondOr(u_ptr_AstNode&& alternative) {
-        return m_secondRemainder ? std::move(m_secondRemainder) : std::move(alternative);
-    }
-};
 
 #endif // PARSER_ASTNODE_H

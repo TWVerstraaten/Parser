@@ -9,7 +9,10 @@
 
 class AstNodeError : public AstNode {
   public:
+    enum class ERROR_TYPE { DEFAULT, DIVISION_BY_ZERO };
+
     AstNodeError() = default;
+    explicit AstNodeError(ERROR_TYPE errorType);
     [[nodiscard]] u_ptr_AstNode  copy() const override;
     [[nodiscard]] std::string    toString() const override;
     [[nodiscard]] u_ptr_AstNode  simplify(SIMPLIFY_RULES simplifyRules) const override;
@@ -20,6 +23,9 @@ class AstNodeError : public AstNode {
 
   protected:
     [[nodiscard]] bool equals(const AstNode& other) const override;
+
+  private:
+    ERROR_TYPE m_errorType = ERROR_TYPE::DEFAULT;
 };
 
 #endif // PARSER_ASTNODEERROR_H

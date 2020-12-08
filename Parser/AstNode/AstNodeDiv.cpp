@@ -6,7 +6,9 @@
 
 #include "../../Algorithm/Algorithm.h"
 #include "AstNodeCommutative.h"
+#include "AstNodeError.h"
 #include "AstNodeInteger.h"
+#include "IntersectStruct.h"
 
 #include <cassert>
 
@@ -23,7 +25,14 @@ u_ptr_AstNode AstNodeDiv::copy() const {
 }
 
 u_ptr_AstNode AstNodeDiv::simplify(SIMPLIFY_RULES simplifyRules) const {
-    auto node = std::make_unique<AstNodeDiv>(m_numerator-> simplify(SIMPLIFY_RULES::NONE), m_denominator-> simplify(SIMPLIFY_RULES::NONE));
+    auto node = std::make_unique<AstNodeDiv>(m_numerator->simplify(SIMPLIFY_RULES::NONE),
+                                             m_denominator->simplify(SIMPLIFY_RULES::NONE));
+
+    if (node->m_numerator->isZero()) {
+        return node->m_denominator->isZero()
+                 ? u_ptr_AstNode(new AstNodeError{AstNodeError::ERROR_TYPE::DIVISION_BY_ZERO})
+                 : AstNode::zero();
+    }
 
     if (node->m_denominator->isOne()) {
         return std::move(node->m_numerator);
@@ -36,7 +45,7 @@ u_ptr_AstNode AstNodeDiv::simplify(SIMPLIFY_RULES simplifyRules) const {
     if (commonFactorStruct.m_common != nullptr) {
         return std::make_unique<AstNodeDiv>(commonFactorStruct.firstOr(AstNode::one()),
                                             commonFactorStruct.secondOr(AstNode::one()))
-            -> simplify(SIMPLIFY_RULES::NONE);
+            ->simplify(SIMPLIFY_RULES::NONE);
     }
 
     return node;
@@ -81,7 +90,7 @@ u_ptr_AstNode AstNodeDiv::simplifiedNumeric() const {
         }
         return std::make_unique<AstNodeDiv>((NUMERIC_CAST(m_numerator.get()) / divisor).toNode(),
                                             (NUMERIC_CAST(m_denominator.get()) / divisor).toNode())
-            -> simplify(SIMPLIFY_RULES::NONE);
+            ->simplify(SIMPLIFY_RULES::NONE);
     }
     return (NUMERIC_CAST(m_numerator.get()) / NUMERIC_CAST(m_denominator.get())).toNode();
 }

@@ -26,16 +26,6 @@ void AstNodeCommutative::removeNode(const AstNode* nodeToRemove) {
                                [&](const u_ptr_AstNode& node) { return *node.get() == *nodeToRemove; }));
 }
 
-void AstNodeCommutative::removeAllCopiesOfNode(const AstNode* nodeToRemove) {
-    while (std::find_if(m_nodes.begin(), m_nodes.end(),
-                        [&](const u_ptr_AstNode& node) { return *node.get() == *nodeToRemove; }) != m_nodes.end()) {
-        removeNode(nodeToRemove);
-        if (m_nodes.empty()) {
-            return;
-        }
-    }
-}
-
 size_t AstNodeCommutative::childCount() const {
     return m_nodes.size();
 }
@@ -123,31 +113,13 @@ bool AstNodeCommutative::cleanUp() {
 }
 
 bool AstNodeCommutative::compareEqualType(const AstNode* rhs) const {
-    assert(rhs->type() == AstNode::NODE_TYPE::ADD || rhs->type() == AstNode::NODE_TYPE::MULTIPLY);
+    assert(rhs->isCommutative());
+    if (type() != rhs->type()) {
+        return type() < rhs->type();
+    }
     const auto& rightNodes = COMMUTATIVE_C_CAST(rhs)->m_nodes;
     return std::lexicographical_compare(m_nodes.begin(), m_nodes.end(), rightNodes.begin(), rightNodes.end(),
                                         AstNode::compare_u_ptr);
-}
-
-std::pair<const AstNode*, const AstNode*> AstNodeCommutative::findViaTypeContainingCopy(AstNode::NODE_TYPE type) const {
-    for (size_t i = 0; i != childCount(); ++i) {
-        for (size_t j = 0; j != childCount(); ++j) {
-            if (i != j && childAt(j)->type() == type && childAt(j)->containsCopyOf(childAt(i))) {
-                return {childAt(i), childAt(j)};
-            }
-        }
-    }
-    return {nullptr, nullptr};
-}
-
-void AstNodeCommutative::removeNodeAndNodeWithSameChild(AstNode::NODE_TYPE type) {
-    std::pair<const AstNode*, const AstNode*> pair = findViaTypeContainingCopy(type);
-    while (pair.first != nullptr) {
-        assert(pair.second != nullptr);
-        removeNode(pair.first);
-        removeNode(pair.second);
-        pair = findViaTypeContainingCopy(AstNode::NODE_TYPE::UNARY_MINUS);
-    }
 }
 
 Decomposition AstNodeCommutative::decompose(const AstNodeCommutative* A, const AstNodeCommutative* B) {

@@ -22,14 +22,11 @@ class AstNodeCommutative : public AstNode {
   public:
     void   addNode(u_ptr_AstNode node);
     void   removeNode(const AstNode* nodeToRemove);
-    void   removeAllCopiesOfNode(const AstNode* nodeToRemove);
-    void   removeNodeAndNodeWithSameChild(AstNode::NODE_TYPE type);
     size_t countCopies(const AstNode* nodeToCompare) const;
 
     static Decomposition decompose(const AstNodeCommutative* A, const AstNodeCommutative* B);
 
-    [[nodiscard]] const AstNode*                            childAt(size_t index) const final;
-    [[nodiscard]] std::pair<const AstNode*, const AstNode*> findViaTypeContainingCopy(NODE_TYPE type) const;
+    [[nodiscard]] const AstNode* childAt(size_t index) const final;
 
   protected:
     AstNodeCommutative(std::function<Numeric(const Numeric&, const Numeric&)> accumulator,
