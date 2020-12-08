@@ -80,14 +80,14 @@ std::unique_ptr<AstNodeAdd> AstNodeAdd::simplifiedCopy(SIMPLIFY_RULES simplifyRu
 bool AstNodeAdd::gatherOverLappingNodes() {
     for (auto it1 = m_nodes.begin(); it1 + 1 != m_nodes.end(); ++it1) {
         for (auto it2 = it1 + 1; it2 != m_nodes.end(); ++it2) {
-            auto commonFactorStruct = intersect(it1->get(), it2->get());
+            auto commonFactorStruct = factor(it1->get(), it2->get());
             if (commonFactorStruct.m_common != nullptr) {
                 m_nodes.erase(it2);
                 m_nodes.erase(it1);
                 m_nodes.emplace_back(
-                    (commonFactorStruct.firstOr(AstNode::one()) + commonFactorStruct.secondOr(AstNode::one()))
-                        ->simplify(SIMPLIFY_RULES::NONE) *
-                    std::move(commonFactorStruct.m_common));
+                    ((commonFactorStruct.firstOr(AstNode::one()) + commonFactorStruct.secondOr(AstNode::one())) *
+                     std::move(commonFactorStruct.m_common))
+                        ->simplify(AstNode::SIMPLIFY_RULES::DISTRIBUTE_MULTIPLICATION));
                 return true;
             }
         }

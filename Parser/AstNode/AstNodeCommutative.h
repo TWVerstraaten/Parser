@@ -57,6 +57,7 @@ class AstNodeCommutative : public AstNode {
   protected:
     friend class AstNodeAdd;
     friend class AstNode;
+    friend class AstNodeUnaryMinus;
 
     void                                                         removeNullptrs();
     const std::function<Numeric(const Numeric&, const Numeric&)> m_accumulator;

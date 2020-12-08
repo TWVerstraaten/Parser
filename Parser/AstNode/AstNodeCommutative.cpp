@@ -58,16 +58,25 @@ bool AstNodeCommutative::sortNodes() {
 }
 
 bool AstNodeCommutative::mergeNodes() {
-    for (auto it = m_nodes.begin(); it != m_nodes.end(); ++it) {
-        if ((*it)->type() == type()) {
-            auto* childNode = COMMUTATIVE_CAST(it->release());
-            m_nodes.erase(it);
-            std::move(childNode->m_nodes.begin(), childNode->m_nodes.end(), std::back_inserter(m_nodes));
-            mergeNodes();
-            return true;
+    size_t requiredNumberOfNodes = m_nodes.size();
+    for (const auto& node : m_nodes) {
+        if (node->type() == type()) {
+            requiredNumberOfNodes += node->childCount();
         }
     }
-    return false;
+    m_nodes.reserve(requiredNumberOfNodes);
+    bool somethingChanged = false;
+    for (auto it = m_nodes.begin(); it != m_nodes.end();) {
+        if ((*it)->type() != type()) {
+            ++it;
+        } else {
+            somethingChanged = true;
+            auto* childNode  = COMMUTATIVE_CAST(it->get());
+            std::move(childNode->m_nodes.begin(), childNode->m_nodes.end(), std::back_inserter(m_nodes));
+            it = m_nodes.erase(it);
+        }
+    }
+    return somethingChanged;
 }
 
 bool AstNodeCommutative::equals(const AstNode& other) const {

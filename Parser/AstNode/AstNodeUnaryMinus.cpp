@@ -4,6 +4,7 @@
 
 #include "AstNodeUnaryMinus.h"
 
+#include "AstNodeAdd.h"
 #include "AstNodeNumeric.h"
 
 #include <cassert>
@@ -21,12 +22,21 @@ u_ptr_AstNode AstNodeUnaryMinus::copy() const {
 
 u_ptr_AstNode AstNodeUnaryMinus::simplify(SIMPLIFY_RULES simplifyRules) const {
     if (m_value->type() == AstNode::NODE_TYPE::UNARY_MINUS) {
-        return m_value->childAt(0)-> simplify(SIMPLIFY_RULES::NONE);
+        return m_value->childAt(0)->simplify(SIMPLIFY_RULES::NONE);
     }
     if (m_value->isNumeric()) {
         return (NUMERIC_CAST(m_value.get()) * -1).toNode();
     }
-    AstNode* simplifiedNode = new AstNodeUnaryMinus(m_value-> simplify(SIMPLIFY_RULES::NONE));
+    auto* simplifiedNode = new AstNodeUnaryMinus(m_value->simplify(SIMPLIFY_RULES::DISTRIBUTE_MULTIPLICATION));
+    if (simplifyRules == AstNode::SIMPLIFY_RULES::DISTRIBUTE_MULTIPLICATION &&
+        simplifiedNode->m_value->type() == AstNode::NODE_TYPE::ADD) {
+        auto* result = new AstNodeAdd{};
+        for (auto& node : COMMUTATIVE_CAST(simplifiedNode->m_value.get())->m_nodes) {
+            result->m_nodes.emplace_back(-std::move(node));
+        }
+
+        return u_ptr_AstNode(result);
+    }
     return u_ptr_AstNode(simplifiedNode);
 }
 

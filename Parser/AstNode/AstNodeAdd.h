@@ -20,6 +20,7 @@ class AstNodeAdd : public AstNodeCommutative {
 
   private:
     friend class AstNodeMul;
+    friend class AstNodeUnaryMinus;
 
     AstNodeAdd();
 

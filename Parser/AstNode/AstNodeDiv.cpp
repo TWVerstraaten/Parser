@@ -32,7 +32,7 @@ u_ptr_AstNode AstNodeDiv::simplify(SIMPLIFY_RULES simplifyRules) const {
         return node->simplifiedNumeric();
     }
 
-    auto commonFactorStruct = intersect(m_numerator.get(), m_denominator.get());
+    auto commonFactorStruct = factor(m_numerator.get(), m_denominator.get());
     if (commonFactorStruct.m_common != nullptr) {
         return std::make_unique<AstNodeDiv>(commonFactorStruct.firstOr(AstNode::one()),
                                             commonFactorStruct.secondOr(AstNode::one()))

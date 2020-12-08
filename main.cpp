@@ -1,7 +1,7 @@
 #include "Parser/Ast.h"
 
 int main() {
-    std::string eq1 = " x * (-b * (-t)) ";
+    std::string eq1 = "x*x^3/(x*y)";
     Ast         ast1(eq1);
     auto*       copyNode1 = ast1.m_copy.get();
 

@@ -64,7 +64,8 @@ u_ptr_AstNode AstNodeMul::simplify(SIMPLIFY_RULES simplifyRules) const {
         if (simplifiedNode->childCount() == 0) {
             return potentiallyNegative(AstNode::one(), minusParity);
         } else if (simplifiedNode->childCount() == 1) {
-            return potentiallyNegative(std::move(simplifiedNode->m_nodes[0]), minusParity);
+            return potentiallyNegative(
+                simplifiedNode->m_nodes[0]->simplify(AstNode::SIMPLIFY_RULES::DISTRIBUTE_MULTIPLICATION), minusParity);
         } else if (ready) {
             return potentiallyNegative(std::move(simplifiedNode), minusParity);
         }
@@ -118,12 +119,6 @@ u_ptr_AstNode AstNodeMul::distributeMultiplication() const {
     }
 
     return u_ptr_AstNode(result);
-}
-
-bool AstNodeMul::containsAdditionNode() const {
-    return std::find_if(m_nodes.begin(), m_nodes.end(), [](const u_ptr_AstNode& node) {
-               return node->type() == AstNode::NODE_TYPE::ADD;
-           }) != m_nodes.end();
 }
 
 bool AstNodeMul::stripUnaryMinuses() {

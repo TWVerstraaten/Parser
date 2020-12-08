@@ -23,7 +23,6 @@ class AstNodeMul : public AstNodeCommutative {
     AstNodeMul();
     bool                                      stripUnaryMinuses();
     bool                                      gatherDuplicates();
-    [[nodiscard]] bool                        containsAdditionNode() const;
     [[nodiscard]] std::unique_ptr<AstNodeMul> simplifiedCopy(SIMPLIFY_RULES simplifyRules) const;
     [[nodiscard]] u_ptr_AstNode               distributeMultiplication() const;
 };

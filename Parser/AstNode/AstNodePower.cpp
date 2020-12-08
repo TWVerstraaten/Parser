@@ -14,7 +14,7 @@ AstNodePower::AstNodePower(u_ptr_AstNode&& base, u_ptr_AstNode&& exponent)
 }
 
 std::string AstNodePower::toString() const {
-    return m_base->toString() + " ^ " + m_exponent->toString();
+    return "(" + m_base->toString() + " ^ " + m_exponent->toString() + ")";
 }
 
 u_ptr_AstNode AstNodePower::copy() const {
@@ -22,8 +22,8 @@ u_ptr_AstNode AstNodePower::copy() const {
 }
 
 u_ptr_AstNode AstNodePower::simplify(SIMPLIFY_RULES simplifyRules) const {
-    auto       base     = m_base-> simplify(SIMPLIFY_RULES::NONE);
-    const auto exponent = m_exponent-> simplify(SIMPLIFY_RULES::NONE);
+    auto       base     = m_base->simplify(SIMPLIFY_RULES::NONE);
+    const auto exponent = m_exponent->simplify(SIMPLIFY_RULES::NONE);
     if (base->isNumeric() && exponent->isNumeric()) {
         return (NUMERIC_CAST(base.get()) ^ NUMERIC_CAST(exponent.get())).toNode();
     }
@@ -32,8 +32,18 @@ u_ptr_AstNode AstNodePower::simplify(SIMPLIFY_RULES simplifyRules) const {
     } else if (exponent->isZero()) {
         return AstNode::one();
     }
-
-    AstNode* simplifiedNode = new AstNodePower(m_base-> simplify(SIMPLIFY_RULES::NONE), m_exponent-> simplify(SIMPLIFY_RULES::NONE));
+    if (m_base->type() == AstNode::NODE_TYPE::POWER) {
+        return std::make_unique<AstNodePower>(
+            m_base->childAt(0)->copy(),
+            (*m_base->childAt(1) * *m_exponent)->simplify(AstNode::SIMPLIFY_RULES::DISTRIBUTE_MULTIPLICATION));
+    }
+    if (m_base->type() == AstNode::NODE_TYPE::UNARY_MINUS && m_exponent->isEven()) {
+        return std::make_unique<AstNodePower>(m_base->childAt(0)->copy(), m_exponent->copy())
+            ->simplify(AstNode::SIMPLIFY_RULES::DISTRIBUTE_MULTIPLICATION);
+    }
+    AstNode* simplifiedNode =
+        new AstNodePower(m_base->simplify(SIMPLIFY_RULES::NONE),
+                         m_exponent->simplify(AstNode::SIMPLIFY_RULES::DISTRIBUTE_MULTIPLICATION));
     return u_ptr_AstNode(simplifiedNode);
 }
 

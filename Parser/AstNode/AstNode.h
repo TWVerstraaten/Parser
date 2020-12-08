@@ -13,6 +13,8 @@ class AstNode;
 typedef std::unique_ptr<AstNode> u_ptr_AstNode;
 
 struct IntersectStruct;
+class AstNodeMul;
+class AstNodePower;
 
 class AstNode {
   public:
@@ -36,11 +38,15 @@ class AstNode {
     [[nodiscard]] bool containsCopyOf(const AstNode* node) const;
     [[nodiscard]] bool isZero() const;
     [[nodiscard]] bool isOne() const;
+    [[nodiscard]] bool isEven() const;
 
-    static IntersectStruct intersect(const AstNode* first, const AstNode* second);
-    static IntersectStruct factorNodeAndMultiply(const AstNode* first, const AstNode* second);
-    //    static IntersectStruct factorPowerAndMultiply(const AstNode* power, const AstNode* multNode);
-    //    static IntersectStruct factorPowers(const AstNode* power, const AstNode* mult);
+    static IntersectStruct factor(const AstNode* first, const AstNode* second, bool isFirstPass = true);
+    static IntersectStruct factorNodeAndMultiply(const AstNode* first, const AstNodeMul* second);
+    static IntersectStruct factor(const AstNodeMul* first, const AstNode* second);
+    static IntersectStruct factor(const AstNodePower* first, const AstNode* second);
+    static IntersectStruct factorPowerAndMultiply(const AstNodePower* power, const AstNodeMul* multiplyNode);
+    static IntersectStruct factorPowers(const AstNodePower* power1, const AstNodePower* power2);
+
     static u_ptr_AstNode zero();
     static u_ptr_AstNode one();
     static u_ptr_AstNode makeInteger(long long val);
