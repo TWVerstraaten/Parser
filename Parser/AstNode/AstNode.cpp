@@ -34,15 +34,6 @@ bool AstNode::compare(const AstNode* lhs, const AstNode* rhs) {
     return lhs->compareEqualType(rhs);
 }
 
-bool AstNode::containsCopyOf(const AstNode* node) const {
-    for (size_t i = 0; i != childCount(); ++i) {
-        if (*childAt(i) == *node) {
-            return true;
-        }
-    }
-    return false;
-}
-
 bool AstNode::isZero() const {
     if (not isNumeric()) {
         return false;
@@ -137,8 +128,7 @@ u_ptr_AstNode AstNode::simplify(const u_ptr_AstNode& node) {
 }
 
 static IntersectStruct switchAB(IntersectStruct&& intersectStruct) {
-    return {std::move(intersectStruct.m_common), std::move(intersectStruct.m_secondRemainder),
-            std::move(intersectStruct.m_firstRemainder)};
+    return {std::move(intersectStruct.m_common), std::move(intersectStruct.m_secondRemainder), std::move(intersectStruct.m_firstRemainder)};
 }
 
 IntersectStruct factorMultiplies(const AstNodeMul* first, const AstNodeMul* second) {
@@ -146,10 +136,9 @@ IntersectStruct factorMultiplies(const AstNodeMul* first, const AstNodeMul* seco
     if (decomposition.m_aCapB.empty()) {
         return {nullptr, nullptr, nullptr};
     } else {
-        return {
-            u_ptr_AstNode(new AstNodeMul(std::move(decomposition.m_aCapB)))->simplify(AstNode::SIMPLIFY_RULES::NONE),
-            u_ptr_AstNode(new AstNodeMul(std::move(decomposition.m_aMinusB)))->simplify(AstNode::SIMPLIFY_RULES::NONE),
-            u_ptr_AstNode(new AstNodeMul(std::move(decomposition.m_bMinusA)))->simplify(AstNode::SIMPLIFY_RULES::NONE)};
+        return {u_ptr_AstNode(new AstNodeMul(std::move(decomposition.m_aCapB)))->simplify(AstNode::SIMPLIFY_RULES::NONE),
+                u_ptr_AstNode(new AstNodeMul(std::move(decomposition.m_aMinusB)))->simplify(AstNode::SIMPLIFY_RULES::NONE),
+                u_ptr_AstNode(new AstNodeMul(std::move(decomposition.m_bMinusA)))->simplify(AstNode::SIMPLIFY_RULES::NONE)};
     }
 }
 
@@ -157,11 +146,11 @@ IntersectStruct AstNode::factorNodeAndMultiply(const AstNode* first, const AstNo
     assert(second->type() == AstNode::NODE_TYPE::MULTIPLY);
     assert(first->type() != NODE_TYPE::MULTIPLY);
     const auto& secondNodes = COMMUTATIVE_C_CAST(second)->m_nodes;
-    if (std::find_if(secondNodes.begin(), secondNodes.end(),
-                     [&first](const u_ptr_AstNode& node) { return *node == *first; }) != secondNodes.end()) {
+    if (std::find_if(secondNodes.begin(), secondNodes.end(), [&first](const u_ptr_AstNode& node) { return *node == *first; }) !=
+        secondNodes.end()) {
         auto secondCopy = second->copy();
         COMMUTATIVE_CAST(secondCopy.get())->removeNode(first);
-        return {first->copy(), AstNode::one(), std::move(secondCopy)};
+        return {first->copy(), AstNode::makeOneNode(), std::move(secondCopy)};
     } else {
         return {nullptr, nullptr, nullptr};
     }
@@ -227,8 +216,7 @@ IntersectStruct AstNode::factor(const AstNode* first, const AstNode* second, boo
     switch (first->type()) {
         case NODE_TYPE::UNARY_MINUS: {
             auto result = factor(first->childAt(0), second, true);
-            return {std::move(result.m_common), -std::move(result.m_firstRemainder),
-                    std::move(result.m_secondRemainder)};
+            return {std::move(result.m_common), -std::move(result.m_firstRemainder), std::move(result.m_secondRemainder)};
         }
         case NODE_TYPE::MULTIPLY:
             return factor(dynamic_cast<const AstNodeMul*>(first), second);
@@ -243,12 +231,12 @@ IntersectStruct AstNode::factor(const AstNode* first, const AstNode* second, boo
     }
 }
 
-u_ptr_AstNode AstNode::zero() {
-    return makeInteger(0);
+u_ptr_AstNode AstNode::makeZeroNode() {
+    return makeInteger(0ul);
 }
 
-u_ptr_AstNode AstNode::one() {
-    return makeInteger(1);
+u_ptr_AstNode AstNode::makeOneNode() {
+    return makeInteger(1ul);
 }
 
 u_ptr_AstNode AstNode::makeInteger(long long val) {

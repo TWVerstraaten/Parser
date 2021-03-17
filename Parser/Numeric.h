@@ -30,13 +30,13 @@ class Numeric {
     Numeric& operator/=(const Numeric& other);
     Numeric& operator^=(const Numeric& other);
 
+    friend std::ostream& operator<<(std::ostream& os, const Numeric& numeric);
+    friend long long     gcd(const Numeric& lhs, const Numeric& rhs);
     friend Numeric       operator+(const Numeric& lhs, const Numeric& rhs);
     friend Numeric       operator-(const Numeric& lhs, const Numeric& rhs);
     friend Numeric       operator*(const Numeric& lhs, const Numeric& rhs);
     friend Numeric       operator/(const Numeric& lhs, const Numeric& rhs);
     friend Numeric       operator^(const Numeric& lhs, const Numeric& rhs);
-    friend long long     gcd(const Numeric& lhs, const Numeric& rhs);
-    friend std::ostream& operator<<(std::ostream& os, const Numeric& numeric);
 
   private:
     DATA_TYPE m_dataType     = DATA_TYPE::INTEGER;

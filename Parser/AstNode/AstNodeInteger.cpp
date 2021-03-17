@@ -30,7 +30,7 @@ AstNode::NODE_TYPE AstNodeInteger::type() const {
 
 bool AstNodeInteger::equals(const AstNode& other) const {
     if (other.isNumeric()) {
-        return m_value == NUMERIC_CAST(&other).doubleValue();
+        return static_cast<double>(m_value) == NUMERIC_CAST(&other).doubleValue();
     }
     return false;
 }

@@ -4,7 +4,6 @@
 
 #include "AstNodeDiv.h"
 
-#include "../../Algorithm/Algorithm.h"
 #include "AstNodeCommutative.h"
 #include "AstNodeError.h"
 #include "AstNodeInteger.h"
@@ -31,7 +30,7 @@ u_ptr_AstNode AstNodeDiv::simplify(SIMPLIFY_RULES simplifyRules) const {
     if (node->m_numerator->isZero()) {
         return node->m_denominator->isZero()
                  ? u_ptr_AstNode(new AstNodeError{AstNodeError::ERROR_TYPE::DIVISION_BY_ZERO})
-                 : AstNode::zero();
+                 : AstNode::makeZeroNode();
     }
 
     if (node->m_denominator->isOne()) {
@@ -43,8 +42,8 @@ u_ptr_AstNode AstNodeDiv::simplify(SIMPLIFY_RULES simplifyRules) const {
 
     auto commonFactorStruct = factor(m_numerator.get(), m_denominator.get());
     if (commonFactorStruct.m_common != nullptr) {
-        return std::make_unique<AstNodeDiv>(commonFactorStruct.firstOr(AstNode::one()),
-                                            commonFactorStruct.secondOr(AstNode::one()))
+        return std::make_unique<AstNodeDiv>(commonFactorStruct.firstOr(AstNode::makeOneNode()),
+                                            commonFactorStruct.secondOr(AstNode::makeOneNode()))
             ->simplify(SIMPLIFY_RULES::NONE);
     }
 

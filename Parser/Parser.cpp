@@ -77,11 +77,6 @@ u_ptr_AstNode Parser::parseValueType(const Token& token) {
     }
 }
 
-bool isValueType(const Token& token) {
-    return token.m_type == TOKEN_TYPE::INTEGER || token.m_type == TOKEN_TYPE::DOUBLE || token.m_type == TOKEN_TYPE::IDENTIFIER ||
-           token.m_type == TOKEN_TYPE::REFERENCE;
-}
-
 u_ptr_AstNode Parser::parseTerm(TokenList& tokenList) {
     assert(not containsFunction(tokenList));
     assert(not containsBrackets(tokenList));

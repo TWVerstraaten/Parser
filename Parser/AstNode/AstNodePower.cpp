@@ -30,7 +30,7 @@ u_ptr_AstNode AstNodePower::simplify(SIMPLIFY_RULES simplifyRules) const {
     if (exponent->isOne()) {
         return base;
     } else if (exponent->isZero()) {
-        return AstNode::one();
+        return AstNode::makeOneNode();
     }
     if (m_base->type() == AstNode::NODE_TYPE::POWER) {
         return std::make_unique<AstNodePower>(

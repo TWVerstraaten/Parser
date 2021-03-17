@@ -14,7 +14,7 @@ std::string AstNodeError::toString() const {
         case ERROR_TYPE::DEFAULT:
             return "Error";
         case ERROR_TYPE::DIVISION_BY_ZERO:
-            return "Division by zero!";
+            return "Division by makeZeroNode!";
         default:
             assert(false);
     }

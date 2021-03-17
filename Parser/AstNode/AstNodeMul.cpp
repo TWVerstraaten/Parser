@@ -28,7 +28,7 @@ AstNodeMul::AstNodeMul(std::vector<u_ptr_AstNode>&& nodes)
           std::move(nodes), [](const Numeric& lhs, const Numeric& rhs) { return lhs * rhs; },
           [](const u_ptr_AstNode& node) { return node->isOne(); }) {
     if (m_nodes.empty()) {
-        m_nodes.emplace_back(AstNode::one());
+        m_nodes.emplace_back(AstNode::makeOneNode());
     }
     mergeNodes();
 }
@@ -62,7 +62,7 @@ u_ptr_AstNode AstNodeMul::simplify(SIMPLIFY_RULES simplifyRules) const {
         minusParity ^= simplifiedNode->stripUnaryMinuses();
         bool ready = not(simplifiedNode->cleanUp() || simplifiedNode->gatherDuplicates());
         if (simplifiedNode->childCount() == 0) {
-            return potentiallyNegative(AstNode::one(), minusParity);
+            return potentiallyNegative(AstNode::makeOneNode(), minusParity);
         } else if (simplifiedNode->childCount() == 1) {
             return potentiallyNegative(
                 simplifiedNode->m_nodes[0]->simplify(AstNode::SIMPLIFY_RULES::DISTRIBUTE_MULTIPLICATION), minusParity);

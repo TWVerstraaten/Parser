@@ -19,7 +19,7 @@ AstNodeAdd::AstNodeAdd(std::vector<u_ptr_AstNode>&& nodes)
           std::move(nodes), [](const Numeric& lhs, const Numeric& rhs) { return lhs + rhs; },
           [](const u_ptr_AstNode& node) { return node->isZero(); }) {
     if (m_nodes.empty()) {
-        m_nodes.emplace_back(AstNode::zero());
+        m_nodes.emplace_back(AstNode::makeZeroNode());
     }
     mergeNodes();
 }
@@ -56,7 +56,7 @@ u_ptr_AstNode AstNodeAdd::simplify(SIMPLIFY_RULES simplifyRules) const {
         bool ready = not(simplifiedNode->cleanUp() || simplifiedNode->cancelTerms() ||
                          simplifiedNode->gatherDuplicates() || simplifiedNode->gatherOverLappingNodes());
         if (simplifiedNode->childCount() == 0) {
-            return AstNode::zero();
+            return AstNode::makeZeroNode();
         } else if (simplifiedNode->childCount() == 1) {
             return std::move(simplifiedNode->m_nodes[0]);
         } else if (ready) {
@@ -86,7 +86,7 @@ bool AstNodeAdd::gatherOverLappingNodes() {
                 m_nodes.erase(it2);
                 m_nodes.erase(it1);
                 m_nodes.emplace_back(
-                    ((commonFactorStruct.firstOr(AstNode::one()) + commonFactorStruct.secondOr(AstNode::one())) *
+                    ((commonFactorStruct.firstOr(AstNode::makeOneNode()) + commonFactorStruct.secondOr(AstNode::makeOneNode())) *
                      std::move(commonFactorStruct.m_common))
                         ->simplify(AstNode::SIMPLIFY_RULES::DISTRIBUTE_MULTIPLICATION));
                 return true;
