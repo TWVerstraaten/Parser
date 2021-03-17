@@ -4,20 +4,16 @@
 
 #include "Tokenizer.h"
 
-#include <algorithm>
 #include <boost/algorithm/string.hpp>
-#include <iostream>
 
-static std::string::const_iterator endOfIdentifier(std::string::const_iterator       begin,
-                                                   const std::string::const_iterator end) {
+static std::string::const_iterator endOfIdentifier(std::string::const_iterator begin, const std::string::const_iterator end) {
     while (begin != end && isalnum(*begin)) {
         ++begin;
     }
     return begin;
 }
 
-static std::string::const_iterator endOfNumber(std::string::const_iterator       begin,
-                                               const std::string::const_iterator end) {
+static std::string::const_iterator endOfNumber(std::string::const_iterator begin, const std::string::const_iterator end) {
     while (begin != end && (isdigit(*begin) || *begin == '.')) {
         ++begin;
     }
@@ -25,7 +21,6 @@ static std::string::const_iterator endOfNumber(std::string::const_iterator      
 }
 
 Tokenizer::Tokenizer(const std::string& string) {
-
     auto trimmedString = string;
     boost::algorithm::trim(trimmedString);
     bool                        minusIsUnary = true;
@@ -79,8 +74,7 @@ Tokenizer::Tokenizer(const std::string& string) {
     findFunctionIdentifiers();
 }
 
-std::string::const_iterator Tokenizer::parseValueType(std::string::const_iterator       it,
-                                                      const std::string::const_iterator end) {
+std::string::const_iterator Tokenizer::parseValueType(std::string::const_iterator it, const std::string::const_iterator end) {
     if (isdigit(*it) || *it == '.') {
         auto        endOfNumberIt = endOfNumber(it, end);
         std::string number        = std::string(it, endOfNumberIt);
@@ -89,12 +83,12 @@ std::string::const_iterator Tokenizer::parseValueType(std::string::const_iterato
         } else {
             m_tokens.emplace_back(Token{TOKEN_TYPE::DOUBLE, std::move(number)});
         }
-        return endOfNumberIt - 1;
+        return std::prev(endOfNumberIt);
     } else {
         assert(isalpha(*it));
         auto endOfIdentifierIt = endOfIdentifier(it, end);
         m_tokens.emplace_back(Token{TOKEN_TYPE::IDENTIFIER, std::string(it, endOfIdentifierIt)});
-        return endOfIdentifierIt - 1;
+        return std::prev(endOfIdentifierIt);
     }
 }
 
@@ -106,9 +100,7 @@ std::string Tokenizer::toString(const TokenList& tokens, bool readable) {
     std::string result;
     if (readable) {
         for (const auto& token : tokens) {
-
             switch (token.m_type) {
-
                 case TOKEN_TYPE::LEFT_BR:
                     result += std::string("(");
                     break;
@@ -140,11 +132,9 @@ std::string Tokenizer::toString(const TokenList& tokens, bool readable) {
                     break;
                 case TOKEN_TYPE::FUN_OPEN_BR:
                     result += std::string("[") + "_" + token.m_string;
-
                     break;
                 case TOKEN_TYPE::FUN_CLOSE_BR:
                     result += std::string("]") + "_" + token.m_string;
-
                     break;
                 case TOKEN_TYPE::BIN_OP_EXPR:
                     result += token.m_string + "_e";
