@@ -13,7 +13,6 @@ class Tokenizer {
     enum class TOKEN_TYPE {
         REFERENCE,
         IDENTIFIER,
-        DOUBLE,
         INTEGER,
         BIN_OP_TERM,
         BIN_OP_FAC,

@@ -6,11 +6,16 @@
 
 #include "Parser.h"
 
-Ast::Ast(std::string string)
-    : m_string(std::move(string)), m_rootNode(Parser::parse(m_string)),
-      m_copy(m_rootNode->simplify(AstNode::SIMPLIFY_RULES::NONE)) {
+Ast::Ast(std::string string) : m_string(std::move(string)), m_rootNode(Parser::parse(m_string)) {
+}
+
+Ast Ast::simplify() const {
+    Ast result;
+    result.m_string   = m_string;
+    result.m_rootNode = m_rootNode->simplify(AstNode::SIMPLIFY_RULES::NONE);
+    return result;
 }
 
 std::string Ast::toString() const {
-    return "Original:\t" + m_rootNode->toString() + "\nSimplified:\t " + m_copy->toString();
+    return m_rootNode->toString();
 }

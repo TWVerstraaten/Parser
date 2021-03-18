@@ -23,8 +23,6 @@ class AstNodeDiv : public AstNode {
     [[nodiscard]] bool equals(const AstNode& other) const override;
 
   private:
-    [[nodiscard]] u_ptr_AstNode simplifiedNumeric() const;
-
     u_ptr_AstNode m_numerator;
     u_ptr_AstNode m_denominator;
 };

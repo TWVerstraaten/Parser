@@ -4,12 +4,9 @@
 
 #include "AstNodeSubtract.h"
 
-#include "AstNodeNumeric.h"
-
 #include <cassert>
 
-AstNodeSubtract::AstNodeSubtract(u_ptr_AstNode&& left, u_ptr_AstNode&& right)
-    : m_leftNode(std::move(left)), m_rightNode(std::move(right)) {
+AstNodeSubtract::AstNodeSubtract(u_ptr_AstNode&& left, u_ptr_AstNode&& right) : m_leftNode(std::move(left)), m_rightNode(std::move(right)) {
 }
 
 std::string AstNodeSubtract::toString() const {
@@ -23,12 +20,13 @@ u_ptr_AstNode AstNodeSubtract::copy() const {
 u_ptr_AstNode AstNodeSubtract::simplify(SIMPLIFY_RULES simplifyRules) const {
     const auto left  = m_leftNode->simplify(SIMPLIFY_RULES::NONE);
     const auto right = m_rightNode->simplify(SIMPLIFY_RULES::NONE);
-    if (left->isNumeric() && right->isNumeric()) {
-        return (NUMERIC_CAST(left.get()) - NUMERIC_CAST(right.get())).toNode();
+    if (left->type() == AstNode::NODE_TYPE::NUMBER && right->type() == AstNode::NODE_TYPE::NUMBER) {
+        std::cout << "Implement\n";
+        assert(false);
+        //        return (NUMERIC_CAST(left.get()) - NUMERIC_CAST(right.get())).toNode();
     }
 
-    AstNode* simplifiedNode =
-        new AstNodeSubtract(m_leftNode->simplify(SIMPLIFY_RULES::NONE), m_rightNode->simplify(SIMPLIFY_RULES::NONE));
+    AstNode* simplifiedNode = new AstNodeSubtract(m_leftNode->simplify(SIMPLIFY_RULES::NONE), m_rightNode->simplify(SIMPLIFY_RULES::NONE));
     return u_ptr_AstNode(simplifiedNode);
 }
 
@@ -37,8 +35,7 @@ AstNode::NODE_TYPE AstNodeSubtract::type() const {
 }
 
 bool AstNodeSubtract::equals(const AstNode& other) const {
-    return other.type() == AstNode::NODE_TYPE::SUBTRACT && *m_leftNode == *other.childAt(0) &&
-         *m_rightNode == *other.childAt(1);
+    return other.type() == AstNode::NODE_TYPE::SUBTRACT && *m_leftNode == *other.childAt(0) && *m_rightNode == *other.childAt(1);
 }
 
 size_t AstNodeSubtract::childCount() const {

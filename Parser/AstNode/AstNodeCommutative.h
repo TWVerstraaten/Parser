@@ -6,8 +6,8 @@
 #define PARSER_ASTNODECOMMUTATIVE_H
 
 #include "../../Algorithm/Algorithm.h"
-#include "../Numeric.h"
 #include "AstNode.h"
+#include "Number.h"
 
 #include <functional>
 #include <vector>
@@ -29,11 +29,10 @@ class AstNodeCommutative : public AstNode {
     [[nodiscard]] const AstNode* childAt(size_t index) const final;
 
   protected:
-    AstNodeCommutative(std::function<Numeric(const Numeric&, const Numeric&)> accumulator,
-                       std::function<bool(u_ptr_AstNode&)>                    removePredicate);
-    AstNodeCommutative(std::vector<u_ptr_AstNode>&&                           nodes,
-                       std::function<Numeric(const Numeric&, const Numeric&)> accumulator,
-                       std::function<bool(u_ptr_AstNode&)>                    removePredicate);
+    AstNodeCommutative(std::function<Number(const Number&, const Number&)> accumulator,
+                       std::function<bool(u_ptr_AstNode&)>                 removePredicate);
+    AstNodeCommutative(std::vector<u_ptr_AstNode>&& nodes, std::function<Number(const Number&, const Number&)> accumulator,
+                       std::function<bool(u_ptr_AstNode&)> removePredicate);
 
     bool sortNodes();
     bool mergeNodes();
@@ -56,10 +55,10 @@ class AstNodeCommutative : public AstNode {
     friend class AstNode;
     friend class AstNodeUnaryMinus;
 
-    void                                                         removeNullptrs();
-    const std::function<Numeric(const Numeric&, const Numeric&)> m_accumulator;
-    const std::function<bool(u_ptr_AstNode&)>                    m_removePredicate;
-    std::vector<u_ptr_AstNode>                                   m_nodes;
+    void                                                      removeNullPointers();
+    const std::function<Number(const Number&, const Number&)> m_accumulator;
+    const std::function<bool(u_ptr_AstNode&)>                 m_removePredicate;
+    std::vector<u_ptr_AstNode>                                m_nodes;
 };
 
 #endif // PARSER_ASTNODECOMMUTATIVE_H

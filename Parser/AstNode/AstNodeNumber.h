@@ -2,15 +2,19 @@
 // Created by pc on 19-11-20.
 //
 
-#ifndef PARSER_ASTNODEINTEGER_H
-#define PARSER_ASTNODEINTEGER_H
+#ifndef PARSER_ASTNODENUMBER_H
+#define PARSER_ASTNODENUMBER_H
 
-#include "AstNodeNumeric.h"
+#include "AstNode.h"
+#include "Number.h"
 
-class AstNodeInteger : public AstNodeNumeric {
+#include <variant>
+
+class AstNodeNumber : public AstNode {
   public:
-    explicit AstNodeInteger(const std::string& string);
-    explicit AstNodeInteger(long long int val);
+    explicit AstNodeNumber(const std::string& string);
+    explicit AstNodeNumber(long long int val);
+    explicit AstNodeNumber(const Number& number);
 
   public:
     [[nodiscard]] std::string    toString() const override;
@@ -20,13 +24,13 @@ class AstNodeInteger : public AstNodeNumeric {
     [[nodiscard]] size_t         childCount() const override;
     [[nodiscard]] const AstNode* childAt(size_t index) const override;
     [[nodiscard]] bool           compareEqualType(const AstNode* rhs) const override;
+    [[nodiscard]] const Number&  value() const;
 
   protected:
-    [[nodiscard]] Numeric toNumeric() const override;
-    [[nodiscard]] bool    equals(const AstNode& other) const override;
+    [[nodiscard]] bool equals(const AstNode& other) const override;
 
   private:
-    long long m_value;
+    Number m_value;
 };
 
-#endif // PARSER_ASTNODEINTEGER_H
+#endif // PARSER_ASTNODENUMBER_H

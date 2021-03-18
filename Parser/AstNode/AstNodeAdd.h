@@ -24,7 +24,6 @@ class AstNodeAdd : public AstNodeCommutative {
 
     AstNodeAdd();
 
-    bool gatherOverLappingNodes();
     bool gatherDuplicates();
     bool cancelTerms();
 

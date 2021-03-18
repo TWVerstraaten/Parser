@@ -4,26 +4,24 @@
 
 #include "AstNodeCommutative.h"
 
-#include "AstNodeNumeric.h"
+#include "AstNodeNumber.h"
 
 #include <cassert>
 
-AstNodeCommutative::AstNodeCommutative(std::function<Numeric(const Numeric&, const Numeric&)> accumulator,
-                                       std::function<bool(u_ptr_AstNode&)>                    removePredicate)
+AstNodeCommutative::AstNodeCommutative(std::function<Number(const Number&, const Number&)> accumulator,
+                                       std::function<bool(u_ptr_AstNode&)>                 removePredicate)
     : m_accumulator(std::move(accumulator)), m_removePredicate(std::move(removePredicate)) {
 }
 
-AstNodeCommutative::AstNodeCommutative(std::vector<u_ptr_AstNode>&&                           nodes,
-                                       std::function<Numeric(const Numeric&, const Numeric&)> accumulator,
-                                       std::function<bool(u_ptr_AstNode&)>                    removePredicate)
+AstNodeCommutative::AstNodeCommutative(std::vector<u_ptr_AstNode>&& nodes, std::function<Number(const Number&, const Number&)> accumulator,
+                                       std::function<bool(u_ptr_AstNode&)> removePredicate)
     : m_accumulator(std::move(accumulator)), m_removePredicate(std::move(removePredicate)), m_nodes(std::move(nodes)) {
 }
 
 void AstNodeCommutative::removeNode(const AstNode* nodeToRemove) {
-    assert(std::find_if(m_nodes.begin(), m_nodes.end(),
-                        [&](const u_ptr_AstNode& node) { return *node.get() == *nodeToRemove; }) != m_nodes.end());
-    m_nodes.erase(std::find_if(m_nodes.begin(), m_nodes.end(),
-                               [&](const u_ptr_AstNode& node) { return *node.get() == *nodeToRemove; }));
+    assert(std::find_if(m_nodes.begin(), m_nodes.end(), [&](const u_ptr_AstNode& node) { return *node.get() == *nodeToRemove; }) !=
+           m_nodes.end());
+    m_nodes.erase(std::find_if(m_nodes.begin(), m_nodes.end(), [&](const u_ptr_AstNode& node) { return *node.get() == *nodeToRemove; }));
 }
 
 size_t AstNodeCommutative::childCount() const {
@@ -94,17 +92,20 @@ bool AstNodeCommutative::accumulateNumeric() {
         return false;
     }
     while (it != m_nodes.end() && (*it)->isNumeric()) {
-        const Numeric num1 = NUMERIC_CAST((it - 1)->get());
-        const Numeric num2 = NUMERIC_CAST(it->get());
-        it                 = m_nodes.erase(it - 1);
-        *it                = m_accumulator(num1, num2).toNode();
+        const Number num1 = (*(it - 1))->getNumber();
+        const Number num2 = (*it)->getNumber();
+        it                = m_nodes.erase(it - 1);
+        *it               = u_ptr_AstNode(new AstNodeNumber(m_accumulator(num1, num2)));
         ++it;
     }
     return true;
 }
 
 bool AstNodeCommutative::cleanUp() {
-    bool isChanged = mergeNodes() || sortNodes() || accumulateNumeric();
+    bool isChanged = false;
+    isChanged |= mergeNodes();
+    isChanged |= sortNodes();
+    isChanged |= accumulateNumeric();
     if (std::find_if(m_nodes.begin(), m_nodes.end(), m_removePredicate) != m_nodes.end()) {
         isChanged = true;
         m_nodes.erase(std::remove_if(m_nodes.begin(), m_nodes.end(), m_removePredicate), m_nodes.end());
@@ -118,18 +119,15 @@ bool AstNodeCommutative::compareEqualType(const AstNode* rhs) const {
         return type() < rhs->type();
     }
     const auto& rightNodes = COMMUTATIVE_C_CAST(rhs)->m_nodes;
-    return std::lexicographical_compare(m_nodes.begin(), m_nodes.end(), rightNodes.begin(), rightNodes.end(),
-                                        AstNode::compare_u_ptr);
+    return std::lexicographical_compare(m_nodes.begin(), m_nodes.end(), rightNodes.begin(), rightNodes.end(), AstNode::compare_u_ptr);
 }
 
 Decomposition AstNodeCommutative::decompose(const AstNodeCommutative* A, const AstNodeCommutative* B) {
     assert(A != B);
     std::vector<const AstNode*> aCopy;
     std::vector<const AstNode*> bCopy;
-    std::transform(A->m_nodes.begin(), A->m_nodes.end(), std::back_inserter(aCopy),
-                   [](const u_ptr_AstNode& u_ptr) { return u_ptr.get(); });
-    std::transform(B->m_nodes.begin(), B->m_nodes.end(), std::back_inserter(bCopy),
-                   [](const u_ptr_AstNode& u_ptr) { return u_ptr.get(); });
+    std::transform(A->m_nodes.begin(), A->m_nodes.end(), std::back_inserter(aCopy), [](const u_ptr_AstNode& u_ptr) { return u_ptr.get(); });
+    std::transform(B->m_nodes.begin(), B->m_nodes.end(), std::back_inserter(bCopy), [](const u_ptr_AstNode& u_ptr) { return u_ptr.get(); });
     std::sort(aCopy.begin(), aCopy.end(), AstNode::compare);
     std::sort(bCopy.begin(), bCopy.end(), AstNode::compare);
 
@@ -141,8 +139,7 @@ AstNode& AstNodeCommutative::operator[](size_t index) {
 }
 
 std::vector<u_ptr_AstNode>::const_iterator AstNodeCommutative::mulBegin() const {
-    return std::find_if(m_nodes.begin(), m_nodes.end(),
-                        [](const auto& node) { return node->type() == AstNode::NODE_TYPE::MULTIPLY; });
+    return std::find_if(m_nodes.begin(), m_nodes.end(), [](const auto& node) { return node->type() == AstNode::NODE_TYPE::MULTIPLY; });
 }
 
 std::vector<u_ptr_AstNode>::const_iterator AstNodeCommutative::mulEnd() const {
@@ -154,8 +151,7 @@ std::vector<u_ptr_AstNode>::const_iterator AstNodeCommutative::mulEnd() const {
 }
 
 std::vector<u_ptr_AstNode>::const_iterator AstNodeCommutative::addBegin() const {
-    return std::find_if(m_nodes.begin(), m_nodes.end(),
-                        [](const auto& node) { return node->type() == AstNode::NODE_TYPE::ADD; });
+    return std::find_if(m_nodes.begin(), m_nodes.end(), [](const auto& node) { return node->type() == AstNode::NODE_TYPE::ADD; });
 }
 
 std::vector<u_ptr_AstNode>::const_iterator AstNodeCommutative::addEnd() const {
@@ -170,7 +166,6 @@ size_t AstNodeCommutative::countCopies(const AstNode* nodeToCompare) const {
     return std::count_if(m_nodes.begin(), m_nodes.end(), [&](const auto& node) { return *node == *nodeToCompare; });
 }
 
-void AstNodeCommutative::removeNullptrs() {
-    m_nodes.erase(std::remove_if(m_nodes.begin(), m_nodes.end(), [](const auto& node) { return node == nullptr; }),
-                  end(m_nodes));
+void AstNodeCommutative::removeNullPointers() {
+    m_nodes.erase(std::remove_if(m_nodes.begin(), m_nodes.end(), [](const auto& node) { return node == nullptr; }), end(m_nodes));
 }

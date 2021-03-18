@@ -5,9 +5,8 @@
 #include "Parser.h"
 
 #include "AstNode/AstNodeAdd.h"
-#include "AstNode/AstNodeDouble.h"
 #include "AstNode/AstNodeFunction.h"
-#include "AstNode/AstNodeInteger.h"
+#include "AstNode/AstNodeNumber.h"
 #include "AstNode/AstNodeVar.h"
 
 #include <cassert>
@@ -68,10 +67,8 @@ u_ptr_AstNode Parser::parseValueType(const Token& token) {
         }
         case TOKEN_TYPE::IDENTIFIER:
             return u_ptr_AstNode(new AstNodeVar(token.m_string));
-        case TOKEN_TYPE::DOUBLE:
-            return u_ptr_AstNode(new AstNodeDouble(token.m_string));
         case TOKEN_TYPE::INTEGER:
-            return u_ptr_AstNode(new AstNodeInteger(token.m_string));
+            return u_ptr_AstNode(new AstNodeNumber(token.m_string));
         default:
             assert(false);
     }

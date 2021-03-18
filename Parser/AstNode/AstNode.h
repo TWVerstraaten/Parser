@@ -5,38 +5,35 @@
 #ifndef PARSER_ASTNODE_H
 #define PARSER_ASTNODE_H
 
+#include "Number.h"
+
 #include <iostream>
 #include <memory>
 #include <string>
+#include <variant>
 
 class AstNode;
 typedef std::unique_ptr<AstNode> u_ptr_AstNode;
 
-struct IntersectStruct;
 class AstNodeMul;
 class AstNodePower;
 
 class AstNode {
   public:
-    enum class NODE_TYPE { INTEGER, DOUBLE, UNARY_MINUS, VARIABLE, ADD, SUBTRACT, MULTIPLY, DIVIDE, POWER, FUNCTION, ERROR };
+    enum class NODE_TYPE { NUMBER, UNARY_MINUS, VARIABLE, ADD, SUBTRACT, MULTIPLY, DIVIDE, POWER, FUNCTION, ERROR };
     explicit AstNode() = default;
 
-    [[nodiscard]] bool isNumeric() const;
-    [[nodiscard]] bool isCommutative() const;
-    [[nodiscard]] bool isZero() const;
-    [[nodiscard]] bool isOne() const;
-    [[nodiscard]] bool isEven() const;
-
-    static IntersectStruct factor(const AstNode* first, const AstNode* second, bool isFirstPass = true);
-    static IntersectStruct factorNodeAndMultiply(const AstNode* first, const AstNodeMul* second);
-    static IntersectStruct factor(const AstNodeMul* first, const AstNode* second);
-    static IntersectStruct factor(const AstNodePower* first, const AstNode* second);
-    static IntersectStruct factorPowerAndMultiply(const AstNodePower* power, const AstNodeMul* multiplyNode);
-    static IntersectStruct factorPowers(const AstNodePower* power1, const AstNodePower* power2);
+    [[nodiscard]] bool   isNumeric() const;
+    [[nodiscard]] bool   isCommutative() const;
+    [[nodiscard]] bool   isZero() const;
+    [[nodiscard]] bool   isOne() const;
+    [[nodiscard]] bool   isEven() const;
+    [[nodiscard]] Number getNumber() const;
 
     static u_ptr_AstNode makeZeroNode();
     static u_ptr_AstNode makeOneNode();
-    static u_ptr_AstNode makeInteger(long long val);
+    static u_ptr_AstNode makeNumber(std::variant<long long int, double> val);
+    static u_ptr_AstNode makeNumber(Number val);
 
     enum class SIMPLIFY_RULES { NONE, DISTRIBUTE_MULTIPLICATION };
 

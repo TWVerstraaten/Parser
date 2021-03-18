@@ -13,10 +13,13 @@ class Ast {
 
     [[nodiscard]] std::string toString() const;
 
-    //  private:
-    const std::string        m_string;
-    std::unique_ptr<AstNode> m_rootNode;
-    std::unique_ptr<AstNode> m_copy;
+    [[nodiscard]] Ast simplify() const;
+
+  private:
+    Ast() = default;
+
+    std::string                    m_string;
+    std::unique_ptr<const AstNode> m_rootNode;
 };
 
 #endif // PARSER_AST_H

@@ -4,13 +4,12 @@
 
 #include "AstNodePower.h"
 
-#include "AstNodeInteger.h"
+#include "AstNodeNumber.h"
 
 #include <cassert>
 #include <cmath>
 
-AstNodePower::AstNodePower(u_ptr_AstNode&& base, u_ptr_AstNode&& exponent)
-    : m_base(std::move(base)), m_exponent(std::move(exponent)) {
+AstNodePower::AstNodePower(u_ptr_AstNode&& base, u_ptr_AstNode&& exponent) : m_base(std::move(base)), m_exponent(std::move(exponent)) {
 }
 
 std::string AstNodePower::toString() const {
@@ -24,9 +23,6 @@ u_ptr_AstNode AstNodePower::copy() const {
 u_ptr_AstNode AstNodePower::simplify(SIMPLIFY_RULES simplifyRules) const {
     auto       base     = m_base->simplify(SIMPLIFY_RULES::NONE);
     const auto exponent = m_exponent->simplify(SIMPLIFY_RULES::NONE);
-    if (base->isNumeric() && exponent->isNumeric()) {
-        return (NUMERIC_CAST(base.get()) ^ NUMERIC_CAST(exponent.get())).toNode();
-    }
     if (exponent->isOne()) {
         return base;
     } else if (exponent->isZero()) {
@@ -34,16 +30,14 @@ u_ptr_AstNode AstNodePower::simplify(SIMPLIFY_RULES simplifyRules) const {
     }
     if (m_base->type() == AstNode::NODE_TYPE::POWER) {
         return std::make_unique<AstNodePower>(
-            m_base->childAt(0)->copy(),
-            (*m_base->childAt(1) * *m_exponent)->simplify(AstNode::SIMPLIFY_RULES::DISTRIBUTE_MULTIPLICATION));
+            m_base->childAt(0)->copy(), (*m_base->childAt(1) * *m_exponent)->simplify(AstNode::SIMPLIFY_RULES::DISTRIBUTE_MULTIPLICATION));
     }
     if (m_base->type() == AstNode::NODE_TYPE::UNARY_MINUS && m_exponent->isEven()) {
         return std::make_unique<AstNodePower>(m_base->childAt(0)->copy(), m_exponent->copy())
             ->simplify(AstNode::SIMPLIFY_RULES::DISTRIBUTE_MULTIPLICATION);
     }
     AstNode* simplifiedNode =
-        new AstNodePower(m_base->simplify(SIMPLIFY_RULES::NONE),
-                         m_exponent->simplify(AstNode::SIMPLIFY_RULES::DISTRIBUTE_MULTIPLICATION));
+        new AstNodePower(m_base->simplify(SIMPLIFY_RULES::NONE), m_exponent->simplify(AstNode::SIMPLIFY_RULES::DISTRIBUTE_MULTIPLICATION));
     return u_ptr_AstNode(simplifiedNode);
 }
 

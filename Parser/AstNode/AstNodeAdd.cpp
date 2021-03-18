@@ -5,18 +5,17 @@
 #include "AstNodeAdd.h"
 
 #include "AstNodeMul.h"
-#include "IntersectStruct.h"
 
 #include <cassert>
 
 AstNodeAdd::AstNodeAdd()
-    : AstNodeCommutative([](const Numeric& lhs, const Numeric& rhs) { return lhs + rhs; },
+    : AstNodeCommutative([](const Number& lhs, const Number& rhs) { return lhs + rhs; },
                          [](const u_ptr_AstNode& node) { return node->isZero(); }) {
 }
 
 AstNodeAdd::AstNodeAdd(std::vector<u_ptr_AstNode>&& nodes)
     : AstNodeCommutative(
-          std::move(nodes), [](const Numeric& lhs, const Numeric& rhs) { return lhs + rhs; },
+          std::move(nodes), [](const Number& lhs, const Number& rhs) { return lhs + rhs; },
           [](const u_ptr_AstNode& node) { return node->isZero(); }) {
     if (m_nodes.empty()) {
         m_nodes.emplace_back(AstNode::makeZeroNode());
@@ -25,7 +24,7 @@ AstNodeAdd::AstNodeAdd(std::vector<u_ptr_AstNode>&& nodes)
 }
 
 AstNodeAdd::AstNodeAdd(u_ptr_AstNode&& left, u_ptr_AstNode&& right)
-    : AstNodeCommutative([](const Numeric& lhs, const Numeric& rhs) { return lhs + rhs; },
+    : AstNodeCommutative([](const Number& lhs, const Number& rhs) { return lhs + rhs; },
                          [](u_ptr_AstNode& node) { return node->isZero(); }) {
     m_nodes.emplace_back(std::move(left));
     m_nodes.emplace_back(std::move(right));
@@ -52,18 +51,8 @@ u_ptr_AstNode AstNodeAdd::copy() const {
 
 u_ptr_AstNode AstNodeAdd::simplify(SIMPLIFY_RULES simplifyRules) const {
     std::unique_ptr<AstNodeAdd> simplifiedNode = simplifiedCopy(AstNode::SIMPLIFY_RULES::DISTRIBUTE_MULTIPLICATION);
-    while (true) {
-        bool ready = not(simplifiedNode->cleanUp() || simplifiedNode->cancelTerms() ||
-                         simplifiedNode->gatherDuplicates() || simplifiedNode->gatherOverLappingNodes());
-        if (simplifiedNode->childCount() == 0) {
-            return AstNode::makeZeroNode();
-        } else if (simplifiedNode->childCount() == 1) {
-            return std::move(simplifiedNode->m_nodes[0]);
-        } else if (ready) {
-            return simplifiedNode;
-        }
-        simplifiedNode = simplifiedNode->simplifiedCopy(AstNode::SIMPLIFY_RULES::NONE);
-    }
+    simplifiedNode->cleanUp();
+    return simplifiedNode;
 }
 
 AstNode::NODE_TYPE AstNodeAdd::type() const {
@@ -78,24 +67,6 @@ std::unique_ptr<AstNodeAdd> AstNodeAdd::simplifiedCopy(SIMPLIFY_RULES simplifyRu
     return copy;
 }
 
-bool AstNodeAdd::gatherOverLappingNodes() {
-    for (auto it1 = m_nodes.begin(); it1 + 1 != m_nodes.end(); ++it1) {
-        for (auto it2 = it1 + 1; it2 != m_nodes.end(); ++it2) {
-            auto commonFactorStruct = factor(it1->get(), it2->get());
-            if (commonFactorStruct.m_common != nullptr) {
-                m_nodes.erase(it2);
-                m_nodes.erase(it1);
-                m_nodes.emplace_back(
-                    ((commonFactorStruct.firstOr(AstNode::makeOneNode()) + commonFactorStruct.secondOr(AstNode::makeOneNode())) *
-                     std::move(commonFactorStruct.m_common))
-                        ->simplify(AstNode::SIMPLIFY_RULES::DISTRIBUTE_MULTIPLICATION));
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
 bool AstNodeAdd::gatherDuplicates() {
     assert(std::is_sorted(m_nodes.begin(), m_nodes.end(), AstNode::compare_u_ptr));
     for (auto it = m_nodes.begin(); it != m_nodes.end(); ++it) {
@@ -103,7 +74,7 @@ bool AstNodeAdd::gatherDuplicates() {
         if (count > 1ul) {
             auto copy = (*it)->copy();
             m_nodes.erase(it + 1, it + count);
-            *it = AstNode::makeInteger(static_cast<long long>(count)) * std::move(*it);
+            *it = AstNode::makeNumber(static_cast<long long>(count)) * std::move(*it);
             return true;
         }
     }
@@ -118,7 +89,7 @@ bool AstNodeAdd::cancelTerms() {
         if (it2 != m_nodes.end()) {
             it->reset(nullptr);
             it2->reset(nullptr);
-            removeNullptrs();
+            removeNullPointers();
             return true;
         }
     }

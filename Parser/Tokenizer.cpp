@@ -78,11 +78,7 @@ std::string::const_iterator Tokenizer::parseValueType(std::string::const_iterato
     if (isdigit(*it) || *it == '.') {
         auto        endOfNumberIt = endOfNumber(it, end);
         std::string number        = std::string(it, endOfNumberIt);
-        if (number.find('.') == std::string::npos) {
-            m_tokens.emplace_back(Token{TOKEN_TYPE::INTEGER, std::move(number)});
-        } else {
-            m_tokens.emplace_back(Token{TOKEN_TYPE::DOUBLE, std::move(number)});
-        }
+        m_tokens.emplace_back(Token{TOKEN_TYPE::INTEGER, std::move(number)});
         return std::prev(endOfNumberIt);
     } else {
         assert(isalpha(*it));
@@ -144,9 +140,6 @@ std::string Tokenizer::toString(const TokenList& tokens, bool readable) {
                     break;
                 case TOKEN_TYPE::BIN_OP_TERM:
                     result += token.m_string + "_t";
-                    break;
-                case TOKEN_TYPE::DOUBLE:
-                    result += token.m_string + "_d";
                     break;
                 case TOKEN_TYPE::FUNCTION:
                     result += token.m_string + "_fun";
