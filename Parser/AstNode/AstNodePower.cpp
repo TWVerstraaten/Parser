@@ -20,9 +20,9 @@ u_ptr_AstNode AstNodePower::copy() const {
     return u_ptr_AstNode(new AstNodePower(m_base->copy(), m_exponent->copy()));
 }
 
-u_ptr_AstNode AstNodePower::simplify(SIMPLIFY_RULES simplifyRules) const {
-    auto       base     = m_base->simplify(SIMPLIFY_RULES::NONE);
-    const auto exponent = m_exponent->simplify(SIMPLIFY_RULES::NONE);
+u_ptr_AstNode AstNodePower::simplify() const {
+    auto       base     = m_base->simplify();
+    const auto exponent = m_exponent->simplify();
     if (exponent->isOne()) {
         return base;
     } else if (exponent->isZero()) {
@@ -30,14 +30,13 @@ u_ptr_AstNode AstNodePower::simplify(SIMPLIFY_RULES simplifyRules) const {
     }
     if (m_base->type() == AstNode::NODE_TYPE::POWER) {
         return std::make_unique<AstNodePower>(
-            m_base->childAt(0)->copy(), (*m_base->childAt(1) * *m_exponent)->simplify(AstNode::SIMPLIFY_RULES::DISTRIBUTE_MULTIPLICATION));
+            m_base->childAt(0)->copy(), (*m_base->childAt(1) * *m_exponent)->simplify());
     }
     if (m_base->type() == AstNode::NODE_TYPE::UNARY_MINUS && m_exponent->isEven()) {
-        return std::make_unique<AstNodePower>(m_base->childAt(0)->copy(), m_exponent->copy())
-            ->simplify(AstNode::SIMPLIFY_RULES::DISTRIBUTE_MULTIPLICATION);
+        return std::make_unique<AstNodePower>(m_base->childAt(0)->copy(), m_exponent->copy())->simplify();
     }
     AstNode* simplifiedNode =
-        new AstNodePower(m_base->simplify(SIMPLIFY_RULES::NONE), m_exponent->simplify(AstNode::SIMPLIFY_RULES::DISTRIBUTE_MULTIPLICATION));
+        new AstNodePower(m_base->simplify(), m_exponent->simplify());
     return u_ptr_AstNode(simplifiedNode);
 }
 
@@ -68,4 +67,14 @@ bool AstNodePower::compareEqualType(const AstNode* rhs) const {
     } else {
         return compare(m_base.get(), rhs->childAt(0));
     }
+}
+
+u_ptr_AstNode AstNodePower::differentiate(const std::string& variable) const {
+    return makeError();
+}
+
+std::set<std::string> AstNodePower::collectVariables() const {
+    auto result = m_base->collectVariables();
+    result.merge(m_exponent->collectVariables());
+    return result;
 }

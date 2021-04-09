@@ -169,3 +169,11 @@ size_t AstNodeCommutative::countCopies(const AstNode* nodeToCompare) const {
 void AstNodeCommutative::removeNullPointers() {
     m_nodes.erase(std::remove_if(m_nodes.begin(), m_nodes.end(), [](const auto& node) { return node == nullptr; }), end(m_nodes));
 }
+
+std::set<std::string> AstNodeCommutative::collectVariables() const {
+    std::set<std::string> result;
+    for (const auto& node : m_nodes) {
+        result.merge(node->collectVariables());
+    }
+    return result;
+}

@@ -24,7 +24,7 @@ u_ptr_AstNode AstNodeError::copy() const {
     return u_ptr_AstNode(new AstNodeError{});
 }
 
-u_ptr_AstNode AstNodeError::simplify(SIMPLIFY_RULES simplifyRules) const {
+u_ptr_AstNode AstNodeError::simplify() const {
     return copy();
 }
 
@@ -47,4 +47,12 @@ const AstNode* AstNodeError::childAt(size_t index) const {
 bool AstNodeError::compareEqualType(const AstNode* rhs) const {
     assert(rhs->type() == type());
     return false;
+}
+
+u_ptr_AstNode AstNodeError::differentiate(const std::string& variable) const {
+    return u_ptr_AstNode(new AstNodeError());
+}
+
+std::set<std::string> AstNodeError::collectVariables() const {
+    return {};
 }

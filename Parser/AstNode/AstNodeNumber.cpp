@@ -23,7 +23,7 @@ u_ptr_AstNode AstNodeNumber::copy() const {
     return u_ptr_AstNode(new AstNodeNumber(m_value));
 }
 
-u_ptr_AstNode AstNodeNumber::simplify(SIMPLIFY_RULES simplifyRules) const {
+u_ptr_AstNode AstNodeNumber::simplify() const {
     return copy();
 }
 
@@ -57,4 +57,12 @@ bool AstNodeNumber::compareEqualType(const AstNode* rhs) const {
 
 const Number& AstNodeNumber::value() const {
     return m_value;
+}
+
+u_ptr_AstNode AstNodeNumber::differentiate(const std::string& variable) const {
+    return makeZeroNode();
+}
+
+std::set<std::string> AstNodeNumber::collectVariables() const {
+    return {};
 }

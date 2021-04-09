@@ -3,7 +3,9 @@
   <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
   <component name="CidrRootsConfiguration">
     <sourceRoots>
+      <file path="$PROJECT_DIR$/App" />
       <file path="$PROJECT_DIR$/Parser" />
+      <file path="$PROJECT_DIR$/Parser/AstNode" />
     </sourceRoots>
   </component>
 </project>

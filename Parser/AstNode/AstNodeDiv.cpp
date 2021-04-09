@@ -21,8 +21,8 @@ u_ptr_AstNode AstNodeDiv::copy() const {
     return std::make_unique<AstNodeDiv>(m_numerator->copy(), m_denominator->copy());
 }
 
-u_ptr_AstNode AstNodeDiv::simplify(SIMPLIFY_RULES simplifyRules) const {
-    auto node = std::make_unique<AstNodeDiv>(m_numerator->simplify(SIMPLIFY_RULES::NONE), m_denominator->simplify(SIMPLIFY_RULES::NONE));
+u_ptr_AstNode AstNodeDiv::simplify() const {
+    auto node = std::make_unique<AstNodeDiv>(m_numerator->simplify(), m_denominator->simplify());
 
     if (node->m_numerator->isZero()) {
         return node->m_denominator->isZero() ? u_ptr_AstNode(new AstNodeError{AstNodeError::ERROR_TYPE::DIVISION_BY_ZERO})
@@ -67,4 +67,14 @@ bool AstNodeDiv::compareEqualType(const AstNode* rhs) const {
     } else {
         return compare(m_numerator.get(), childAt(0));
     }
+}
+
+u_ptr_AstNode AstNodeDiv::differentiate(const std::string& variable) const {
+    return makeError();
+}
+
+std::set<std::string> AstNodeDiv::collectVariables() const {
+    auto result = m_numerator->collectVariables();
+    result.merge(m_denominator->collectVariables());
+    return result;
 }

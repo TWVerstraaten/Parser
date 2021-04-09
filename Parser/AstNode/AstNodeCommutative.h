@@ -10,6 +10,7 @@
 #include "Number.h"
 
 #include <functional>
+#include <set>
 #include <vector>
 
 class AstNodeCommutative;
@@ -27,6 +28,8 @@ class AstNodeCommutative : public AstNode {
     static Decomposition decompose(const AstNodeCommutative* A, const AstNodeCommutative* B);
 
     [[nodiscard]] const AstNode* childAt(size_t index) const final;
+
+    [[nodiscard]] std::set<std::string> collectVariables() const override;
 
   protected:
     AstNodeCommutative(std::function<Number(const Number&, const Number&)> accumulator,

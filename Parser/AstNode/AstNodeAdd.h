@@ -15,8 +15,9 @@ class AstNodeAdd : public AstNodeCommutative {
 
     [[nodiscard]] std::string   toString() const override;
     [[nodiscard]] u_ptr_AstNode copy() const override;
-    [[nodiscard]] u_ptr_AstNode simplify(SIMPLIFY_RULES simplifyRules) const override;
+    [[nodiscard]] u_ptr_AstNode simplify() const override;
     [[nodiscard]] NODE_TYPE     type() const override;
+    [[nodiscard]] u_ptr_AstNode differentiate(const std::string& variable) const override;
 
   private:
     friend class AstNodeMul;
@@ -24,10 +25,7 @@ class AstNodeAdd : public AstNodeCommutative {
 
     AstNodeAdd();
 
-    bool gatherDuplicates();
-    bool cancelTerms();
-
-    [[nodiscard]] std::unique_ptr<AstNodeAdd> simplifiedCopy(SIMPLIFY_RULES simplifyRules) const;
+    [[nodiscard]] std::unique_ptr<AstNodeAdd> simplifiedCopy() const;
 };
 
 #endif // PARSER_ASTNODEADD_H

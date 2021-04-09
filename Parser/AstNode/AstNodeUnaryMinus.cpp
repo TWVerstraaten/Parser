@@ -20,22 +20,14 @@ u_ptr_AstNode AstNodeUnaryMinus::copy() const {
     return u_ptr_AstNode(new AstNodeUnaryMinus(m_value->copy()));
 }
 
-u_ptr_AstNode AstNodeUnaryMinus::simplify(SIMPLIFY_RULES simplifyRules) const {
+u_ptr_AstNode AstNodeUnaryMinus::simplify() const {
     if (m_value->type() == AstNode::NODE_TYPE::UNARY_MINUS) {
-        return m_value->childAt(0)->simplify(SIMPLIFY_RULES::NONE);
+        return m_value->childAt(0)->simplify();
     }
     if (m_value->isNumeric()) {
         return makeNumber(m_value->getNumber().negate());
     }
-    auto* simplifiedNode = new AstNodeUnaryMinus(m_value->simplify(SIMPLIFY_RULES::DISTRIBUTE_MULTIPLICATION));
-    if (simplifyRules == AstNode::SIMPLIFY_RULES::DISTRIBUTE_MULTIPLICATION && simplifiedNode->m_value->type() == AstNode::NODE_TYPE::ADD) {
-        auto* result = new AstNodeAdd{};
-        for (auto& node : COMMUTATIVE_CAST(simplifiedNode->m_value.get())->m_nodes) {
-            result->m_nodes.emplace_back(-std::move(node));
-        }
-
-        return u_ptr_AstNode(result);
-    }
+    auto* simplifiedNode = new AstNodeUnaryMinus(m_value->simplify());
     return u_ptr_AstNode(simplifiedNode);
 }
 
@@ -62,4 +54,11 @@ const AstNode* AstNodeUnaryMinus::childAt(size_t index) const {
 bool AstNodeUnaryMinus::compareEqualType(const AstNode* rhs) const {
     assert(rhs->type() == type());
     return compare(m_value.get(), rhs->childAt(0));
+}
+u_ptr_AstNode AstNodeUnaryMinus::differentiate(const std::string& variable) const {
+    return -m_value->differentiate(variable);
+}
+
+std::set<std::string> AstNodeUnaryMinus::collectVariables() const {
+    return m_value->collectVariables();
 }

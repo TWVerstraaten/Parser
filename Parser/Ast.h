@@ -7,13 +7,16 @@
 
 #include "AstNode/AstNode.h"
 
+#include <vector>
+
 class Ast {
   public:
     explicit Ast(std::string string);
 
-    [[nodiscard]] std::string toString() const;
-
-    [[nodiscard]] Ast simplify() const;
+    [[nodiscard]] std::string              toString() const;
+    [[nodiscard]] Ast                      simplify() const;
+    [[nodiscard]] Ast                      differentiate(const std::string& variable) const;
+    [[nodiscard]] std::set<std::string>    variables() const;
 
   private:
     Ast() = default;

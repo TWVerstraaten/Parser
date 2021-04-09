@@ -70,7 +70,7 @@ u_ptr_AstNode Parser::parseValueType(const Token& token) {
         case TOKEN_TYPE::INTEGER:
             return u_ptr_AstNode(new AstNodeNumber(token.m_string));
         default:
-            assert(false);
+            throw std::runtime_error("Expected value type");
     }
 }
 
@@ -94,7 +94,9 @@ u_ptr_AstNode Parser::parseTerm(TokenList& tokenList) {
         m_subExpressionList.emplace_back((startsWithUnaryMinus ? -parseValueType(*it) : parseValueType(*it)) +
                                          parseValueType(*std::next(it, 2)));
     } else {
-        assert(std::next(it)->m_string == "-");
+        if (std::next(it)->m_string != "-") {
+            throw std::runtime_error("Didn't see + so expecting -");
+        }
         m_subExpressionList.emplace_back((startsWithUnaryMinus ? -parseValueType(*it) : parseValueType(*it)) +
                                          -parseValueType(*std::next(it, 2)));
     }
@@ -144,10 +146,14 @@ u_ptr_AstNode Parser::parseBrackets(TokenList& tokenList) {
     while (containsBrackets(tokenList)) {
         auto openBracketIt =
             std::find_if(tokenList.begin(), tokenList.end(), [](const auto& token) { return token.m_type == TOKEN_TYPE::LEFT_BR; });
-        assert(openBracketIt != tokenList.cend());
+        if (openBracketIt == tokenList.cend()) {
+            throw std::runtime_error("Brackets don't match");
+        }
         const auto openBracketString = openBracketIt->m_string;
         auto       closingBracketIt  = std::find(openBracketIt, tokenList.end(), Token{TOKEN_TYPE::RIGHT_BR, openBracketString});
-        assert(closingBracketIt != tokenList.cend());
+        if (closingBracketIt == tokenList.cend()) {
+            throw std::runtime_error("Brackets don't match");
+        }
 
         openBracketIt    = tokenList.insert(openBracketIt, freshReferenceToken(0));
         openBracketIt    = tokenList.erase(std::next(openBracketIt));

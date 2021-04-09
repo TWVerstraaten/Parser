@@ -6,6 +6,7 @@
 
 #include "AstNodeAdd.h"
 #include "AstNodeDiv.h"
+#include "AstNodeError.h"
 #include "AstNodeMul.h"
 #include "AstNodeNumber.h"
 #include "AstNodePower.h"
@@ -121,7 +122,7 @@ u_ptr_AstNode AstNode::copy(const u_ptr_AstNode& node) {
 }
 
 u_ptr_AstNode AstNode::simplify(const u_ptr_AstNode& node) {
-    return node->simplify(SIMPLIFY_RULES::NONE);
+    return node->simplify();
 }
 
 u_ptr_AstNode AstNode::makeZeroNode() {
@@ -143,4 +144,8 @@ u_ptr_AstNode AstNode::makeNumber(Number val) {
 Number AstNode::getNumber() const {
     assert(type() == NODE_TYPE::NUMBER);
     return dynamic_cast<const AstNodeNumber&>(*this).value();
+}
+
+u_ptr_AstNode AstNode::makeError() {
+    return u_ptr_AstNode(new AstNodeError());
 }

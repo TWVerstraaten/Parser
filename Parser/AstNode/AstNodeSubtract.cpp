@@ -17,16 +17,16 @@ u_ptr_AstNode AstNodeSubtract::copy() const {
     return u_ptr_AstNode(new AstNodeSubtract(m_leftNode->copy(), m_rightNode->copy()));
 }
 
-u_ptr_AstNode AstNodeSubtract::simplify(SIMPLIFY_RULES simplifyRules) const {
-    const auto left  = m_leftNode->simplify(SIMPLIFY_RULES::NONE);
-    const auto right = m_rightNode->simplify(SIMPLIFY_RULES::NONE);
+u_ptr_AstNode AstNodeSubtract::simplify() const {
+    const auto left  = m_leftNode->simplify();
+    const auto right = m_rightNode->simplify();
     if (left->type() == AstNode::NODE_TYPE::NUMBER && right->type() == AstNode::NODE_TYPE::NUMBER) {
         std::cout << "Implement\n";
         assert(false);
         //        return (NUMERIC_CAST(left.get()) - NUMERIC_CAST(right.get())).toNode();
     }
 
-    AstNode* simplifiedNode = new AstNodeSubtract(m_leftNode->simplify(SIMPLIFY_RULES::NONE), m_rightNode->simplify(SIMPLIFY_RULES::NONE));
+    AstNode* simplifiedNode = new AstNodeSubtract(m_leftNode->simplify(), m_rightNode->simplify());
     return u_ptr_AstNode(simplifiedNode);
 }
 
@@ -54,4 +54,13 @@ bool AstNodeSubtract::compareEqualType(const AstNode* rhs) const {
     } else {
         return compare(m_leftNode.get(), rhs->childAt(0));
     }
+}
+u_ptr_AstNode AstNodeSubtract::differentiate(const std::string& variable) const {
+    return m_leftNode->differentiate(variable) - m_rightNode->differentiate(variable);
+}
+
+std::set<std::string> AstNodeSubtract::collectVariables() const {
+    auto result = m_rightNode->collectVariables();
+    result.merge(m_leftNode->collectVariables());
+    return result;
 }

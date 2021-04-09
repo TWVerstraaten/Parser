@@ -9,8 +9,10 @@
 
 #include <iostream>
 #include <memory>
+#include <set>
 #include <string>
 #include <variant>
+#include <vector>
 
 class AstNode;
 typedef std::unique_ptr<AstNode> u_ptr_AstNode;
@@ -22,6 +24,7 @@ class AstNode {
   public:
     enum class NODE_TYPE { NUMBER, UNARY_MINUS, VARIABLE, ADD, SUBTRACT, MULTIPLY, DIVIDE, POWER, FUNCTION, ERROR };
     explicit AstNode() = default;
+    virtual ~AstNode() = default;
 
     [[nodiscard]] bool   isNumeric() const;
     [[nodiscard]] bool   isCommutative() const;
@@ -34,15 +37,16 @@ class AstNode {
     static u_ptr_AstNode makeOneNode();
     static u_ptr_AstNode makeNumber(std::variant<long long int, double> val);
     static u_ptr_AstNode makeNumber(Number val);
+    static u_ptr_AstNode makeError();
 
-    enum class SIMPLIFY_RULES { NONE, DISTRIBUTE_MULTIPLICATION };
-
-    [[nodiscard]] virtual size_t         childCount() const                           = 0;
-    [[nodiscard]] virtual NODE_TYPE      type() const                                 = 0;
-    [[nodiscard]] virtual std::string    toString() const                             = 0;
-    [[nodiscard]] virtual const AstNode* childAt(size_t index) const                  = 0;
-    [[nodiscard]] virtual u_ptr_AstNode  simplify(SIMPLIFY_RULES simplifyRules) const = 0;
-    [[nodiscard]] virtual u_ptr_AstNode  copy() const                                 = 0;
+    [[nodiscard]] virtual size_t                childCount() const                               = 0;
+    [[nodiscard]] virtual NODE_TYPE             type() const                                     = 0;
+    [[nodiscard]] virtual std::string           toString() const                                 = 0;
+    [[nodiscard]] virtual const AstNode*        childAt(size_t index) const                      = 0;
+    [[nodiscard]] virtual u_ptr_AstNode         simplify() const                                 = 0;
+    [[nodiscard]] virtual u_ptr_AstNode         copy() const                                     = 0;
+    [[nodiscard]] virtual u_ptr_AstNode         differentiate(const std::string& variable) const = 0;
+    [[nodiscard]] virtual std::set<std::string> collectVariables() const                         = 0;
 
     static bool          compare(const AstNode* lhs, const AstNode* rhs);
     static u_ptr_AstNode copy(const u_ptr_AstNode& node);

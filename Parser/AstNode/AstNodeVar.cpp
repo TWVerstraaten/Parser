@@ -17,7 +17,7 @@ u_ptr_AstNode AstNodeVar::copy() const {
     return u_ptr_AstNode(new AstNodeVar(m_variableName));
 }
 
-u_ptr_AstNode AstNodeVar::simplify(SIMPLIFY_RULES simplifyRules) const {
+u_ptr_AstNode AstNodeVar::simplify() const {
     return copy();
 }
 
@@ -43,4 +43,12 @@ const AstNode* AstNodeVar::childAt(size_t index) const {
 bool AstNodeVar::compareEqualType(const AstNode* rhs) const {
     assert(rhs->type() == type());
     return m_variableName < dynamic_cast<const AstNodeVar*>(rhs)->m_variableName;
+}
+
+u_ptr_AstNode AstNodeVar::differentiate(const std::string& variable) const {
+    return variable == m_variableName ? makeOneNode() : makeZeroNode();
+}
+
+std::set<std::string> AstNodeVar::collectVariables() const {
+    return {m_variableName};
 }
