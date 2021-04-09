@@ -13,8 +13,6 @@ FormulaWidget::FormulaWidget(QWidget* parent) : QWidget(parent) {
     m_messageLabel    = new QLabel("_", this);
     m_simplifiedLabel = new QLabel("_", this);
 
-    connect(m_lineEdit, &QLineEdit::textChanged, this, &FormulaWidget::setAst);
-
     m_layout->addWidget(m_activeCheckBox, 0, 0);
     m_layout->addWidget(m_lineEdit, 0, 1);
     m_layout->addWidget(new QLabel("Var:"), 1, 0);
@@ -24,6 +22,7 @@ FormulaWidget::FormulaWidget(QWidget* parent) : QWidget(parent) {
     m_layout->addWidget(new QLabel("Msg:"), 3, 0);
     m_layout->addWidget(m_messageLabel, 3, 1);
 
+    connect(m_lineEdit, &QLineEdit::textChanged, this, &FormulaWidget::setAst);
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
 }
 
@@ -59,9 +58,9 @@ void FormulaWidget::handleCorrectFormula() {
         }
         variableString.chop(1);
         m_variableLabel->setText(variableString);
-        m_messageLabel->setText("_");
     }
-    m_simplifiedLabel->setText(QString::fromStdString(m_ast->simplify().toString()));
+    m_messageLabel->setText("_");
+    m_simplifiedLabel->setText(QString::fromStdString(m_ast->toString()));
 }
 
 void FormulaWidget::handleWrongFormula(const std::runtime_error& error) {

@@ -5,12 +5,17 @@
 #include "Number.h"
 
 #include <cassert>
+#include <sstream>
 
-Number::Number(std::variant<long long int, double> value) : m_number(value) {
+Number::Number(const Number& other) {
+    if (std::holds_alternative<long long>(other.m_number)) {
+        m_number = std::get<long long>(other.m_number);
+    } else {
+        m_number = std::get<double>(other.m_number);
+    }
 }
 
-std::string Number::toString() const {
-    return std::visit([](const auto& a) { return std::to_string(a); }, m_number);
+Number::Number(std::variant<long long int, double> value) : m_number(value) {
 }
 
 const std::variant<long long int, double>& Number::number() const {
@@ -19,10 +24,20 @@ const std::variant<long long int, double>& Number::number() const {
 
 Number::Number(const std::string& value) {
     if (value.find('.') == std::string::npos) {
-        m_number = stoll(value);
+        std::istringstream stringStream(value);
+        long long          val;
+        stringStream >> val;
+        m_number = val;
     } else {
-        m_number = stod(value);
+        std::istringstream stringStream(value);
+        double             val;
+        stringStream >> val;
+        m_number = val;
     }
+}
+
+std::string Number::toString() const {
+    return std::visit([](const auto& a) { return std::to_string(a); }, m_number);
 }
 
 Number Number::negate() const {

@@ -6,8 +6,6 @@
 
 #include "AstNodeMul.h"
 
-#include <cassert>
-
 AstNodeAdd::AstNodeAdd()
     : AstNodeCommutative([](const Number& lhs, const Number& rhs) { return lhs + rhs; },
                          [](const u_ptr_AstNode& node) { return node->isZero(); }) {

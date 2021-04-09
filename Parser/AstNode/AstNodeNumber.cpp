@@ -9,7 +9,7 @@
 AstNodeNumber::AstNodeNumber(const std::string& string) : m_value(string) {
 }
 
-AstNodeNumber::AstNodeNumber(long long int val) : m_value(val) {
+AstNodeNumber::AstNodeNumber(long long val) : m_value(val) {
 }
 
 AstNodeNumber::AstNodeNumber(const Number& number) : m_value(number) {

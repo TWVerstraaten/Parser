@@ -59,7 +59,9 @@ u_ptr_AstNode AstNodeMul::simplify() const {
     if (m_nodes.size() == 1) {
         return m_nodes.front()->simplify();
     }
-    return copy();
+    std::unique_ptr<AstNodeMul> simplifiedNode = simplifiedCopy();
+    simplifiedNode->cleanUp();
+    return simplifiedNode;
 }
 
 AstNode::NODE_TYPE AstNodeMul::type() const {

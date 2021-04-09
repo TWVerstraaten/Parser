@@ -6,7 +6,10 @@
 
 #include "Parser.h"
 
+#include <utility>
+
 Ast::Ast(std::string string) : m_string(std::move(string)), m_rootNode(Parser::parse(m_string)) {
+    std::cout << "Ast:\t" << toString() << " " << m_string << "\n";
 }
 
 Ast Ast::simplify() const {

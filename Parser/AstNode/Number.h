@@ -11,7 +11,7 @@
 class Number {
 
   public:
-    Number(const Number& other) = default;
+    Number(const Number& other);
     Number(std::variant<long long, double> value);
     Number(const std::string& value);
 

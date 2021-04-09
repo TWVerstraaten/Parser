@@ -35,7 +35,7 @@ class AstNode {
 
     static u_ptr_AstNode makeZeroNode();
     static u_ptr_AstNode makeOneNode();
-    static u_ptr_AstNode makeNumber(std::variant<long long int, double> val);
+    static u_ptr_AstNode makeNumber(std::variant<long long, double> val);
     static u_ptr_AstNode makeNumber(Number val);
     static u_ptr_AstNode makeError();
 
