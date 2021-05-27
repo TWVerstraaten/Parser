@@ -25,7 +25,7 @@ class FormulaWidget : public QWidget {
   private:
     void setTextColor(const QColor& color);
     void handleCorrectFormula();
-    void handleWrongFormula(const std::runtime_error& error);
+    void handleWrongFormula(const std::string& errorMessage);
 
     QGridLayout* m_layout          = nullptr;
     QCheckBox*   m_activeCheckBox  = nullptr;

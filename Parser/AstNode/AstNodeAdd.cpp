@@ -48,11 +48,14 @@ u_ptr_AstNode AstNodeAdd::copy() const {
 }
 
 u_ptr_AstNode AstNodeAdd::simplify() const {
-    if (m_nodes.size() == 1) {
-        return m_nodes.front()->simplify();
-    }
     std::unique_ptr<AstNodeAdd> simplifiedNode = simplifiedCopy();
     simplifiedNode->cleanUp();
+    if (simplifiedNode->m_nodes.empty()) {
+        return makeZeroNode();
+    }
+    if (simplifiedNode->m_nodes.size() == 1) {
+        return simplifiedNode->m_nodes.front()->simplify();
+    }
     return simplifiedNode;
 }
 

@@ -4,6 +4,12 @@
 
 #include "FormulaWidget.h"
 
+static void setTextColor(QWidget* widget, const QColor& color) {
+    auto* palette = new QPalette();
+    palette->setColor(QPalette::Text, color);
+    widget->setPalette(*palette);
+}
+
 FormulaWidget::FormulaWidget(QWidget* parent) : QWidget(parent) {
     m_layout = new QGridLayout(this);
 
@@ -28,16 +34,12 @@ FormulaWidget::FormulaWidget(QWidget* parent) : QWidget(parent) {
 
 void FormulaWidget::setAst(const QString& string) {
     std::string functionString = string.toStdString();
-    try {
-        m_ast = std::make_unique<Ast>(functionString);
+    m_ast                      = std::make_unique<Ast>(functionString);
+    if (m_ast->parseSuccessful()) {
         handleCorrectFormula();
-    } catch (const std::runtime_error& error) { handleWrongFormula(error); }
-}
-
-static void setTextColor(QWidget* widget, const QColor& color) {
-    auto* palette = new QPalette();
-    palette->setColor(QPalette::Text, color);
-    widget->setPalette(*palette);
+    } else {
+        handleWrongFormula(m_ast->errorString());
+    }
 }
 
 void FormulaWidget::setTextColor(const QColor& color) {
@@ -60,11 +62,11 @@ void FormulaWidget::handleCorrectFormula() {
         m_variableLabel->setText(variableString);
     }
     m_messageLabel->setText("_");
-    m_simplifiedLabel->setText(QString::fromStdString(m_ast->toString()));
+    m_simplifiedLabel->setText(QString::fromStdString(m_ast->simplify().toString()));
 }
 
-void FormulaWidget::handleWrongFormula(const std::runtime_error& error) {
+void FormulaWidget::handleWrongFormula(const std::string& errorMessage) {
     setTextColor(Qt::red);
     m_variableLabel->setText("_");
-    m_messageLabel->setText(error.what());
+    m_messageLabel->setText(QString::fromStdString(errorMessage));
 }

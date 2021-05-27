@@ -5,6 +5,7 @@
 #include "Number.h"
 
 #include <cassert>
+#include <cmath>
 #include <sstream>
 
 Number::Number(const Number& other) {
@@ -70,4 +71,28 @@ Number operator/(const Number& a, const Number& b) {
         }
     }
     return std::visit([](const auto& a, const auto& b) { return Number(a / static_cast<double>(b)); }, a.m_number, b.m_number);
+}
+
+long long power(long long base, long long exponent) {
+    long long result = 1;
+    while (exponent) {
+        if (exponent & 1) {
+            result = result * base;
+        }
+        exponent >>= 1;
+        base *= base;
+    }
+    return result;
+}
+
+Number operator^(const Number& a, const Number& b) {
+    if (std::holds_alternative<long long>(a.number()) && std::holds_alternative<long long>(b.number())) {
+        long long base     = std::get<long long>(a.number());
+        long long exponent = std::get<long long>(b.number());
+        if ((exponent < std::numeric_limits<long long>::digits) && (exponent * std::log2(base) < std::numeric_limits<long long>::digits)) {
+            return Number{power(base, exponent)};
+        }
+    }
+    return std::visit([](const auto& a, const auto& b) { return Number(std::pow(static_cast<double>(a), static_cast<double>(b))); },
+                      a.m_number, b.m_number);
 }

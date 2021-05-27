@@ -56,11 +56,18 @@ u_ptr_AstNode AstNodeMul::copy() const {
 }
 
 u_ptr_AstNode AstNodeMul::simplify() const {
-    if (m_nodes.size() == 1) {
-        return m_nodes.front()->simplify();
-    }
     std::unique_ptr<AstNodeMul> simplifiedNode = simplifiedCopy();
     simplifiedNode->cleanUp();
+    if (simplifiedNode->m_nodes.empty()) {
+        return makeOneNode();
+    }
+    if (simplifiedNode->m_nodes.size() == 1) {
+        return simplifiedNode->m_nodes.front()->simplify();
+    }
+    if (std::find_if(simplifiedNode->m_nodes.begin(), simplifiedNode->m_nodes.end(), [](const u_ptr_AstNode& a) { return a->isZero(); }) !=
+        simplifiedNode->m_nodes.end()) {
+        return makeZeroNode();
+    }
     return simplifiedNode;
 }
 

@@ -1,4 +1,6 @@
 #include "App/FormulaWidget.h"
+#include "Parser/Formula.h"
+#include "Parser/FormulaHeader.h"
 
 #include <QApplication>
 #include <QDebug>

@@ -23,20 +23,22 @@ u_ptr_AstNode AstNodePower::copy() const {
 u_ptr_AstNode AstNodePower::simplify() const {
     auto       base     = m_base->simplify();
     const auto exponent = m_exponent->simplify();
+    if (base->isNumeric() && exponent->isNumeric()) {
+        return makeNumber(base->getNumber() ^ exponent->getNumber());
+    }
     if (exponent->isOne()) {
         return base;
     } else if (exponent->isZero()) {
         return AstNode::makeOneNode();
     }
     if (m_base->type() == AstNode::NODE_TYPE::POWER) {
-        return std::make_unique<AstNodePower>(
-            m_base->childAt(0)->copy(), (*m_base->childAt(1) * *m_exponent)->simplify());
+        return std::make_unique<AstNodePower>(m_base->childAt(0)->copy(), (*m_base->childAt(1) * *m_exponent)->simplify());
     }
     if (m_base->type() == AstNode::NODE_TYPE::UNARY_MINUS && m_exponent->isEven()) {
         return std::make_unique<AstNodePower>(m_base->childAt(0)->copy(), m_exponent->copy())->simplify();
     }
-    AstNode* simplifiedNode =
-        new AstNodePower(m_base->simplify(), m_exponent->simplify());
+    AstNode* simplifiedNode = new AstNodePower(m_base->simplify(), m_exponent->simplify());
+    if (base->isNumeric() && exponent->isNumeric()) {}
     return u_ptr_AstNode(simplifiedNode);
 }
 

@@ -5,11 +5,17 @@
 #include "Ast.h"
 
 #include "Parser.h"
+#include "ParserException.h"
 
 #include <utility>
 
-Ast::Ast(std::string string) : m_string(std::move(string)), m_rootNode(Parser::parse(m_string)) {
-    std::cout << "Ast:\t" << toString() << " " << m_string << "\n";
+Ast::Ast(std::string string) : m_string(std::move(string)) {
+    try {
+        m_rootNode = Parser::parse(m_string);
+    } catch (ParserException& e) {
+        m_parseSuccessful = false;
+        m_errorString     = e.toString();
+    }
 }
 
 Ast Ast::simplify() const {
@@ -32,4 +38,12 @@ std::string Ast::toString() const {
 
 std::set<std::string> Ast::variables() const {
     return m_rootNode->collectVariables();
+}
+
+const std::string& Ast::errorString() const {
+    return m_errorString;
+}
+
+bool Ast::parseSuccessful() const {
+    return m_parseSuccessful;
 }

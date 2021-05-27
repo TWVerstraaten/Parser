@@ -22,6 +22,7 @@ class Number {
     friend Number operator+(const Number& a, const Number& b);
     friend Number operator*(const Number& a, const Number& b);
     friend Number operator/(const Number& a, const Number& b);
+    friend Number operator^(const Number& a, const Number& b);
     friend bool   operator==(const Number& a, const Number& b);
     friend bool   operator<(const Number& a, const Number& b);
 

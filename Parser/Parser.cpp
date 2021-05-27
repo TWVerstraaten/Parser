@@ -8,9 +8,9 @@
 #include "AstNode/AstNodeFunction.h"
 #include "AstNode/AstNodeNumber.h"
 #include "AstNode/AstNodeVar.h"
+#include "ParserException.h"
 
 #include <cassert>
-#include <iterator>
 
 using TokenList  = Tokenizer::TokenList;
 using Token      = Tokenizer::Token;
@@ -26,6 +26,17 @@ static TokenList::const_iterator lastBeforeOccurrenceOfType(TokenList::const_ite
         begin = std::next(begin);
     }
     return end;
+}
+
+static std::set<char> findIllegalCharacters(const std::string& string) {
+    std::set<char>           illegalCharacters;
+    static const std::string allowedSpecialCharacters = "()+-*/^=\t ";
+    for (char c : string) {
+        if (not isalnum(c) && allowedSpecialCharacters.find_first_of(c) == std::string::npos) {
+            illegalCharacters.insert(c);
+        }
+    }
+    return illegalCharacters;
 }
 
 static bool containsFactor(const TokenList& tokenList) {
@@ -49,6 +60,11 @@ static bool containsBrackets(const TokenList& tokenList) {
 }
 
 u_ptr_AstNode Parser::parse(const std::string& string) {
+    if (auto illegalCharacters = findIllegalCharacters(string); not illegalCharacters.empty()) {
+        std::string chars;
+        std::for_each(illegalCharacters.begin(), illegalCharacters.end(), [&](char c) { chars += c; });
+        throw ParserException(ParserException::PARSER_ERROR::ILLEGAL_SYMBOL, chars);
+    }
     return Parser::parse(Tokenizer(string).tokenList());
 }
 
@@ -70,7 +86,7 @@ u_ptr_AstNode Parser::parseValueType(const Token& token) {
         case TOKEN_TYPE::INTEGER:
             return u_ptr_AstNode(new AstNodeNumber(token.m_string));
         default:
-            throw std::runtime_error("Expected value type");
+            throw ParserException(ParserException::PARSER_ERROR::VALUE_TYPE_READ, token.m_string);
     }
 }
 
@@ -87,15 +103,18 @@ u_ptr_AstNode Parser::parseTerm(TokenList& tokenList) {
     if (tokenList.size() == 1) {
         return startsWithUnaryMinus ? -parseValueType(tokenList.front()) : parseValueType(tokenList.front());
     }
+    if (tokenList.size() < 3) {
+        throw ParserException(ParserException::PARSER_ERROR::UNTERMINATED);
+    }
     auto it = tokenList.cbegin();
-    it      = tokenList.insert(it, freshReferenceToken(0));
+    it      = tokenList.insert(it, freshReferenceToken());
     it      = std::next(it);
     if (std::next(it)->m_string == "+") {
         m_subExpressionList.emplace_back((startsWithUnaryMinus ? -parseValueType(*it) : parseValueType(*it)) +
                                          parseValueType(*std::next(it, 2)));
     } else {
         if (std::next(it)->m_string != "-") {
-            throw std::runtime_error("Didn't see + so expecting -");
+            throw ParserException(ParserException::PARSER_ERROR::INVALID_TERM_OP, std::next(it)->m_string);
         }
         m_subExpressionList.emplace_back((startsWithUnaryMinus ? -parseValueType(*it) : parseValueType(*it)) +
                                          -parseValueType(*std::next(it, 2)));
@@ -112,13 +131,18 @@ u_ptr_AstNode Parser::parseFactor(TokenList& tokenList) {
     if (not containsFactor(tokenList)) {
         return parseTerm(tokenList);
     }
+    if (tokenList.size() < 3) {
+        throw ParserException(ParserException::PARSER_ERROR::UNTERMINATED);
+    }
     auto it = lastBeforeOccurrenceOfType(tokenList.begin(), tokenList.end(), TOKEN_TYPE::BIN_OP_FAC);
-    it      = tokenList.insert(it, freshReferenceToken(0));
+    it      = tokenList.insert(it, freshReferenceToken());
     it      = std::next(it);
     if (std::next(it)->m_string == "*") {
         m_subExpressionList.emplace_back(parseValueType(*it) * parseValueType(*std::next(it, 2)));
     } else {
-        assert(std::next(it)->m_string == "/");
+        if (std::next(it)->m_string != "/") {
+            throw ParserException(ParserException::PARSER_ERROR::INVALID_FACTOR_OP, std::next(it)->m_string);
+        }
         m_subExpressionList.emplace_back(parseValueType(*it) / parseValueType(*std::next(it, 2)));
     }
     tokenList.erase(it, std::next(it, 3));
@@ -132,10 +156,15 @@ u_ptr_AstNode Parser::parseExpression(TokenList& tokenList) {
     if (not containsExpression(tokenList)) {
         return parseFactor(tokenList);
     }
+    if (tokenList.size() < 3) {
+        throw ParserException(ParserException::PARSER_ERROR::UNTERMINATED);
+    }
     auto it = lastBeforeOccurrenceOfType(tokenList.begin(), tokenList.end(), TOKEN_TYPE::BIN_OP_EXPR);
-    it      = tokenList.insert(it, freshReferenceToken(0));
+    it      = tokenList.insert(it, freshReferenceToken());
     it      = std::next(it);
-    assert(std::next(it)->m_string == "^");
+    if (std::next(it)->m_string != "^") {
+        throw ParserException(ParserException::PARSER_ERROR::INVALID_EXPR_OP, std::next(it)->m_string);
+    }
     m_subExpressionList.emplace_back(parseValueType(*it) ^ parseValueType(*std::next(it, 2)));
     tokenList.erase(it, std::next(it, 3));
     return parseExpression(tokenList);
@@ -147,15 +176,15 @@ u_ptr_AstNode Parser::parseBrackets(TokenList& tokenList) {
         auto openBracketIt =
             std::find_if(tokenList.begin(), tokenList.end(), [](const auto& token) { return token.m_type == TOKEN_TYPE::LEFT_BR; });
         if (openBracketIt == tokenList.cend()) {
-            throw std::runtime_error("Brackets don't match");
+            throw ParserException(ParserException::PARSER_ERROR::BRACKET_MISMATCH);
         }
         const auto openBracketString = openBracketIt->m_string;
         auto       closingBracketIt  = std::find(openBracketIt, tokenList.end(), Token{TOKEN_TYPE::RIGHT_BR, openBracketString});
         if (closingBracketIt == tokenList.cend()) {
-            throw std::runtime_error("Brackets don't match");
+            throw ParserException(ParserException::PARSER_ERROR::BRACKET_MISMATCH);
         }
 
-        openBracketIt    = tokenList.insert(openBracketIt, freshReferenceToken(0));
+        openBracketIt    = tokenList.insert(openBracketIt, freshReferenceToken());
         openBracketIt    = tokenList.erase(std::next(openBracketIt));
         closingBracketIt = tokenList.erase(closingBracketIt);
 
@@ -175,15 +204,19 @@ u_ptr_AstNode Parser::parseFunctions(TokenList tokenList) {
             std::find_if(tokenList.begin(), tokenList.end(), [](const Token& token) { return token.m_type == TOKEN_TYPE::FUNCTION; });
         assert(functionIdIt != tokenList.cend());
         auto openBracketIt = std::next(functionIdIt);
-        assert(openBracketIt != tokenList.cend());
+        if (openBracketIt == tokenList.cend()) {
+            throw ParserException(ParserException::PARSER_ERROR::BRACKET_MISMATCH);
+        }
         auto closingBracketIt = std::find(functionIdIt, tokenList.end(), Token{TOKEN_TYPE::RIGHT_BR, openBracketIt->m_string});
-        assert(closingBracketIt != tokenList.end());
+        if (closingBracketIt == tokenList.end()) {
+            throw ParserException(ParserException::PARSER_ERROR::BRACKET_MISMATCH);
+        }
 
         const auto functionName = functionIdIt->m_string;
         functionIdIt            = tokenList.erase(functionIdIt);
         functionIdIt            = tokenList.erase(functionIdIt);
         closingBracketIt        = tokenList.erase(closingBracketIt);
-        functionIdIt            = tokenList.insert(functionIdIt, freshReferenceToken(0));
+        functionIdIt            = tokenList.insert(functionIdIt, freshReferenceToken());
 
         TokenList expressionInBrackets;
         expressionInBrackets.splice(expressionInBrackets.begin(), tokenList, std::next(functionIdIt), closingBracketIt);
@@ -195,8 +228,8 @@ u_ptr_AstNode Parser::parseFunctions(TokenList tokenList) {
     return parseBrackets(tokenList);
 }
 
-Token Parser::freshReferenceToken(size_t offset) const {
-    return Token{TOKEN_TYPE::REFERENCE, "$" + std::to_string(m_subExpressionList.size() - offset)};
+Token Parser::freshReferenceToken() const {
+    return Token{TOKEN_TYPE::REFERENCE, "$" + std::to_string(m_subExpressionList.size())};
 }
 
 std::string Parser::toString(const TokenList& tokenList) const {

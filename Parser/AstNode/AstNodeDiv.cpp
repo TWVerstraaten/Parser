@@ -23,19 +23,16 @@ u_ptr_AstNode AstNodeDiv::copy() const {
 
 u_ptr_AstNode AstNodeDiv::simplify() const {
     auto node = std::make_unique<AstNodeDiv>(m_numerator->simplify(), m_denominator->simplify());
-
     if (node->m_numerator->isZero()) {
         return node->m_denominator->isZero() ? u_ptr_AstNode(new AstNodeError{AstNodeError::ERROR_TYPE::DIVISION_BY_ZERO})
                                              : AstNode::makeZeroNode();
     }
-
     if (node->m_denominator->isOne()) {
         return std::move(node->m_numerator);
     }
     if (node->m_numerator->isNumeric() && node->m_denominator->isNumeric()) {
         return makeNumber(node->m_numerator->getNumber() / node->m_denominator->getNumber());
     }
-
     return node;
 }
 
