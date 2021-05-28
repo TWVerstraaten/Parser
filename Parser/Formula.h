@@ -6,22 +6,31 @@
 #define PARSER_FORMULA_H
 
 #include "Ast.h"
+#include "ErrorBase.h"
 #include "FormulaHeader.h"
 
 #include <memory>
 #include <string>
 
-class Formula {
+class Formula : public ErrorBase {
 
   public:
     explicit Formula(std::string string);
 
-    [[nodiscard]] bool               parseSuccessful() const;
-    [[nodiscard]] const std::string& errorString() const;
+    [[nodiscard]] const Ast&           ast() const;
+    [[nodiscard]] const FormulaHeader& formulaHeader() const;
+
+    [[nodiscard]] const std::set<std::string>& declaredVariables() const;
+    [[nodiscard]] std::set<std::string>        referencedVariables() const;
+    [[nodiscard]] std::set<std::string>        unusedVariables() const;
+    [[nodiscard]] std::set<std::string>        undeclaredVariables() const;
+    [[nodiscard]] std::string                  getHints() const;
 
   private:
-    bool        m_parseSuccessful = true;
-    std::string m_errorString;
+    bool containsIllegalCharacters();
+    bool checkForUndeclaredArguments();
+    bool parseAst(const std::string& string);
+    bool parseFormulaHeader(const std::string& string);
 
     std::string                    m_string;
     std::unique_ptr<Ast>           m_ast;

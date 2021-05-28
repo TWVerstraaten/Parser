@@ -28,17 +28,6 @@ static TokenList::const_iterator lastBeforeOccurrenceOfType(TokenList::const_ite
     return end;
 }
 
-static std::set<char> findIllegalCharacters(const std::string& string) {
-    std::set<char>           illegalCharacters;
-    static const std::string allowedSpecialCharacters = "()+-*/^=\t ";
-    for (char c : string) {
-        if (not isalnum(c) && allowedSpecialCharacters.find_first_of(c) == std::string::npos) {
-            illegalCharacters.insert(c);
-        }
-    }
-    return illegalCharacters;
-}
-
 static bool containsFactor(const TokenList& tokenList) {
     return std::find_if(tokenList.begin(), tokenList.end(), [](const Token& token) { return token.m_type == TOKEN_TYPE::BIN_OP_FAC; }) !=
            tokenList.end();
@@ -60,11 +49,6 @@ static bool containsBrackets(const TokenList& tokenList) {
 }
 
 u_ptr_AstNode Parser::parse(const std::string& string) {
-    if (auto illegalCharacters = findIllegalCharacters(string); not illegalCharacters.empty()) {
-        std::string chars;
-        std::for_each(illegalCharacters.begin(), illegalCharacters.end(), [&](char c) { chars += c; });
-        throw ParserException(ParserException::PARSER_ERROR::ILLEGAL_SYMBOL, chars);
-    }
     return Parser::parse(Tokenizer(string).tokenList());
 }
 
@@ -103,12 +87,12 @@ u_ptr_AstNode Parser::parseTerm(TokenList& tokenList) {
     if (tokenList.size() == 1) {
         return startsWithUnaryMinus ? -parseValueType(tokenList.front()) : parseValueType(tokenList.front());
     }
-    if (tokenList.size() < 3) {
-        throw ParserException(ParserException::PARSER_ERROR::UNTERMINATED);
-    }
     auto it = tokenList.cbegin();
     it      = tokenList.insert(it, freshReferenceToken());
     it      = std::next(it);
+    if (std::next(std::next(it)) == tokenList.end()) {
+        throw ParserException(ParserException::PARSER_ERROR::UNTERMINATED, std::next(it)->m_string);
+    }
     if (std::next(it)->m_string == "+") {
         m_subExpressionList.emplace_back((startsWithUnaryMinus ? -parseValueType(*it) : parseValueType(*it)) +
                                          parseValueType(*std::next(it, 2)));
@@ -137,6 +121,9 @@ u_ptr_AstNode Parser::parseFactor(TokenList& tokenList) {
     auto it = lastBeforeOccurrenceOfType(tokenList.begin(), tokenList.end(), TOKEN_TYPE::BIN_OP_FAC);
     it      = tokenList.insert(it, freshReferenceToken());
     it      = std::next(it);
+    if (std::next(std::next(it)) == tokenList.end()) {
+        throw ParserException(ParserException::PARSER_ERROR::UNTERMINATED, std::next(it)->m_string);
+    }
     if (std::next(it)->m_string == "*") {
         m_subExpressionList.emplace_back(parseValueType(*it) * parseValueType(*std::next(it, 2)));
     } else {
@@ -162,8 +149,9 @@ u_ptr_AstNode Parser::parseExpression(TokenList& tokenList) {
     auto it = lastBeforeOccurrenceOfType(tokenList.begin(), tokenList.end(), TOKEN_TYPE::BIN_OP_EXPR);
     it      = tokenList.insert(it, freshReferenceToken());
     it      = std::next(it);
-    if (std::next(it)->m_string != "^") {
-        throw ParserException(ParserException::PARSER_ERROR::INVALID_EXPR_OP, std::next(it)->m_string);
+    assert(std::next(it)->m_string == "^");
+    if (std::next(std::next(it)) == tokenList.end()) {
+        throw ParserException(ParserException::PARSER_ERROR::UNTERMINATED, std::next(it)->m_string);
     }
     m_subExpressionList.emplace_back(parseValueType(*it) ^ parseValueType(*std::next(it, 2)));
     tokenList.erase(it, std::next(it, 3));

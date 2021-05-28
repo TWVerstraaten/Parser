@@ -5,22 +5,26 @@
 #ifndef PARSER_FORMULAHEADER_H
 #define PARSER_FORMULAHEADER_H
 
-#include <string>
-#include <unordered_set>
+#include "ErrorBase.h"
 
-class FormulaHeader {
+#include <set>
+#include <string>
+
+class FormulaHeader : public ErrorBase {
 
   public:
     explicit FormulaHeader(std::string headerString);
 
-    [[nodiscard]] const std::string&                     name() const;
-    [[nodiscard]] const std::unordered_set<std::string>& variables() const;
-    [[nodiscard]] const std::string&                     headerString() const;
+    [[nodiscard]] const std::string&           name() const;
+    [[nodiscard]] const std::string&           headerString() const;
+    [[nodiscard]] const std::set<std::string>& variables() const;
 
   private:
-    std::string                     m_name;
-    std::unordered_set<std::string> m_variables;
-    std::string                     m_headerString;
+    bool containsIllegalCharacters();
+
+    std::string           m_name;
+    std::set<std::string> m_variables;
+    std::string           m_headerString;
 };
 
 #endif // PARSER_FORMULAHEADER_H

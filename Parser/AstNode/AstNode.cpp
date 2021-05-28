@@ -137,7 +137,7 @@ u_ptr_AstNode AstNode::makeNumber(std::variant<long long int, double> val) {
     return std::make_unique<AstNodeNumber>(val);
 }
 
-u_ptr_AstNode AstNode::makeNumber(Number val) {
+u_ptr_AstNode AstNode::makeNumber(const Number& val) {
     return std::make_unique<AstNodeNumber>(val);
 }
 

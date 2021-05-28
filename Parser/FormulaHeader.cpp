@@ -4,17 +4,25 @@
 
 #include "FormulaHeader.h"
 
+#include "../Algorithm/BoostWrapper.h"
 #include "Tokenizer.h"
 
-#include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
-#include <iostream>
 
-bool checkIdentifier(const std::string& string) {
-    auto trimmedString = string;
-    boost::trim(trimmedString);
+static std::set<char> findIllegalCharactersInHeader(const std::string& string) {
+    std::set<char>           illegalCharacters;
+    static const std::string allowedSpecialCharacters = ",()\t ";
+    for (char c : string) {
+        if (not isalnum(c) && allowedSpecialCharacters.find_first_of(c) == std::string::npos) {
+            illegalCharacters.insert(c);
+        }
+    }
+    return illegalCharacters;
+}
+
+static bool checkIdentifier(const std::string& string) {
+    auto trimmedString = BoostWrapper::trim(string);
     assert(trimmedString == string);
-
     auto it = trimmedString.begin();
     if (not isalpha(*it)) {
         return false;
@@ -29,44 +37,60 @@ bool checkIdentifier(const std::string& string) {
 }
 
 FormulaHeader::FormulaHeader(std::string headerString) : m_headerString(std::move(headerString)) {
-    auto trimmedString = m_headerString;
-    boost::trim_if(trimmedString, boost::is_any_of("\t "));
+    if ((containsIllegalCharacters())) {
+        return;
+    }
 
-    std::vector<std::string> parts;
-    boost::split(parts, trimmedString, boost::is_any_of("("));
-    assert(not parts.empty());
-
-    m_name = parts.at(0);
-    boost::trim(m_name);
-    assert(checkIdentifier(m_name));
+    const auto parts = BoostWrapper::trimAndSplit(m_headerString, "(");
+    if (setErrorIf(parts.empty(), "Empty function header")) {
+        return;
+    } else if (setErrorIf(parts.size() > 2, "Too many opening brackets")) {
+        return;
+    }
+    m_name = BoostWrapper::trim(parts.at(0));
+    if (setErrorIf(not checkIdentifier(m_name), "Invalid function name: " + m_name)) {
+        return;
+    }
 
     if (parts.size() == 2) {
-        assert(parts.size() == 2);
-        assert(parts.at(1).at(parts.at(1).length() - 1) == ')');
+        if (setErrorIf(parts.at(1).empty(), "Empty argument list")) {
+            return;
+        }
+        if (setErrorIf(parts.at(1).at(parts.at(1).length() - 1) != ')', "Closing bracket should be last character of header")) {
+            return;
+        }
 
         boost::tokenizer<> tokenizer(parts.at(1));
         for (boost::tokenizer<>::iterator token = tokenizer.begin(); token != tokenizer.end(); ++token) {
-            std::string next = *token;
-            boost::trim(next);
-            assert(checkIdentifier(next));
+            std::string next = BoostWrapper::trim(*token);
+            if (setErrorIf(not checkIdentifier(next), "Invalid variable name: " + next)) {
+                return;
+            }
             m_variables.insert(next);
         }
     }
-    std::cout << "Name =\t " << m_name << "\nVariables =\t ";
-    for (const auto& var : m_variables) {
-        std::cout << var << " ";
-    }
-    std::cout << '\n';
 }
 
 const std::string& FormulaHeader::name() const {
     return m_name;
 }
 
-const std::unordered_set<std::string>& FormulaHeader::variables() const {
+const std::set<std::string>& FormulaHeader::variables() const {
     return m_variables;
 }
 
 const std::string& FormulaHeader::headerString() const {
     return m_headerString;
+}
+
+bool FormulaHeader::containsIllegalCharacters() {
+    auto illegalCharacters = findIllegalCharactersInHeader(m_headerString);
+    if (illegalCharacters.empty()) {
+        return false;
+    }
+    std::string chars;
+    std::for_each(illegalCharacters.begin(), illegalCharacters.end(), [&](char c) { chars += c; });
+    m_success     = false;
+    m_errorString = "Illegal characters in header: " + chars;
+    return true;
 }

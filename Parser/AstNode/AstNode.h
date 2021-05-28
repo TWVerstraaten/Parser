@@ -36,7 +36,7 @@ class AstNode {
     static u_ptr_AstNode makeZeroNode();
     static u_ptr_AstNode makeOneNode();
     static u_ptr_AstNode makeNumber(std::variant<long long, double> val);
-    static u_ptr_AstNode makeNumber(Number val);
+    static u_ptr_AstNode makeNumber(const Number& val);
     static u_ptr_AstNode makeError();
 
     [[nodiscard]] virtual size_t                childCount() const                               = 0;

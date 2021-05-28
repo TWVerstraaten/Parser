@@ -4,32 +4,121 @@
 
 #include "Formula.h"
 
-#include <boost/algorithm/string.hpp>
+#include "../Algorithm/BoostWrapper.h"
+
+#include <algorithm>
+#include <cassert>
+#include <iterator>
+#include <sstream>
+
+static std::set<char> findIllegalCharacters(const std::string& string) {
+    std::set<char>           illegalCharacters;
+    static const std::string allowedSpecialCharacters = ".,()+-*/^=\t ";
+    for (char c : string) {
+        if (not isalnum(c) && allowedSpecialCharacters.find_first_of(c) == std::string::npos) {
+            illegalCharacters.insert(c);
+        }
+    }
+    return illegalCharacters;
+}
 
 Formula::Formula(std::string string) : m_string(std::move(string)) {
-    std::string trimmedString = m_string;
-    boost::trim(trimmedString);
-    std::vector<std::string> parts;
-    boost::split(parts, trimmedString, boost::is_any_of("="));
-    if (parts.size() == 1) {
-        m_parseSuccessful = false;
-        m_errorString     = "Does not contain a '=' sign";
+    if (containsIllegalCharacters()) {
+        return;
     }
-    if (parts.size() > 2) {
-        m_parseSuccessful = false;
-        m_errorString     = "Too many '=' signs";
+
+    const auto parts = BoostWrapper::trimAndSplit(m_string, "=");
+    if (setErrorIf(parts.size() == 1, "Does not contain '=' sign")) {
+        return;
+    } else if (setErrorIf(parts.size() > 2, "Too many '=' signs")) {
+        return;
     }
-    m_ast = std::make_unique<Ast>(parts.at(1));
-    if (not m_ast->parseSuccessful()) {
-        m_parseSuccessful = false;
-        m_errorString     = m_ast->errorString();
+    if (not parseFormulaHeader(parts.at(0)) || not parseAst(parts.at(1))) {
+        return;
     }
+    checkForUndeclaredArguments();
 }
 
-bool Formula::parseSuccessful() const {
-    return m_parseSuccessful;
+const Ast& Formula::ast() const {
+    assert(m_ast);
+    return *m_ast;
 }
 
-const std::string& Formula::errorString() const {
-    return m_errorString;
+const FormulaHeader& Formula::formulaHeader() const {
+    assert(m_formulaHeader);
+    return *m_formulaHeader;
+}
+
+bool Formula::containsIllegalCharacters() {
+    auto illegalCharacters = findIllegalCharacters(m_string);
+    if (illegalCharacters.empty()) {
+        return false;
+    }
+    std::string chars;
+    std::for_each(illegalCharacters.begin(), illegalCharacters.end(), [&](char c) { chars += c; });
+    m_success     = false;
+    m_errorString = "Illegal characters: " + chars;
+    return true;
+}
+
+static std::string setToString(const std::set<std::string>& set) {
+    std::ostringstream stream;
+    std::copy(set.begin(), set.end(), std::ostream_iterator<std::string>(stream, ","));
+    std::string result = stream.str();
+    return result.empty() ? "" : result.substr(0, result.length() - 1);
+}
+
+bool Formula::checkForUndeclaredArguments() {
+    const auto undeclared = undeclaredVariables();
+    if (setErrorIf(not undeclared.empty(), "Undeclared arguments: " + setToString(undeclared))) {
+        return true;
+    }
+    return false;
+}
+
+bool Formula::parseAst(const std::string& string) {
+    m_ast = std::make_unique<Ast>(string);
+    if (setErrorIf(not m_ast->success(), m_ast->errorString())) {
+        return false;
+    }
+    return true;
+}
+
+bool Formula::parseFormulaHeader(const std::string& string) {
+    m_formulaHeader = std::make_unique<FormulaHeader>(string);
+    if (setErrorIf(not m_formulaHeader->success(), m_formulaHeader->errorString())) {
+        return false;
+    }
+    return true;
+}
+
+const std::set<std::string>& Formula::declaredVariables() const {
+    return m_formulaHeader->variables();
+}
+
+std::set<std::string> Formula::referencedVariables() const {
+    return m_ast->variables();
+}
+
+std::set<std::string> Formula::unusedVariables() const {
+    std::set<std::string> result;
+    const auto&           declared   = declaredVariables();
+    const auto&           referenced = referencedVariables();
+
+    std::set_difference(declared.begin(), declared.end(), referenced.begin(), referenced.end(), std::inserter(result, result.begin()));
+    return result;
+}
+
+std::set<std::string> Formula::undeclaredVariables() const {
+    std::set<std::string> result;
+    const auto&           declared   = declaredVariables();
+    const auto&           referenced = referencedVariables();
+
+    std::set_difference(referenced.begin(), referenced.end(), declared.begin(), declared.end(), std::inserter(result, result.begin()));
+    return result;
+}
+
+std::string Formula::getHints() const {
+    const auto unused = unusedVariables();
+    return unused.empty() ? "" : "Unused variables: " + setToString(unused);
 }
