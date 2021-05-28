@@ -56,3 +56,7 @@ u_ptr_AstNode AstNodeError::differentiate(const std::string& variable) const {
 std::set<std::string> AstNodeError::collectVariables() const {
     return {};
 }
+Number AstNodeError::eval(const std::map<std::string, Number>& arguments) const {
+    assert(false);
+    return 0ll;
+}

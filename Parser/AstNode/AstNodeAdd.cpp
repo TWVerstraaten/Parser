@@ -77,3 +77,11 @@ u_ptr_AstNode AstNodeAdd::differentiate(const std::string& variable) const {
                    [&](const auto& a) { return a->differentiate(variable); });
     return u_ptr_AstNode(new AstNodeAdd(std::move(differentiatedNodes)));
 }
+
+Number AstNodeAdd::eval(const std::map<std::string, Number>& arguments) const {
+    Number res = 0ll;
+    for (const auto& node : m_nodes) {
+        res = res + node->eval(arguments);
+    }
+    return res;
+}

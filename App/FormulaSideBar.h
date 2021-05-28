@@ -30,7 +30,6 @@ class FormulaSideBar : public QWidget {
     FormulaWidget* fromIndex(size_t index);
 
     std::vector<FormulaWidget*> m_formulaWidgets;
-    std::vector<FormulaWidget*> m_stashedWidgets;
     QVBoxLayout*                m_layout;
 };
 

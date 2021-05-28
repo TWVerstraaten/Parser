@@ -5,8 +5,6 @@
 #ifndef PARSER_UNDOREDOCONSUMER_H
 #define PARSER_UNDOREDOCONSUMER_H
 
-#include <QDebug>
-#include <QKeyEvent>
 #include <QObject>
 #include <memory>
 

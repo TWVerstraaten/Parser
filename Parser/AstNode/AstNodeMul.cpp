@@ -83,20 +83,6 @@ std::unique_ptr<AstNodeMul> AstNodeMul::simplifiedCopy() const {
     return copy;
 }
 
-bool AstNodeMul::gatherDuplicates() {
-    assert(std::is_sorted(m_nodes.begin(), m_nodes.end(), AstNode::compare_u_ptr));
-    for (auto it = m_nodes.begin(); it != m_nodes.end(); ++it) {
-        const auto count = countCopies(it->get());
-        if (count > 1ul) {
-            auto copy = (*it)->copy();
-            m_nodes.erase(it + 1, it + count);
-            *it = std::move(*it) ^ AstNode::makeNumber(static_cast<long long>(count));
-            return true;
-        }
-    }
-    return false;
-}
-
 u_ptr_AstNode AstNodeMul::distributeMultiplication() const {
     const auto addIt =
         std::find_if(m_nodes.begin(), m_nodes.end(), [](const u_ptr_AstNode& node) { return node->type() == AstNode::NODE_TYPE::ADD; });
@@ -118,21 +104,6 @@ u_ptr_AstNode AstNodeMul::distributeMultiplication() const {
     return u_ptr_AstNode(result);
 }
 
-bool AstNodeMul::stripUnaryMinuses() {
-    bool minusParity = false;
-    auto it          = std::find_if(m_nodes.begin(), m_nodes.end(),
-                           [](const u_ptr_AstNode& node) { return node->type() == AstNode::NODE_TYPE::UNARY_MINUS; });
-
-    while (it != m_nodes.end()) {
-        minusParity = not minusParity;
-        assert((*it)->type() == AstNode::NODE_TYPE::UNARY_MINUS);
-        *it = (*it)->childAt(0)->copy();
-        it  = std::find_if(m_nodes.begin(), m_nodes.end(),
-                          [](const u_ptr_AstNode& node) { return node->type() == AstNode::NODE_TYPE::UNARY_MINUS; });
-    }
-    return minusParity;
-}
-
 u_ptr_AstNode AstNodeMul::differentiate(const std::string& variable) const {
     assert(not m_nodes.empty());
     if (m_nodes.size() == 1) {
@@ -146,4 +117,12 @@ u_ptr_AstNode AstNodeMul::differentiate(const std::string& variable) const {
                                         u_ptr_AstNode(new AstNodeMul(g->differentiate(variable), f->copy())))
 
     );
+}
+
+Number AstNodeMul::eval(const std::map<std::string, Number>& arguments) const {
+    Number res = 1ll;
+    for (const auto& node : m_nodes) {
+        res = res * node->eval(arguments);
+    }
+    return res;
 }

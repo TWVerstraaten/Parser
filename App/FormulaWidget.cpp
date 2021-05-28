@@ -4,15 +4,14 @@
 
 #include "FormulaWidget.h"
 
+#include "../Algorithm/StringAlg.h"
 #include "../Command/FormulaChangedCommand.h"
 #include "../Command/SkipFirstRedoCommand.h"
 #include "UndoRedoConsumer.h"
 #include "UndoRedoHandler.h"
 
 #include <QCheckBox>
-#include <QDebug>
 #include <QGridLayout>
-#include <QKeyEvent>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
@@ -70,28 +69,17 @@ void FormulaWidget::setTextColor(const QColor& color) {
 void FormulaWidget::handleCorrectFormula() {
     setTextColor(Qt::black);
     const auto variableSet = m_formula->declaredVariables();
-    if (variableSet.empty()) {
-        m_variableLabel->setText("_");
-    } else {
-        QString variableString = "<font color=\"green\">";
-        for (const auto& var : variableSet) {
-            variableString += QString::fromStdString(var) + ",";
-        }
-        variableString.chop(1);
-        m_variableLabel->setText(variableString);
-    }
+    m_variableLabel->setText(variableSet.empty() ? "_"
+                                                 : "<font color=\"green\">" + QString::fromStdString(StringAlg::setToString(variableSet)));
     m_messageLabel->setText("_");
     m_simplifiedLabel->setText(QString::fromStdString(m_formula->ast().toString()));
     QToolTip::hideText();
 
     if (const auto hint = m_formula->getHints(); not hint.empty()) {
-        QPalette palette = QToolTip::palette();
-        palette.setColor(QPalette::ToolTipBase, QColor(16185078));
-        palette.setColor(QPalette::ToolTipText, QColor(251));
-        QToolTip::setPalette(palette);
-
-        QToolTip::showText(pos() + m_lineEdit->pos(), QString::fromStdString(hint));
+        showToolTipAtLineEdit(251, QString::fromStdString(hint));
     }
+    std::cout << "x=1,y=3"
+              << " " << m_formula->eval({{"x", Number(1ll)}, {"y", Number(3ll)}}).toString() << '\n';
 }
 
 void FormulaWidget::handleWrongFormula(const std::string& errorMessage) {
@@ -99,12 +87,7 @@ void FormulaWidget::handleWrongFormula(const std::string& errorMessage) {
     m_variableLabel->setText("_");
     m_messageLabel->setText(QString::fromStdString(errorMessage));
 
-    QPalette palette = QToolTip::palette();
-    palette.setColor(QPalette::ToolTipBase, QColor(16185078));
-    palette.setColor(QPalette::ToolTipText, QColor(16449536));
-    QToolTip::setPalette(palette);
-
-    QToolTip::showText(pos() + m_lineEdit->pos(), QString::fromStdString(errorMessage));
+    showToolTipAtLineEdit(16449536, QString::fromStdString(errorMessage));
 }
 
 size_t FormulaWidget::index() const {
@@ -154,4 +137,13 @@ void FormulaWidget::connectSignals() {
         UndoRedoHandler::push(new SkipFirstRedoCommand(new FormulaChangedCommand(this, m_oldFormula, m_lineEdit->text())));
         m_oldFormula = m_lineEdit->text();
     });
+}
+
+void FormulaWidget::showToolTipAtLineEdit(QRgb textColor, const QString& message) {
+    QPalette palette = QToolTip::palette();
+    palette.setColor(QPalette::ToolTipBase, QColor(16185078));
+    palette.setColor(QPalette::ToolTipText, QColor(textColor));
+    QToolTip::setPalette(palette);
+
+    QToolTip::showText(mapToGlobal(m_lineEdit->pos()), message);
 }

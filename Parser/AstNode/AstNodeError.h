@@ -22,6 +22,7 @@ class AstNodeError : public AstNode {
     [[nodiscard]] bool                  compareEqualType(const AstNode* rhs) const override;
     [[nodiscard]] u_ptr_AstNode         differentiate(const std::string& variable) const override;
     [[nodiscard]] std::set<std::string> collectVariables() const override;
+    [[nodiscard]] Number                eval(const std::map<std::string, Number>& arguments) const override;
 
   protected:
     [[nodiscard]] bool equals(const AstNode& other) const override;

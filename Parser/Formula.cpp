@@ -5,11 +5,10 @@
 #include "Formula.h"
 
 #include "../Algorithm/BoostWrapper.h"
+#include "../Algorithm/StringAlg.h"
 
 #include <algorithm>
 #include <cassert>
-#include <iterator>
-#include <sstream>
 
 static std::set<char> findIllegalCharacters(const std::string& string) {
     std::set<char>           illegalCharacters;
@@ -61,16 +60,9 @@ bool Formula::containsIllegalCharacters() {
     return true;
 }
 
-static std::string setToString(const std::set<std::string>& set) {
-    std::ostringstream stream;
-    std::copy(set.begin(), set.end(), std::ostream_iterator<std::string>(stream, ","));
-    std::string result = stream.str();
-    return result.empty() ? "" : result.substr(0, result.length() - 1);
-}
-
 bool Formula::checkForUndeclaredArguments() {
     const auto undeclared = undeclaredVariables();
-    if (setErrorIf(not undeclared.empty(), "Undeclared arguments: " + setToString(undeclared))) {
+    if (setErrorIf(not undeclared.empty(), "Undeclared arguments: " + StringAlg::setToString(undeclared))) {
         return true;
     }
     return false;
@@ -120,5 +112,9 @@ std::set<std::string> Formula::undeclaredVariables() const {
 
 std::string Formula::getHints() const {
     const auto unused = unusedVariables();
-    return unused.empty() ? "" : "Unused variables: " + setToString(unused);
+    return unused.empty() ? "" : "Unused variables: " + StringAlg::setToString(unused);
+}
+
+Number Formula::eval(const std::map<std::string, Number>& arguments) const {
+    return m_ast->eval(arguments);
 }

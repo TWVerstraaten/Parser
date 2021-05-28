@@ -8,6 +8,7 @@
 #include "AstNode/AstNode.h"
 #include "ErrorBase.h"
 
+#include <map>
 #include <vector>
 
 class Ast : public ErrorBase {
@@ -18,6 +19,7 @@ class Ast : public ErrorBase {
     [[nodiscard]] Ast                   simplify() const;
     [[nodiscard]] Ast                   differentiate(const std::string& variable) const;
     [[nodiscard]] std::set<std::string> variables() const;
+    [[nodiscard]] Number                eval(const std::map<std::string, Number> &arguments) const;
 
   private:
     Ast() = default;

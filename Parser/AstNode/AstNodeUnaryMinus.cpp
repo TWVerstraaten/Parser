@@ -5,7 +5,6 @@
 #include "AstNodeUnaryMinus.h"
 
 #include "AstNodeAdd.h"
-#include "AstNodeNumber.h"
 
 #include <cassert>
 
@@ -61,4 +60,8 @@ u_ptr_AstNode AstNodeUnaryMinus::differentiate(const std::string& variable) cons
 
 std::set<std::string> AstNodeUnaryMinus::collectVariables() const {
     return m_value->collectVariables();
+}
+
+Number AstNodeUnaryMinus::eval(const std::map<std::string, Number>& arguments) const {
+    return -m_value->eval(arguments);
 }

@@ -49,6 +49,10 @@ Number operator+(const Number& a, const Number& b) {
     return std::visit([](const auto& a, const auto& b) { return Number(a + b); }, a.m_number, b.m_number);
 }
 
+Number operator-(const Number& a, const Number& b) {
+    return std::visit([](const auto& a, const auto& b) { return Number(a - b); }, a.m_number, b.m_number);
+}
+
 Number operator*(const Number& a, const Number& b) {
     return std::visit([](const auto& a, const auto& b) { return Number(a * b); }, a.m_number, b.m_number);
 }
@@ -95,4 +99,8 @@ Number operator^(const Number& a, const Number& b) {
     }
     return std::visit([](const auto& a, const auto& b) { return Number(std::pow(static_cast<double>(a), static_cast<double>(b))); },
                       a.m_number, b.m_number);
+}
+
+Number operator-(const Number& a) {
+    return std::visit([](const auto& a) { return Number(-1 * a); }, a.m_number);
 }

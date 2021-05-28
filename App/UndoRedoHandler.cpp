@@ -4,8 +4,6 @@
 
 #include "UndoRedoHandler.h"
 
-#include <memory>
-
 void UndoRedoHandler::init() {
     m_undoStack = std::make_unique<QUndoStack>(nullptr);
     m_undoView  = std::make_unique<QUndoView>(m_undoStack.get());

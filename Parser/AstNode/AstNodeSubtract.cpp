@@ -64,3 +64,7 @@ std::set<std::string> AstNodeSubtract::collectVariables() const {
     result.merge(m_leftNode->collectVariables());
     return result;
 }
+
+Number AstNodeSubtract::eval(const std::map<std::string, Number>& arguments) const {
+    return m_leftNode->eval(arguments) - m_rightNode->eval(arguments);
+}

@@ -60,3 +60,7 @@ u_ptr_AstNode AstNodeFunction::differentiate(const std::string& variable) const 
 std::set<std::string> AstNodeFunction::collectVariables() const {
     return m_argument->collectVariables();
 }
+Number AstNodeFunction::eval(const std::map<std::string, Number>& arguments) const {
+    assert(false);
+    return 0ll;
+}

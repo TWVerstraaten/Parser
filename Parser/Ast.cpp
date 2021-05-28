@@ -37,3 +37,7 @@ std::string Ast::toString() const {
 std::set<std::string> Ast::variables() const {
     return m_rootNode->collectVariables();
 }
+
+Number Ast::eval(const std::map<std::string, Number>& arguments) const {
+    return m_rootNode->eval(arguments);
+}

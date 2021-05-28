@@ -4,8 +4,6 @@
 
 #include "AstNodePower.h"
 
-#include "AstNodeNumber.h"
-
 #include <cassert>
 #include <cmath>
 
@@ -79,4 +77,8 @@ std::set<std::string> AstNodePower::collectVariables() const {
     auto result = m_base->collectVariables();
     result.merge(m_exponent->collectVariables());
     return result;
+}
+
+Number AstNodePower::eval(const std::map<std::string, Number>& arguments) const {
+    return m_base->eval(arguments) ^ m_exponent->eval(arguments);
 }

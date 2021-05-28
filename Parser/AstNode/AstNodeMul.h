@@ -17,13 +17,12 @@ class AstNodeMul : public AstNodeCommutative {
     [[nodiscard]] u_ptr_AstNode copy() const override;
     [[nodiscard]] u_ptr_AstNode simplify() const override;
     [[nodiscard]] u_ptr_AstNode differentiate(const std::string& variable) const override;
+    [[nodiscard]] Number        eval(const std::map<std::string, Number>& arguments) const override;
 
   private:
     friend class AstNodeAdd;
 
     AstNodeMul();
-    bool                                      stripUnaryMinuses();
-    bool                                      gatherDuplicates();
     [[nodiscard]] std::unique_ptr<AstNodeMul> simplifiedCopy() const;
     [[nodiscard]] u_ptr_AstNode               distributeMultiplication() const;
 };

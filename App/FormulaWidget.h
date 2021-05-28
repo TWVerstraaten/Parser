@@ -39,6 +39,7 @@ class FormulaWidget : public QWidget {
     void initPointers();
     void initButtons();
     void connectSignals();
+    void showToolTipAtLineEdit(QRgb textColor, const QString& message);
 
     inline static size_t m_maxIndex = 0;
 

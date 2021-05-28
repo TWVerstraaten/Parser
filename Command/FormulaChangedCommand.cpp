@@ -4,12 +4,10 @@
 
 #include "FormulaChangedCommand.h"
 
-#include <QDebug>
 #include <QLineEdit>
 
 FormulaChangedCommand::FormulaChangedCommand(FormulaWidget* formula, QString old, QString newString)
     : m_formula(formula), m_old(std::move(old)), m_new(std::move(newString)) {
-    qDebug() << m_old << " to " << m_new << '\n';
 }
 
 void FormulaChangedCommand::undo() {

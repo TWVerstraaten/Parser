@@ -18,6 +18,7 @@ class AstNodeAdd : public AstNodeCommutative {
     [[nodiscard]] u_ptr_AstNode simplify() const override;
     [[nodiscard]] NODE_TYPE     type() const override;
     [[nodiscard]] u_ptr_AstNode differentiate(const std::string& variable) const override;
+    [[nodiscard]] Number        eval(const std::map<std::string, Number>& arguments) const override;
 
   private:
     friend class AstNodeMul;

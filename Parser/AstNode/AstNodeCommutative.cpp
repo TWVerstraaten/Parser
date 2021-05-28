@@ -122,52 +122,12 @@ bool AstNodeCommutative::compareEqualType(const AstNode* rhs) const {
     return std::lexicographical_compare(m_nodes.begin(), m_nodes.end(), rightNodes.begin(), rightNodes.end(), AstNode::compare_u_ptr);
 }
 
-Decomposition AstNodeCommutative::decompose(const AstNodeCommutative* A, const AstNodeCommutative* B) {
-    assert(A != B);
-    std::vector<const AstNode*> aCopy;
-    std::vector<const AstNode*> bCopy;
-    std::transform(A->m_nodes.begin(), A->m_nodes.end(), std::back_inserter(aCopy), [](const u_ptr_AstNode& u_ptr) { return u_ptr.get(); });
-    std::transform(B->m_nodes.begin(), B->m_nodes.end(), std::back_inserter(bCopy), [](const u_ptr_AstNode& u_ptr) { return u_ptr.get(); });
-    std::sort(aCopy.begin(), aCopy.end(), AstNode::compare);
-    std::sort(bCopy.begin(), bCopy.end(), AstNode::compare);
-
-    return alg::decomposeSorted(aCopy, bCopy, [](const AstNode* node) { return node->copy(); });
-}
-
 AstNode& AstNodeCommutative::operator[](size_t index) {
     return *m_nodes[index];
 }
 
-std::vector<u_ptr_AstNode>::const_iterator AstNodeCommutative::mulBegin() const {
-    return std::find_if(m_nodes.begin(), m_nodes.end(), [](const auto& node) { return node->type() == AstNode::NODE_TYPE::MULTIPLY; });
-}
-
-std::vector<u_ptr_AstNode>::const_iterator AstNodeCommutative::mulEnd() const {
-    auto it = mulBegin();
-    while (it != m_nodes.end() && (*it)->type() == AstNode::NODE_TYPE::MULTIPLY) {
-        ++it;
-    }
-    return it;
-}
-
-std::vector<u_ptr_AstNode>::const_iterator AstNodeCommutative::addBegin() const {
-    return std::find_if(m_nodes.begin(), m_nodes.end(), [](const auto& node) { return node->type() == AstNode::NODE_TYPE::ADD; });
-}
-
-std::vector<u_ptr_AstNode>::const_iterator AstNodeCommutative::addEnd() const {
-    auto it = mulBegin();
-    while (it != m_nodes.end() && (*it)->type() == AstNode::NODE_TYPE::ADD) {
-        ++it;
-    }
-    return it;
-}
-
 size_t AstNodeCommutative::countCopies(const AstNode* nodeToCompare) const {
     return std::count_if(m_nodes.begin(), m_nodes.end(), [&](const auto& node) { return *node == *nodeToCompare; });
-}
-
-void AstNodeCommutative::removeNullPointers() {
-    m_nodes.erase(std::remove_if(m_nodes.begin(), m_nodes.end(), [](const auto& node) { return node == nullptr; }), end(m_nodes));
 }
 
 std::set<std::string> AstNodeCommutative::collectVariables() const {

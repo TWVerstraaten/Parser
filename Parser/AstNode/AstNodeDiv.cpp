@@ -75,3 +75,7 @@ std::set<std::string> AstNodeDiv::collectVariables() const {
     result.merge(m_denominator->collectVariables());
     return result;
 }
+
+Number AstNodeDiv::eval(const std::map<std::string, Number>& arguments) const {
+    return m_numerator->eval(arguments) / m_denominator->eval(arguments);
+}

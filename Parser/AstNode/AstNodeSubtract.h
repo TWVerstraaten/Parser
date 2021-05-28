@@ -20,6 +20,7 @@ class AstNodeSubtract : public AstNode {
     [[nodiscard]] u_ptr_AstNode         simplify() const override;
     [[nodiscard]] u_ptr_AstNode         differentiate(const std::string& variable) const override;
     [[nodiscard]] std::set<std::string> collectVariables() const override;
+    [[nodiscard]] Number                eval(const std::map<std::string, Number>& arguments) const override;
 
   protected:
     [[nodiscard]] bool compareEqualType(const AstNode* rhs) const override;

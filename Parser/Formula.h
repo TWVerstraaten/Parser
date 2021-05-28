@@ -8,7 +8,9 @@
 #include "Ast.h"
 #include "ErrorBase.h"
 #include "FormulaHeader.h"
+#include "Number.h"
 
+#include <map>
 #include <memory>
 #include <string>
 
@@ -25,6 +27,7 @@ class Formula : public ErrorBase {
     [[nodiscard]] std::set<std::string>        unusedVariables() const;
     [[nodiscard]] std::set<std::string>        undeclaredVariables() const;
     [[nodiscard]] std::string                  getHints() const;
+    [[nodiscard]] Number                       eval(const std::map<std::string, Number>& arguments) const;
 
   private:
     bool containsIllegalCharacters();

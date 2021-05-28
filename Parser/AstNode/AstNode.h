@@ -5,9 +5,10 @@
 #ifndef PARSER_ASTNODE_H
 #define PARSER_ASTNODE_H
 
-#include "Number.h"
+#include "../Number.h"
 
 #include <iostream>
+#include <map>
 #include <memory>
 #include <set>
 #include <string>
@@ -35,18 +36,18 @@ class AstNode {
 
     static u_ptr_AstNode makeZeroNode();
     static u_ptr_AstNode makeOneNode();
-    static u_ptr_AstNode makeNumber(std::variant<long long, double> val);
     static u_ptr_AstNode makeNumber(const Number& val);
     static u_ptr_AstNode makeError();
 
-    [[nodiscard]] virtual size_t                childCount() const                               = 0;
-    [[nodiscard]] virtual NODE_TYPE             type() const                                     = 0;
-    [[nodiscard]] virtual std::string           toString() const                                 = 0;
-    [[nodiscard]] virtual const AstNode*        childAt(size_t index) const                      = 0;
-    [[nodiscard]] virtual u_ptr_AstNode         simplify() const                                 = 0;
-    [[nodiscard]] virtual u_ptr_AstNode         copy() const                                     = 0;
-    [[nodiscard]] virtual u_ptr_AstNode         differentiate(const std::string& variable) const = 0;
-    [[nodiscard]] virtual std::set<std::string> collectVariables() const                         = 0;
+    [[nodiscard]] virtual size_t                childCount() const                                         = 0;
+    [[nodiscard]] virtual NODE_TYPE             type() const                                               = 0;
+    [[nodiscard]] virtual std::string           toString() const                                           = 0;
+    [[nodiscard]] virtual const AstNode*        childAt(size_t index) const                                = 0;
+    [[nodiscard]] virtual u_ptr_AstNode         simplify() const                                           = 0;
+    [[nodiscard]] virtual u_ptr_AstNode         copy() const                                               = 0;
+    [[nodiscard]] virtual u_ptr_AstNode         differentiate(const std::string& variable) const           = 0;
+    [[nodiscard]] virtual std::set<std::string> collectVariables() const                                   = 0;
+    [[nodiscard]] virtual Number                eval(const std::map<std::string, Number>& arguments) const = 0;
 
     static bool          compare(const AstNode* lhs, const AstNode* rhs);
     static u_ptr_AstNode copy(const u_ptr_AstNode& node);

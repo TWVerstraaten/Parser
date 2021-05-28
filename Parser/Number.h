@@ -9,20 +9,27 @@
 #include <variant>
 
 class Number {
-
   public:
     Number(const Number& other);
     Number(std::variant<long long, double> value);
     Number(const std::string& value);
+    Number(long long value) {
+        m_number = value;
+    }
+    Number(double value) {
+        m_number = value;
+    }
 
     [[nodiscard]] Number                                     negate() const;
     [[nodiscard]] const std::variant<long long int, double>& number() const;
     [[nodiscard]] std::string                                toString() const;
 
     friend Number operator+(const Number& a, const Number& b);
+    friend Number operator-(const Number& a, const Number& b);
     friend Number operator*(const Number& a, const Number& b);
     friend Number operator/(const Number& a, const Number& b);
     friend Number operator^(const Number& a, const Number& b);
+    friend Number operator-(const Number& a);
     friend bool   operator==(const Number& a, const Number& b);
     friend bool   operator<(const Number& a, const Number& b);
 
