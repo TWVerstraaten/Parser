@@ -11,6 +11,7 @@
 #include "ParserException.h"
 
 #include <cassert>
+#include <iostream>
 
 namespace fml::prs {
 
@@ -193,7 +194,7 @@ namespace fml::prs {
                 std::find_if(tokenList.begin(), tokenList.end(), [](const Token& token) { return token.m_type == TOKEN_TYPE::FUNCTION; });
             assert(functionIdIt != tokenList.cend());
             auto openBracketIt = std::next(functionIdIt);
-            if (openBracketIt == tokenList.cend()) {
+            if (openBracketIt == tokenList.cend() || openBracketIt->m_type != TOKEN_TYPE::FUN_OPEN_BR) {
                 throw ParserException(ParserException::PARSER_ERROR::BRACKET_MISMATCH);
             }
             auto closingBracketIt = std::find(functionIdIt, tokenList.end(), Token{TOKEN_TYPE::RIGHT_BR, openBracketIt->m_string});
@@ -212,7 +213,11 @@ namespace fml::prs {
 
             const size_t indexOfNewExpression = m_subExpressionList.size();
             m_subExpressionList.emplace_back(nullptr);
-            m_subExpressionList[indexOfNewExpression] = std::make_unique<ast::AstNodeFunction>(functionName, parse(expressionInBrackets));
+
+            std::vector<ast::u_ptr_AstNode> arguments;
+            arguments.push_back(parse(expressionInBrackets));
+
+            m_subExpressionList[indexOfNewExpression] = std::make_unique<ast::AstNodeFunction>(functionName, std::move(arguments));
         }
         return parseBrackets(tokenList);
     }

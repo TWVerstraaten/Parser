@@ -7,10 +7,12 @@
 
 #include "AstNode.h"
 
+#include <vector>
+
 namespace ast {
     class AstNodeFunction : public AstNode {
       public:
-        AstNodeFunction(std::string functionName, u_ptr_AstNode&& argument);
+        AstNodeFunction(std::string functionName, std::vector<u_ptr_AstNode>&& arguments);
 
         [[nodiscard]] bool                  compareEqualType(const AstNode* rhs) const override;
         [[nodiscard]] size_t                childCount() const override;
@@ -27,8 +29,8 @@ namespace ast {
         [[nodiscard]] bool equals(const AstNode& other) const override;
 
       private:
-        std::string   m_functionName;
-        u_ptr_AstNode m_argument;
+        std::string                m_functionName;
+        std::vector<u_ptr_AstNode> m_arguments;
     };
 } // namespace ast
 

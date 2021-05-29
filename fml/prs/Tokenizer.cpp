@@ -44,6 +44,9 @@ namespace fml::prs {
                     m_tokens.emplace_back(Token{TOKEN_TYPE::RIGHT_BR, std::to_string(bracketDepth - 1)});
                     --bracketDepth;
                     break;
+                case ',':
+                    m_tokens.emplace_back(Token{TOKEN_TYPE::COMMA, ","});
+                    break;
                 case '+':
                     m_tokens.emplace_back(Token{TOKEN_TYPE::BIN_OP_TERM, "+"});
                     break;

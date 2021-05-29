@@ -15,6 +15,7 @@ namespace fml::prs {
             REFERENCE,
             IDENTIFIER,
             INTEGER,
+            COMMA,
             BIN_OP_TERM,
             BIN_OP_FAC,
             BIN_OP_EXPR,

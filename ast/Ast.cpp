@@ -12,6 +12,7 @@ namespace ast {
         try {
             m_rootNode = fml::prs::Parser::parse(m_string);
         } catch (fml::prs::ParserException& e) {
+            m_rootNode    = ast::AstNode::makeError();
             m_success     = false;
             m_errorString = e.toString();
         }
