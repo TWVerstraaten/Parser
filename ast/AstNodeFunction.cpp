@@ -6,7 +6,8 @@
 
 #include <algorithm>
 #include <cassert>
-#include <numeric>
+#include <iterator>
+#include <sstream>
 
 namespace ast {
 
@@ -15,12 +16,19 @@ namespace ast {
     }
 
     std::string AstNodeFunction::toString() const {
-        std::string result = m_functionName + "(";
-        for (const auto& arg : m_arguments) {
-            result += arg->toString() + std::string(", ");
+        if (m_arguments.empty()) {
+            return "";
         }
-        result += ")";
-        return result;
+        std::ostringstream oss;
+        oss << m_functionName + "(";
+        for (size_t i = 0; i != m_arguments.size(); ++i) {
+            oss << m_arguments.at(i)->toString();
+            if (i + 1 != m_arguments.size()) {
+                oss << ", ";
+            }
+        }
+        oss << ")";
+        return oss.str();
     }
 
     u_ptr_AstNode AstNodeFunction::copy() const {
@@ -44,16 +52,13 @@ namespace ast {
     bool AstNodeFunction::equals(const AstNode& other) const {
         if (other.type() == AstNode::NODE_TYPE::FUNCTION) {
             const auto& cast = dynamic_cast<const AstNodeFunction&>(other);
-            if (cast.m_functionName != m_functionName) {
+            if (cast.m_functionName != m_functionName || childCount() != other.childCount()) {
                 return false;
             }
-            for (auto it1 = m_arguments.begin(), it2 = cast.m_arguments.begin(); it1 != m_arguments.end(); ++it1, ++it2) {
-                if (not(**it1 == **it2)) {
-                    return false;
-                }
-            }
+            return std::equal(m_arguments.begin(), m_arguments.end(), cast.m_arguments.begin(), cast.m_arguments.end(),
+                              [](const auto& a, const auto& b) { return *a == *b; });
         }
-        return true;
+        return false;
     }
 
     size_t AstNodeFunction::childCount() const {

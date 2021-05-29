@@ -213,10 +213,22 @@ namespace fml::prs {
 
             const size_t indexOfNewExpression = m_subExpressionList.size();
             m_subExpressionList.emplace_back(nullptr);
-
             std::vector<ast::u_ptr_AstNode> arguments;
+            TokenList                       currentArgument;
+            auto                            commaIt = std::find_if(expressionInBrackets.begin(), expressionInBrackets.end(),
+                                        [](const Token& token) { return token.m_type == TOKEN_TYPE::COMMA; });
+            while (commaIt != expressionInBrackets.end()) {
+                currentArgument.clear();
+                currentArgument.splice(currentArgument.begin(), expressionInBrackets, expressionInBrackets.begin(), commaIt);
+                arguments.push_back(parse(currentArgument));
+                //                std::cout << toString(currentArgument) << '\n';
+                assert(expressionInBrackets.front().m_type == Tokenizer::TOKEN_TYPE::COMMA);
+                expressionInBrackets.pop_front();
+                commaIt = std::find_if(expressionInBrackets.begin(), expressionInBrackets.end(),
+                                       [](const Token& token) { return token.m_type == TOKEN_TYPE::COMMA; });
+            }
+            //            std::cout << toString(expressionInBrackets) << '\n';
             arguments.push_back(parse(expressionInBrackets));
-
             m_subExpressionList[indexOfNewExpression] = std::make_unique<ast::AstNodeFunction>(functionName, std::move(arguments));
         }
         return parseBrackets(tokenList);

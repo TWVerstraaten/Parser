@@ -10,7 +10,7 @@ int main(int argc, char* argv[]) {
 
     //    std::cout << tok.toString() << '\n';
 
-    fml::Formula formula("f(x,y)= h( (2+g( (x+4))))  ");
+    fml::Formula formula("f(x,y)= h(x+t(y),y*2,3-1)  ");
     if (formula.success()) {
         std::cout << formula.toProcessedString() << '\n';
     } else {
