@@ -16,6 +16,8 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QToolTip>
+#include <iostream>
+
 namespace app {
 
     static void setTextColor(QWidget* widget, const QColor& color) {
@@ -69,10 +71,9 @@ namespace app {
 
     void FormulaWidget::handleCorrectFormula() {
         setTextColor(Qt::black);
-        const auto variableSet = m_formula->declaredVariables();
-        m_variableLabel->setText(
-            variableSet.empty() ? "_" : "<font color=\"green\">" + QString::fromStdString(alg::StringAlg::setToString(variableSet)));
-        m_messageLabel->setText("_");
+        m_variableLabel->setText("<font color=\"green\">" +
+                                 QString::fromStdString(alg::StringAlg::setToString(m_formula->declaredVariables())));
+        m_messageLabel->setText("");
         m_simplifiedLabel->setText(QString::fromStdString(m_formula->ast().toString()));
         QToolTip::hideText();
 
@@ -81,14 +82,16 @@ namespace app {
         }
         std::cout << "x=1,y=3"
                   << " " << m_formula->eval({{"x", gen::Number(1ll)}, {"y", gen::Number(3ll)}}).toString() << '\n';
+        update();
     }
 
     void FormulaWidget::handleWrongFormula(const std::string& errorMessage) {
         setTextColor(Qt::red);
-        m_variableLabel->setText("_");
+        m_variableLabel->setText("");
         m_messageLabel->setText(QString::fromStdString(errorMessage));
 
         showToolTipAtLineEdit(16449536, QString::fromStdString(errorMessage));
+        update();
     }
 
     size_t FormulaWidget::index() const {

@@ -24,51 +24,49 @@ namespace fml {
     static bool checkIdentifier(const std::string& string) {
         auto trimmedString = alg::BoostWrapper::trim(string);
         assert(trimmedString == string);
+        if (trimmedString.empty()) {
+            return false;
+        }
         auto it = trimmedString.begin();
         if (not isalpha(*it)) {
             return false;
         }
         ++it;
-        for (; it != trimmedString.end(); ++it) {
-            if (not isalnum(*it)) {
-                return false;
-            }
-        }
-        return true;
+        return std::all_of(it, trimmedString.end(), isalnum);
     }
 
     FormulaHeader::FormulaHeader(std::string headerString) : m_headerString(std::move(headerString)) {
         if ((containsIllegalCharacters())) {
             return;
         }
-
         const auto parts = alg::BoostWrapper::trimAndSplit(m_headerString, "(");
-        if (setErrorIf(parts.empty(), "Empty function header")) {
-            return;
-        } else if (setErrorIf(parts.size() > 2, "Too many opening brackets")) {
+        if (setErrorIf(parts.empty(), "Empty function header") || setErrorIf(parts.size() > 2, "Too many opening brackets")) {
             return;
         }
         m_name = alg::BoostWrapper::trim(parts.at(0));
         if (setErrorIf(not checkIdentifier(m_name), "Invalid function name: " + m_name)) {
             return;
         }
-
         if (parts.size() == 2) {
-            if (setErrorIf(parts.at(1).empty(), "Empty argument list")) {
-                return;
-            }
-            if (setErrorIf(parts.at(1).at(parts.at(1).length() - 1) != ')', "Closing bracket should be last character of header")) {
-                return;
-            }
+            parseArguments(parts.at(1));
+        }
+    }
 
-            boost::tokenizer<> tokenizer(parts.at(1));
-            for (boost::tokenizer<>::iterator token = tokenizer.begin(); token != tokenizer.end(); ++token) {
-                std::string next = alg::BoostWrapper::trim(*token);
-                if (setErrorIf(not checkIdentifier(next), "Invalid variable name: " + next)) {
-                    return;
-                }
-                m_variables.insert(next);
+    void FormulaHeader::parseArguments(const std::string& argumentString) {
+        if (setErrorIf(argumentString.empty(), "Empty argument list")) {
+            return;
+        }
+        if (setErrorIf(argumentString.at(argumentString.length() - 1) != ')', "Closing bracket should be last character of header")) {
+            return;
+        }
+
+        boost::tokenizer<> tokenizer(argumentString);
+        for (boost::tokenizer<>::iterator token = tokenizer.begin(); token != tokenizer.end(); ++token) {
+            std::string next = alg::BoostWrapper::trim(*token);
+            if (setErrorIf(not checkIdentifier(next), "Invalid variable name: " + next)) {
+                return;
             }
+            m_variables.insert(next);
         }
     }
 

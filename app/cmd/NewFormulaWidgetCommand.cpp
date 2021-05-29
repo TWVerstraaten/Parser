@@ -4,6 +4,9 @@
 
 #include "NewFormulaWidgetCommand.h"
 
+#include "../FormulaSideBar.h"
+#include "../FormulaWidget.h"
+
 namespace app::cmd {
     NewFormulaWidgetCommand::NewFormulaWidgetCommand(app::FormulaSideBar* formulaSideBar, size_t index)
         : m_formulaSideBar(formulaSideBar), m_indexOfNewFormulaWidget(index) {

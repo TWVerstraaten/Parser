@@ -23,9 +23,7 @@ namespace ast {
         const auto left  = m_leftNode->simplify();
         const auto right = m_rightNode->simplify();
         if (left->type() == AstNode::NODE_TYPE::NUMBER && right->type() == AstNode::NODE_TYPE::NUMBER) {
-            std::cout << "Implement\n";
-            assert(false);
-            //        return (NUMERIC_CAST(left.get()) - NUMERIC_CAST(right.get())).toNode();
+            return makeNumber(left->eval({}) - right->eval({}));
         }
 
         AstNode* simplifiedNode = new AstNodeSubtract(m_leftNode->simplify(), m_rightNode->simplify());

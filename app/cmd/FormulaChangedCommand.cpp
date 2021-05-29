@@ -4,6 +4,8 @@
 
 #include "FormulaChangedCommand.h"
 
+#include "../FormulaWidget.h"
+
 #include <QLineEdit>
 
 namespace app::cmd {

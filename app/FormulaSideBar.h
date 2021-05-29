@@ -5,14 +5,15 @@
 #ifndef PARSER_FORMULASIDEBAR_H
 #define PARSER_FORMULASIDEBAR_H
 
-#include "FormulaWidget.h"
-
 #include <QWidget>
+#include <iostream>
 #include <vector>
 
 class QVBoxLayout;
 
 namespace app {
+    class FormulaWidget;
+
     class FormulaSideBar : public QWidget {
         Q_OBJECT
 

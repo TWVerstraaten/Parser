@@ -22,6 +22,7 @@ namespace fml {
 
       private:
         bool containsIllegalCharacters();
+        void parseArguments(const std::string& argumentString);
 
         std::string           m_name;
         std::set<std::string> m_variables;

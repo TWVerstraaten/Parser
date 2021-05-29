@@ -13,15 +13,9 @@ namespace app {
         Q_OBJECT
 
       public:
-        explicit UndoRedoConsumer(QObject* parent) : QObject(parent) {
-        }
+        explicit UndoRedoConsumer(QObject* parent);
 
-        static UndoRedoConsumer* undoRedoConsumer() {
-            if (not m_undoRedoConsumer) {
-                m_undoRedoConsumer = std::make_unique<UndoRedoConsumer>(nullptr);
-            }
-            return m_undoRedoConsumer.get();
-        }
+        static UndoRedoConsumer* undoRedoConsumer();
 
       protected:
         bool eventFilter(QObject* obj, QEvent* event) override;

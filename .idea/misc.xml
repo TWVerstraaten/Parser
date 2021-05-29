@@ -3,9 +3,13 @@
   <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
   <component name="CidrRootsConfiguration">
     <sourceRoots>
+      <file path="$PROJECT_DIR$/alg" />
       <file path="$PROJECT_DIR$/app" />
+      <file path="$PROJECT_DIR$/app/cmd" />
       <file path="$PROJECT_DIR$/ast" />
+      <file path="$PROJECT_DIR$/fml" />
       <file path="$PROJECT_DIR$/fml/prs" />
+      <file path="$PROJECT_DIR$/gen" />
     </sourceRoots>
   </component>
 </project>

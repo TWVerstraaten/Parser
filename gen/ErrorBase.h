@@ -16,7 +16,7 @@ namespace gen {
       protected:
         bool setErrorIf(bool b, const std::string& errorString);
 
-        bool        m_success = true;
+        bool        m_success{true};
         std::string m_errorString;
     };
 } // namespace gen

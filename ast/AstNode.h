@@ -7,13 +7,10 @@
 
 #include "../gen/Number.h"
 
-#include <iostream>
 #include <map>
 #include <memory>
 #include <set>
 #include <string>
-#include <variant>
-#include <vector>
 
 namespace ast {
     class AstNode;

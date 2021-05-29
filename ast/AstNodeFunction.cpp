@@ -61,6 +61,7 @@ namespace ast {
     std::set<std::string> AstNodeFunction::collectVariables() const {
         return m_argument->collectVariables();
     }
+
     gen::Number AstNodeFunction::eval(const std::map<std::string, gen::Number>& arguments) const {
         assert(false);
         return gen::Number(0ll);

@@ -5,9 +5,7 @@
 #ifndef PARSER_STRINGALG_H
 #define PARSER_STRINGALG_H
 
-#include <iterator>
 #include <set>
-#include <sstream>
 #include <string>
 
 namespace alg {

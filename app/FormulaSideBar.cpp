@@ -4,6 +4,7 @@
 
 #include "FormulaSideBar.h"
 
+#include "FormulaWidget.h"
 #include "UndoRedoConsumer.h"
 #include "UndoRedoHandler.h"
 #include "cmd/NewFormulaWidgetCommand.h"
@@ -13,9 +14,6 @@
 
 namespace app {
     FormulaSideBar::FormulaSideBar(QWidget* parent) : QWidget(parent) {
-
-        installEventFilter(UndoRedoConsumer::undoRedoConsumer());
-
         m_layout = new QVBoxLayout(this);
 
         UndoRedoHandler::setPushBlocked(true);
@@ -25,6 +23,7 @@ namespace app {
 
         m_layout->setAlignment(Qt::AlignTop);
         setLayout(m_layout);
+        installEventFilter(UndoRedoConsumer::undoRedoConsumer());
     }
 
     void FormulaSideBar::addNewFormulaWidget() {

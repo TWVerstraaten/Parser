@@ -119,4 +119,16 @@ namespace fml {
     gen::Number Formula::eval(const std::map<std::string, gen::Number>& arguments) const {
         return m_ast->eval(arguments);
     }
+
+    const std::string& Formula::toString() const {
+        return m_string;
+    }
+
+    std::string Formula::toProcessedString() const {
+        std::string result;
+        result += m_formulaHeader->name() + ": " + alg::StringAlg::setToString(m_formulaHeader->variables()) + "\n";
+        result += m_ast->toString() + "\n";
+
+        return result;
+    }
 } // namespace fml

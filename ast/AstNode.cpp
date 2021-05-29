@@ -14,6 +14,7 @@
 #include "AstNodeUnaryMinus.h"
 
 #include <cassert>
+#include <iostream>
 
 namespace ast {
     bool AstNode::isNumeric() const {

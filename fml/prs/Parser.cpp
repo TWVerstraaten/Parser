@@ -82,31 +82,32 @@ namespace fml::prs {
         assert(not containsExpression(tokenList));
         assert(not containsFactor(tokenList));
 
-        bool startsWithUnaryMinus = tokenList.begin()->m_type == TOKEN_TYPE::UNARY_OP;
-        if (startsWithUnaryMinus) {
-            tokenList.erase(tokenList.begin());
-        }
-        if (tokenList.size() == 1) {
-            return startsWithUnaryMinus ? -parseValueType(tokenList.front()) : parseValueType(tokenList.front());
-        }
-        auto it = tokenList.cbegin();
-        it      = tokenList.insert(it, freshReferenceToken());
-        it      = std::next(it);
-        if (std::next(std::next(it)) == tokenList.end()) {
-            throw ParserException(ParserException::PARSER_ERROR::UNTERMINATED, std::next(it)->m_string);
-        }
-        if (std::next(it)->m_string == "+") {
-            m_subExpressionList.emplace_back((startsWithUnaryMinus ? -parseValueType(*it) : parseValueType(*it)) +
-                                             parseValueType(*std::next(it, 2)));
-        } else {
-            if (std::next(it)->m_string != "-") {
-                throw ParserException(ParserException::PARSER_ERROR::INVALID_TERM_OP, std::next(it)->m_string);
+        while (true) {
+            bool startsWithUnaryMinus = tokenList.begin()->m_type == TOKEN_TYPE::UNARY_OP;
+            if (startsWithUnaryMinus) {
+                tokenList.erase(tokenList.begin());
             }
-            m_subExpressionList.emplace_back((startsWithUnaryMinus ? -parseValueType(*it) : parseValueType(*it)) +
-                                             -parseValueType(*std::next(it, 2)));
+            if (tokenList.size() == 1) {
+                return startsWithUnaryMinus ? -parseValueType(tokenList.front()) : parseValueType(tokenList.front());
+            }
+            auto it = tokenList.cbegin();
+            it      = tokenList.insert(it, freshReferenceToken());
+            it      = std::next(it);
+            if (std::next(std::next(it)) == tokenList.end()) {
+                throw ParserException(ParserException::PARSER_ERROR::UNTERMINATED, std::next(it)->m_string);
+            }
+            if (std::next(it)->m_string == "+") {
+                m_subExpressionList.emplace_back((startsWithUnaryMinus ? -parseValueType(*it) : parseValueType(*it)) +
+                                                 parseValueType(*std::next(it, 2)));
+            } else {
+                if (std::next(it)->m_string != "-") {
+                    throw ParserException(ParserException::PARSER_ERROR::INVALID_TERM_OP, std::next(it)->m_string);
+                }
+                m_subExpressionList.emplace_back((startsWithUnaryMinus ? -parseValueType(*it) : parseValueType(*it)) +
+                                                 -parseValueType(*std::next(it, 2)));
+            }
+            tokenList.erase(it, std::next(it, 3));
         }
-        tokenList.erase(it, std::next(it, 3));
-        return parseTerm(tokenList);
     }
 
     ast::u_ptr_AstNode Parser::parseFactor(TokenList& tokenList) {
@@ -114,50 +115,48 @@ namespace fml::prs {
         assert(not containsBrackets(tokenList));
         assert(not containsExpression(tokenList));
 
-        if (not containsFactor(tokenList)) {
-            return parseTerm(tokenList);
-        }
-        if (tokenList.size() < 3) {
-            throw ParserException(ParserException::PARSER_ERROR::UNTERMINATED);
-        }
-        auto it = lastBeforeOccurrenceOfType(tokenList.begin(), tokenList.end(), TOKEN_TYPE::BIN_OP_FAC);
-        it      = tokenList.insert(it, freshReferenceToken());
-        it      = std::next(it);
-        if (std::next(std::next(it)) == tokenList.end()) {
-            throw ParserException(ParserException::PARSER_ERROR::UNTERMINATED, std::next(it)->m_string);
-        }
-        if (std::next(it)->m_string == "*") {
-            m_subExpressionList.emplace_back(parseValueType(*it) * parseValueType(*std::next(it, 2)));
-        } else {
-            if (std::next(it)->m_string != "/") {
-                throw ParserException(ParserException::PARSER_ERROR::INVALID_FACTOR_OP, std::next(it)->m_string);
+        while (containsFactor(tokenList)) {
+            if (tokenList.size() < 3) {
+                throw ParserException(ParserException::PARSER_ERROR::UNTERMINATED);
             }
-            m_subExpressionList.emplace_back(parseValueType(*it) / parseValueType(*std::next(it, 2)));
+            auto it = lastBeforeOccurrenceOfType(tokenList.begin(), tokenList.end(), TOKEN_TYPE::BIN_OP_FAC);
+            it      = tokenList.insert(it, freshReferenceToken());
+            it      = std::next(it);
+            if (std::next(std::next(it)) == tokenList.end()) {
+                throw ParserException(ParserException::PARSER_ERROR::UNTERMINATED, std::next(it)->m_string);
+            }
+            if (std::next(it)->m_string == "*") {
+                m_subExpressionList.emplace_back(parseValueType(*it) * parseValueType(*std::next(it, 2)));
+            } else {
+                if (std::next(it)->m_string != "/") {
+                    throw ParserException(ParserException::PARSER_ERROR::INVALID_FACTOR_OP, std::next(it)->m_string);
+                }
+                m_subExpressionList.emplace_back(parseValueType(*it) / parseValueType(*std::next(it, 2)));
+            }
+            tokenList.erase(it, std::next(it, 3));
         }
-        tokenList.erase(it, std::next(it, 3));
-        return parseFactor(tokenList);
+        return parseTerm(tokenList);
     }
 
     ast::u_ptr_AstNode Parser::parseExpression(TokenList& tokenList) {
         assert(not containsFunction(tokenList));
         assert(not containsBrackets(tokenList));
 
-        if (not containsExpression(tokenList)) {
-            return parseFactor(tokenList);
+        while (containsExpression(tokenList)) {
+            if (tokenList.size() < 3) {
+                throw ParserException(ParserException::PARSER_ERROR::UNTERMINATED);
+            }
+            auto it = lastBeforeOccurrenceOfType(tokenList.begin(), tokenList.end(), TOKEN_TYPE::BIN_OP_EXPR);
+            it      = tokenList.insert(it, freshReferenceToken());
+            it      = std::next(it);
+            assert(std::next(it)->m_string == "^");
+            if (std::next(std::next(it)) == tokenList.end()) {
+                throw ParserException(ParserException::PARSER_ERROR::UNTERMINATED, std::next(it)->m_string);
+            }
+            m_subExpressionList.emplace_back(parseValueType(*it) ^ parseValueType(*std::next(it, 2)));
+            tokenList.erase(it, std::next(it, 3));
         }
-        if (tokenList.size() < 3) {
-            throw ParserException(ParserException::PARSER_ERROR::UNTERMINATED);
-        }
-        auto it = lastBeforeOccurrenceOfType(tokenList.begin(), tokenList.end(), TOKEN_TYPE::BIN_OP_EXPR);
-        it      = tokenList.insert(it, freshReferenceToken());
-        it      = std::next(it);
-        assert(std::next(it)->m_string == "^");
-        if (std::next(std::next(it)) == tokenList.end()) {
-            throw ParserException(ParserException::PARSER_ERROR::UNTERMINATED, std::next(it)->m_string);
-        }
-        m_subExpressionList.emplace_back(parseValueType(*it) ^ parseValueType(*std::next(it, 2)));
-        tokenList.erase(it, std::next(it, 3));
-        return parseExpression(tokenList);
+        return parseFactor(tokenList);
     }
 
     ast::u_ptr_AstNode Parser::parseBrackets(TokenList& tokenList) {

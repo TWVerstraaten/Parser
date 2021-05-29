@@ -9,6 +9,9 @@
 #include <QKeyEvent>
 
 namespace app {
+    UndoRedoConsumer::UndoRedoConsumer(QObject* parent) : QObject(parent) {
+    }
+
     bool UndoRedoConsumer::eventFilter(QObject* obj, QEvent* event) {
         if (event->type() == QEvent::KeyPress) {
             auto*        key_event = dynamic_cast<QKeyEvent*>(event);
@@ -22,5 +25,12 @@ namespace app {
             }
         }
         return QObject::eventFilter(obj, event);
+    }
+
+    UndoRedoConsumer* UndoRedoConsumer::undoRedoConsumer() {
+        if (not m_undoRedoConsumer) {
+            m_undoRedoConsumer = std::make_unique<UndoRedoConsumer>(nullptr);
+        }
+        return m_undoRedoConsumer.get();
     }
 } // namespace app

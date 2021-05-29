@@ -4,6 +4,9 @@
 
 #include "StringAlg.h"
 
+#include <iterator>
+#include <sstream>
+
 namespace alg {
 
     std::string StringAlg::setToString(const std::set<std::string>& set) {

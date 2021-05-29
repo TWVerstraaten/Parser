@@ -23,7 +23,7 @@ namespace app {
         explicit FormulaWidget(QWidget* parent = nullptr);
 
         [[nodiscard]] size_t     index() const;
-        [[nodiscard]] QLineEdit* lineEdit() ;
+        [[nodiscard]] QLineEdit* lineEdit();
 
       signals:
         void deleteClicked(size_t index);
