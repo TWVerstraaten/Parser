@@ -5,18 +5,12 @@
 #include "OpenGlWidget.h"
 
 #include <QMouseEvent>
-#include <cmath>
 
 namespace app {
-
     OpenGlWidget::OpenGlWidget(QWidget* parent) : QOpenGLWidget(parent) {
-        m_cameraUpDirection -= (QVector3D::dotProduct(m_cameraUpDirection, m_viewDirection) * m_viewDirection).normalized();
-        assert(std::abs(QVector3D::dotProduct(m_cameraUpDirection, m_viewDirection)) < 0.01f);
-    }
-
-    OpenGlWidget::~OpenGlWidget() {
-        makeCurrent();
-        doneCurrent();
+        m_cameraWidget = new CameraWidget();
+        m_cameraWidget->show();
+        connect(m_cameraWidget, &CameraWidget::updated, this, [this]() { update(); });
     }
 
     void OpenGlWidget::mousePressEvent(QMouseEvent* e) {
@@ -38,13 +32,13 @@ namespace app {
             case CLICK_STATE::NONE:
                 break;
             case CLICK_STATE::LEFT:
-                rotateViewDirection(dX, dY);
+                m_cameraWidget->translateCameraPosition(dX, dY);
                 break;
             case CLICK_STATE::RIGHT:
-                translateCameraPosition(dX, dY);
+                m_cameraWidget->rotateViewDirection(dX, dY);
                 break;
             case CLICK_STATE::MIDDLE:
-                rotateUpDirection(dX, dY);
+                m_cameraWidget->rotateUpDirection(dX, dY);
                 break;
         }
 
@@ -85,82 +79,21 @@ namespace app {
     }
 
     void OpenGlWidget::resizeGL(int w, int h) {
-        //        qreal aspect = qreal(w) / qreal(h ? h : 1);
-        //
-        const qreal zNear = 1.0;
-        const qreal zFar  = 1000.0;
-        //        const qreal fov   = 54.0;
-
-        m_projectionMatrix.setToIdentity();
-        //        m_projectionMatrix.perspective(fov, aspect, zNear, zFar);
-        const float right = static_cast<float>(w) * std::exp(m_zoomParameter) * 0.002f;
-        const float top   = static_cast<float>(h) * std::exp(m_zoomParameter) * 0.002f;
-        m_projectionMatrix.ortho(-right, right, -top, top, zNear, zFar);
+        m_cameraWidget->setProjectionMatrix(w, h);
     }
 
     void OpenGlWidget::paintGL() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        setProjectionMatrix(width(), height());
-        QMatrix4x4 lookAtMatrix;
-        lookAtMatrix.lookAt(m_cameraPosition, m_cameraPosition + m_viewDirection, m_cameraUpDirection);
-        m_shaderProgram.setUniformValue("mvp_matrix", m_projectionMatrix * lookAtMatrix);
+        m_cameraWidget->setProjectionMatrix(width(), height());
+        m_shaderProgram.setUniformValue("mvp_matrix", m_cameraWidget->projectionMatrix() * m_cameraWidget->lookAtMatrix());
         m_surfaceManager->draw(&m_shaderProgram);
     }
 
     void OpenGlWidget::wheelEvent(QWheelEvent* event) {
         const float degrees = event->angleDelta().y() / 8.0f;
-        if (degrees != 0.0f) {
-            m_cameraPosition += m_zoomSensitivity * degrees * m_viewDirection;
-            m_zoomParameter -= m_zoomSensitivity * degrees;
-        }
-
+        m_cameraWidget->zoom(degrees);
         update();
-    }
-
-    void OpenGlWidget::rotateViewDirection(float dX, float dY) {
-        const auto normal = QVector3D::crossProduct(m_viewDirection, m_cameraUpDirection).normalized();
-        QMatrix4x4 rotation;
-        rotation.setToIdentity();
-        rotation.rotate(-0.08f * dX, m_cameraUpDirection);
-        rotation.rotate(-0.08f * dY, normal);
-        m_viewDirection     = m_viewDirection * rotation;
-        m_cameraUpDirection = m_cameraUpDirection * rotation;
-        assert(std::abs(QVector3D::dotProduct(m_cameraUpDirection, m_viewDirection)) < 0.01f);
-    }
-
-    void OpenGlWidget::translateCameraPosition(float dX, float dY) {
-        const auto normal = QVector3D::crossProduct(m_viewDirection, m_cameraUpDirection).normalized();
-        m_cameraPosition -= dX * normal * 2.0f * zoomParameterToLeft(width()) / width();
-        m_cameraPosition += dY * m_cameraUpDirection * 2.0f * zoomParameterToTop(height()) / height();
-    }
-
-    void OpenGlWidget::rotateUpDirection(float dX, float dY) {
-        QMatrix4x4 rotation;
-        rotation.setToIdentity();
-        rotation.rotate(-0.08f * dX, m_viewDirection);
-        m_cameraUpDirection = m_cameraUpDirection * rotation;
-        assert(std::abs(QVector3D::dotProduct(m_cameraUpDirection, m_viewDirection)) < 0.01f);
-    }
-
-    void OpenGlWidget::setProjectionMatrix(int w, int h) {
-        const qreal zNear = 1.0;
-        const qreal zFar  = 1000.0;
-        //        const qreal fov   = 54.0;
-
-        m_projectionMatrix.setToIdentity();
-        //        m_projectionMatrix.perspective(fov, aspect, zNear, zFar);
-        const auto right = zoomParameterToLeft(w);
-        const auto top   = zoomParameterToTop(h);
-        m_projectionMatrix.ortho(-right, right, -top, top, zNear, zFar);
-    }
-
-    float OpenGlWidget::zoomParameterToLeft(int w) const {
-        return w * std::exp(m_zoomParameter) * 0.002;
-    }
-
-    float OpenGlWidget::zoomParameterToTop(int h) const {
-        return h * std::exp(m_zoomParameter) * 0.002;
     }
 
 } // namespace app

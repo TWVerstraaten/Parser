@@ -5,8 +5,8 @@
 #ifndef PARSER_FORMULASIDEBAR_H
 #define PARSER_FORMULASIDEBAR_H
 
+#include <QPushButton>
 #include <QWidget>
-#include <iostream>
 #include <vector>
 
 class QVBoxLayout;
@@ -24,12 +24,12 @@ namespace app {
 
       private slots:
         void RemoveFormulaWidget(size_t indexOfWidget);
-
-      private:
         void addNewFormulaWidget();
 
+      private:
         std::vector<FormulaWidget*> m_formulaWidgets;
         QVBoxLayout*                m_layout;
+        QPushButton*                m_newFormulaPushButton;
     };
 } // namespace app
 

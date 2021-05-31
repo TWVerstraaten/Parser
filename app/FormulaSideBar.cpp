@@ -16,6 +16,12 @@ namespace app {
     FormulaSideBar::FormulaSideBar(QWidget* parent) : QWidget(parent) {
         m_layout = new QVBoxLayout(this);
 
+        m_newFormulaPushButton = new QPushButton(this);
+        m_newFormulaPushButton->setText("+");
+        m_layout->addWidget(m_newFormulaPushButton);
+
+        connect(m_newFormulaPushButton, &QPushButton::clicked, this, &FormulaSideBar::addNewFormulaWidget);
+
         UndoRedoHandler::setPushBlocked(true);
         addNewFormulaWidget();
         addNewFormulaWidget();
@@ -27,11 +33,14 @@ namespace app {
     }
 
     void FormulaSideBar::addNewFormulaWidget() {
+
+        layout()->removeWidget(m_newFormulaPushButton);
         auto* newFormulaWidget = new FormulaWidget(this);
         m_formulaWidgets.push_back(newFormulaWidget);
         UndoRedoHandler::push(new cmd::NewFormulaWidgetCommand(this, newFormulaWidget->index()));
         connect(newFormulaWidget, &FormulaWidget::deleteClicked, this, &FormulaSideBar::RemoveFormulaWidget);
         m_layout->addWidget(m_formulaWidgets.back());
+        m_layout->addWidget(m_newFormulaPushButton);
     }
 
     FormulaWidget* FormulaSideBar::fromIndex(size_t index) {

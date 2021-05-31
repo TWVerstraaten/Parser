@@ -44,8 +44,8 @@ namespace app {
 
         for (size_t i = 0; i != i_lim; ++i) {
             for (size_t j = 0; j != j_lim; ++j) {
-                vertices.push_back({{o - 0.5f + 0.2f * i, o - 0.5f + 0.2f * j, -5.0f + o + 0.2f * sinf(1.3f * i * 0.3 * j - 0.2 * i)},
-                                    {0.15f * i, 0.15f * j, 0.02f * i + 0.04f * j}});
+                vertices.push_back(
+                    {{o - 0.5f + 0.2f * i, o - 0.5f + 0.2f * j, o + std::abs(0.2f * i)}, {0.15f * i, 0.15f * j, 0.02f * i + 0.04f * j}});
             }
         }
         o -= 1.0f;
