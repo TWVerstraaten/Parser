@@ -23,8 +23,6 @@ namespace app {
 
         FormulaWidget* fromIndex(size_t index);
 
-        [[nodiscard]] QSize sizeHint() const override;
-
       signals:
         void updated();
 

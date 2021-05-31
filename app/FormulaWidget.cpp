@@ -51,8 +51,6 @@ namespace app {
         m_lineEdit->installEventFilter(UndoRedoConsumer::undoRedoConsumer());
 
         m_layout->setAlignment(Qt::AlignTop);
-        setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-        setMinimumWidth(200);
     }
 
     void FormulaWidget::setFormula(const QString& string) {
@@ -157,4 +155,5 @@ namespace app {
     QLineEdit* FormulaWidget::lineEdit() {
         return m_lineEdit;
     }
+
 } // namespace app

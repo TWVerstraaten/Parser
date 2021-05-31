@@ -15,9 +15,9 @@ app::CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent) {
 
     auto* splitter = new QSplitter;
     splitter->addWidget(m_formulaSideBar);
-    splitter->setStretchFactor(0, 1);
+    splitter->setStretchFactor(0, 0);
     splitter->addWidget(m_openGlWidget);
-    splitter->setStretchFactor(1, 2);
+    splitter->setStretchFactor(1, 1);
     splitter->setOrientation(Qt::Horizontal);
 
     //    m_layout->addWidget(m_formulaSideBar, 1);

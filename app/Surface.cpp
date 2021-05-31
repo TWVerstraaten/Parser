@@ -37,30 +37,50 @@ namespace app {
         QVector<VertexData> vertices;
         QVector<GLuint>     indices;
 
-        const size_t i_lim = 15;
-        const size_t j_lim = 23;
+        //        const size_t i_lim = 15;
+        //        const size_t j_lim = 23;
 
         static float o = 0.0f;
 
-        for (size_t i = 0; i != i_lim; ++i) {
-            for (size_t j = 0; j != j_lim; ++j) {
-                vertices.push_back(
-                    {{o - 0.5f + 0.2f * i, o - 0.5f + 0.2f * j, o + std::abs(0.2f * i)}, {0.15f * i, 0.15f * j, 0.02f * i + 0.04f * j}});
-            }
-        }
-        o -= 1.0f;
+        vertices.push_back({{0.0f + o, 0.0f + o, 0.0f + o}, {0.12, 0.51, 0.33}});
+        vertices.push_back({{0.9f + o, 0.0f + o, 0.0f + o}, {0.12, 0.51, 0.13}});
+        vertices.push_back({{0.0f + o, 0.9f + o, 0.0f + o}, {0.12, 0.21, 0.33}});
+        vertices.push_back({{0.9f + o, 0.9f + o, 0.0f + o}, {0.72, 0.51, 0.33}});
 
-        for (size_t i = 0; i != i_lim - 1; ++i) {
-            for (size_t j = 0; j != j_lim - 1; ++j) {
-                indices.push_back(j + 1 + j_lim * i);
-                indices.push_back(j + j_lim * i);
-                indices.push_back(j + j_lim * (i + 1));
+        vertices.push_back({{0.0f + o, 0.0f + o, 1.0f + o}, {0.02, 0.01, 0.83}});
+        vertices.push_back({{0.9f + o, 0.0f + o, 1.0f + o}, {0.12, 0.51, 0.63}});
+        vertices.push_back({{0.0f + o, 0.9f + o, 1.0f + o}, {0.62, 0.51, 0.63}});
+        vertices.push_back({{0.9f + o, 0.9f + o, 1.0f + o}, {0.22, 0.11, 0.93}});
 
-                indices.push_back(j + 1 + j_lim * i);
-                indices.push_back(j + j_lim * (i + 1));
-                indices.push_back(j + 1 + j_lim * (i + 1));
-            }
-        }
+        indices.push_back({0});
+        indices.push_back({1});
+        indices.push_back({2});
+        indices.push_back({1});
+        indices.push_back({2});
+        indices.push_back({3});
+
+        indices.push_back({4});
+        indices.push_back({5});
+        indices.push_back({6});
+        indices.push_back({5});
+        indices.push_back({6});
+        indices.push_back({7});
+
+        indices.push_back({0});
+        indices.push_back({1});
+        indices.push_back({4});
+        indices.push_back({1});
+        indices.push_back({4});
+        indices.push_back({5});
+
+        indices.push_back({2});
+        indices.push_back({3});
+        indices.push_back({6});
+        indices.push_back({3});
+        indices.push_back({6});
+        indices.push_back({7});
+
+        o += 0.9f;
 
         m_vertexBuffer.bind();
         m_vertexBuffer.allocate(vertices.data(), vertices.size() * sizeof(VertexData));

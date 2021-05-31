@@ -57,8 +57,8 @@ namespace app {
     void CameraWidget::setProjectionMatrix(int w, int h) {
         //        const qreal aspect = qreal(w) / qreal(h ? h : 1);
 
-        const qreal zNear = 0.2;
-        const qreal zFar  = 1000.0;
+        const qreal zNear = 0.01;
+        const qreal zFar  = 10000.0;
         //        const qreal fov   = 54.0;
 
         m_projectionMatrix.setToIdentity();

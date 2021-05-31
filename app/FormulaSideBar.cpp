@@ -16,36 +16,29 @@
 
 namespace app {
     FormulaSideBar::FormulaSideBar(QWidget* parent) : QWidget(parent) {
+        m_layout     = new QVBoxLayout();
         m_scrollArea = new QScrollArea(this);
-        m_scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-        m_scrollArea->setWidgetResizable(true);
-
         auto* widget = new QWidget();
-        m_scrollArea->setWidget(widget);
-
-        m_layout = new QVBoxLayout();
+        m_scrollArea->setWidgetResizable(true);
         widget->setLayout(m_layout);
+        m_scrollArea->setWidget(widget);
+        auto* layout = new QHBoxLayout(this);
+        layout->addWidget(m_scrollArea);
+        setLayout(layout);
 
         m_newFormulaPushButton = new QPushButton(m_scrollArea->widget());
         m_newFormulaPushButton->setText("+");
-        m_layout->addWidget(m_newFormulaPushButton);
-
         connect(m_newFormulaPushButton, &QPushButton::clicked, this, &FormulaSideBar::addNewFormulaWidget);
+        m_layout->addWidget(m_newFormulaPushButton);
+        m_layout->setAlignment(Qt::AlignTop);
 
         UndoRedoHandler::setPushBlocked(true);
         addNewFormulaWidget();
         addNewFormulaWidget();
         UndoRedoHandler::setPushBlocked(false);
 
-        m_layout->setAlignment(Qt::AlignTop);
-        setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-
-        auto* layout = new QHBoxLayout(this);
-        layout->addWidget(m_scrollArea);
-        setLayout(layout);
+        setBaseSize({300, 800});
         installEventFilter(UndoRedoConsumer::undoRedoConsumer());
-
-        //        setMinimumWidth(300);
     }
 
     void FormulaSideBar::addNewFormulaWidget() {
@@ -70,7 +63,4 @@ namespace app {
         UndoRedoHandler::push(new cmd::RemoveFormulaWidgetCommand(this, indexOfWidget));
     }
 
-    QSize FormulaSideBar::sizeHint() const {
-        return {300, 1000};
-    }
 } // namespace app

@@ -20,7 +20,7 @@ void app::SurfaceManager::add(std::unique_ptr<Surface>&& surface) {
 }
 
 void app::SurfaceManager::draw(QOpenGLShaderProgram* program) {
-    if (not m_axes.isHidden()){
+    if (not m_axes.isHidden()) {
         m_axes.draw(program);
     }
     for (const auto& surface : m_surfaces) {
@@ -31,7 +31,6 @@ void app::SurfaceManager::draw(QOpenGLShaderProgram* program) {
 }
 
 void app::SurfaceManager::remove(size_t indexOfSurface) {
-
     auto it = std::find_if(m_surfaces.begin(), m_surfaces.end(), [indexOfSurface](const auto& a) { return a->index() == indexOfSurface; });
     if (it != m_surfaces.end()) {
         m_surfaces.erase(it);
