@@ -27,6 +27,7 @@ namespace app {
 
       signals:
         void deleteClicked(size_t index);
+        void updated();
 
       private slots:
         void setFormula(const QString& string);

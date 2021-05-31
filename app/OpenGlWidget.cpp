@@ -11,6 +11,9 @@ namespace app {
         m_cameraWidget = new CameraWidget();
         m_cameraWidget->show();
         connect(m_cameraWidget, &CameraWidget::updated, this, [this]() { update(); });
+
+        setMinimumWidth(400);
+        setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     }
 
     void OpenGlWidget::mousePressEvent(QMouseEvent* e) {

@@ -17,6 +17,7 @@
 #include <QPushButton>
 #include <QToolTip>
 #include <iostream>
+#include <memory>
 
 namespace app {
 
@@ -50,17 +51,18 @@ namespace app {
         m_lineEdit->installEventFilter(UndoRedoConsumer::undoRedoConsumer());
 
         m_layout->setAlignment(Qt::AlignTop);
-        setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+        setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+        setMinimumWidth(200);
     }
 
     void FormulaWidget::setFormula(const QString& string) {
-        std::string functionString = string.toStdString();
-        m_formula                  = std::make_unique<fml::Formula>(functionString);
+        m_formula = std::make_unique<fml::Formula>(string.toStdString());
         if (m_formula->success()) {
             handleCorrectFormula();
         } else {
             handleWrongFormula(m_formula->errorString());
         }
+        emit updated();
     }
 
     void FormulaWidget::setTextColor(const QColor& color) {
