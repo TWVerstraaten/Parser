@@ -20,4 +20,4 @@ namespace alg {
         boost::trim(string);
         return string;
     }
-}
+} // namespace alg

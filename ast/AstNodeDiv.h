@@ -7,8 +7,6 @@
 
 #include "AstNode.h"
 
-#include <set>
-
 namespace ast {
     class AstNodeDiv : public AstNode {
       public:

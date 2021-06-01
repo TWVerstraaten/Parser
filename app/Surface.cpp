@@ -5,8 +5,6 @@
 #include "Surface.h"
 
 #include <QOpenGLShaderProgram>
-#include <QVector3D>
-#include <cmath>
 
 namespace app {
 
@@ -43,14 +41,14 @@ namespace app {
         static float o = 0.0f;
 
         vertices.push_back({{0.0f + o, 0.0f + o, 0.0f + o}, {0.12, 0.51, 0.33}});
-        vertices.push_back({{0.9f + o, 0.0f + o, 0.0f + o}, {0.12, 0.51, 0.13}});
-        vertices.push_back({{0.0f + o, 0.9f + o, 0.0f + o}, {0.12, 0.21, 0.33}});
-        vertices.push_back({{0.9f + o, 0.9f + o, 0.0f + o}, {0.72, 0.51, 0.33}});
+        vertices.push_back({{0.6f + o, 0.0f + o, 0.0f + o}, {0.12, 0.51, 0.13}});
+        vertices.push_back({{0.0f + o, 0.6f + o, 0.0f + o}, {0.12, 0.21, 0.33}});
+        vertices.push_back({{0.6f + o, 0.6f + o, 0.0f + o}, {0.72, 0.51, 0.33}});
 
-        vertices.push_back({{0.0f + o, 0.0f + o, 1.0f + o}, {0.02, 0.01, 0.83}});
-        vertices.push_back({{0.9f + o, 0.0f + o, 1.0f + o}, {0.12, 0.51, 0.63}});
-        vertices.push_back({{0.0f + o, 0.9f + o, 1.0f + o}, {0.62, 0.51, 0.63}});
-        vertices.push_back({{0.9f + o, 0.9f + o, 1.0f + o}, {0.22, 0.11, 0.93}});
+        vertices.push_back({{0.0f + o, 0.0f + o, 0.6f + o}, {0.02, 0.01, 0.83}});
+        vertices.push_back({{0.6f + o, 0.0f + o, 0.6f + o}, {0.12, 0.51, 0.63}});
+        vertices.push_back({{0.0f + o, 0.6f + o, 0.6f + o}, {0.62, 0.51, 0.63}});
+        vertices.push_back({{0.6f + o, 0.6f + o, 0.6f + o}, {0.22, 0.11, 0.63}});
 
         indices.push_back({0});
         indices.push_back({1});
@@ -80,7 +78,7 @@ namespace app {
         indices.push_back({6});
         indices.push_back({7});
 
-        o += 0.9f;
+        o += 0.6f;
 
         m_vertexBuffer.bind();
         m_vertexBuffer.allocate(vertices.data(), vertices.size() * sizeof(VertexData));
@@ -104,7 +102,7 @@ namespace app {
         program->enableAttributeArray(colorLocation);
         program->setAttributeBuffer(colorLocation, GL_FLOAT, offset, 3, sizeof(VertexData));
 
-        glDrawElements(GL_TRIANGLES, m_indexBuffer.size(), GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, m_indexBuffer.size(), GL_UNSIGNED_INT, nullptr);
     }
 
     bool Surface::isHidden() const {

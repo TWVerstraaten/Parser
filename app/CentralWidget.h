@@ -5,18 +5,21 @@
 #ifndef PARSER_CENTRALWIDGET_H
 #define PARSER_CENTRALWIDGET_H
 
-#include "FormulaSideBar.h"
-#include "OpenGlWidget.h"
-
 #include <QWidget>
 
 class QHBoxLayout;
 
 namespace app {
+    class FormulaSideBar;
+    class OpenGlWidget;
+
     class CentralWidget : public QWidget {
         Q_OBJECT
       public:
         explicit CentralWidget(QWidget* parent = nullptr);
+
+      protected:
+        void keyPressEvent(QKeyEvent* event) override;
 
       private:
         FormulaSideBar* m_formulaSideBar = nullptr;

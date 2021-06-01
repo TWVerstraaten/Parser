@@ -17,7 +17,6 @@
 #include <QPushButton>
 #include <QToolTip>
 #include <iostream>
-#include <memory>
 
 namespace app {
 

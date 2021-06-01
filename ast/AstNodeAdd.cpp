@@ -55,7 +55,7 @@ namespace ast {
         if (simplifiedNode->m_nodes.size() == 1) {
             return simplifiedNode->m_nodes.front()->simplify();
         }
-        return simplifiedNode;
+        return u_ptr_AstNode(std::move(simplifiedNode));
     }
 
     AstNode::NODE_TYPE AstNodeAdd::type() const {

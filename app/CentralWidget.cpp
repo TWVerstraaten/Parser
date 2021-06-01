@@ -4,7 +4,11 @@
 
 #include "CentralWidget.h"
 
+#include "FormulaSideBar.h"
+#include "OpenGlWidget.h"
+
 #include <QHBoxLayout>
+#include <QKeyEvent>
 #include <QSplitter>
 
 app::CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent) {
@@ -20,10 +24,18 @@ app::CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent) {
     splitter->setStretchFactor(1, 1);
     splitter->setOrientation(Qt::Horizontal);
 
-    //    m_layout->addWidget(m_formulaSideBar, 1);
-    //    m_layout->addWidget(m_openGlWidget, 4);
-
     m_layout->addWidget(splitter);
     setLayout(m_layout);
     resize(800, 600);
+}
+
+void app::CentralWidget::keyPressEvent(QKeyEvent* event) {
+    switch (event->key()) {
+        case Qt::Key_C:
+            m_openGlWidget->cameraWidget().toggleCameraMode();
+            m_openGlWidget->repaint();
+            break;
+        default:
+            break;
+    }
 }

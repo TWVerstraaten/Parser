@@ -10,7 +10,6 @@
 
 namespace alg {
     class StringAlg {
-
       public:
         static std::string setToString(const std::set<std::string>& set);
     };

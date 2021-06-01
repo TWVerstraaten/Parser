@@ -9,6 +9,7 @@
 #include "AstNode.h"
 
 #include <map>
+#include <memory>
 #include <vector>
 
 namespace ast {

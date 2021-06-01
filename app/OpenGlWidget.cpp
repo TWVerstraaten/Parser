@@ -8,9 +8,7 @@
 
 namespace app {
     OpenGlWidget::OpenGlWidget(QWidget* parent) : QOpenGLWidget(parent) {
-        m_cameraWidget = new CameraWidget();
-        m_cameraWidget->show();
-        connect(m_cameraWidget, &CameraWidget::updated, this, [this]() { update(); });
+        m_cameraManager.reset(new CameraManager(this));
     }
 
     void OpenGlWidget::mousePressEvent(QMouseEvent* e) {
@@ -32,13 +30,13 @@ namespace app {
             case CLICK_STATE::NONE:
                 break;
             case CLICK_STATE::LEFT:
-                m_cameraWidget->translateCameraPosition(dX, dY);
+                m_cameraManager->translateCameraPosition(dX, dY);
                 break;
             case CLICK_STATE::RIGHT:
-                m_cameraWidget->rotateViewDirection(dX, dY);
+                m_cameraManager->rotateViewDirection(dX, dY);
                 break;
             case CLICK_STATE::MIDDLE:
-                m_cameraWidget->rotateUpDirection(dX, dY);
+                m_cameraManager->rotateUpDirection(dX, dY);
                 break;
         }
 
@@ -46,13 +44,13 @@ namespace app {
         update();
     }
 
-    void OpenGlWidget::mouseReleaseEvent(QMouseEvent* e) {
+    void OpenGlWidget::mouseReleaseEvent([[maybe_unused]] QMouseEvent* e) {
         m_clickState = CLICK_STATE::NONE;
     }
 
     void OpenGlWidget::initializeGL() {
         initializeOpenGLFunctions();
-        glClearColor(1, 1, 1, 1);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         initShaders();
 
         glEnable(GL_DEPTH_TEST);
@@ -60,6 +58,7 @@ namespace app {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+        // This call needs to be done after initializeOpenGLFunctions()
         m_surfaceManager = std::make_unique<SurfaceManager>();
     }
 
@@ -79,21 +78,25 @@ namespace app {
     }
 
     void OpenGlWidget::resizeGL(int w, int h) {
-        m_cameraWidget->setProjectionMatrix(w, h);
+        m_cameraManager->setProjectionMatrix(w, h);
     }
 
     void OpenGlWidget::paintGL() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        m_cameraWidget->setProjectionMatrix(width(), height());
-        m_shaderProgram.setUniformValue("mvp_matrix", m_cameraWidget->projectionMatrix() * m_cameraWidget->lookAtMatrix());
+        m_cameraManager->setProjectionMatrix(width(), height());
+        m_shaderProgram.setUniformValue("mvp_matrix", m_cameraManager->projectionMatrix() * m_cameraManager->lookAtMatrix());
         m_surfaceManager->draw(&m_shaderProgram);
     }
 
     void OpenGlWidget::wheelEvent(QWheelEvent* event) {
         const float degrees = event->angleDelta().y() / 8.0f;
-        m_cameraWidget->zoom(degrees);
+        m_cameraManager->zoom(degrees);
         update();
+    }
+
+    CameraManager& OpenGlWidget::cameraWidget() {
+        return *m_cameraManager;
     }
 
 } // namespace app

@@ -8,8 +8,6 @@
 #include "../gen/Number.h"
 #include "AstNode.h"
 
-#include <variant>
-
 namespace ast {
     class AstNodeNumber : public AstNode {
       public:
