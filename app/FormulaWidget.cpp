@@ -59,7 +59,7 @@ namespace app {
         } else {
             handleWrongFormula(m_formula->errorString());
         }
-        emit updated();
+        emit updated(m_index);
     }
 
     void FormulaWidget::setTextColor(const QColor& color) {
@@ -79,8 +79,6 @@ namespace app {
         if (const auto hint = m_formula->getHints(); not hint.empty()) {
             showToolTipAtLineEdit(251, QString::fromStdString(hint));
         }
-        std::cout << "x=1,y=3"
-                  << " " << m_formula->eval({{"x", gen::Number(1ll)}, {"y", gen::Number(3ll)}}).toString() << '\n';
         update();
     }
 
@@ -153,6 +151,10 @@ namespace app {
 
     QLineEdit* FormulaWidget::lineEdit() {
         return m_lineEdit;
+    }
+
+    const fml::Formula* FormulaWidget::formula() const {
+        return m_formula.get();
     }
 
 } // namespace app

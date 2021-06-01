@@ -109,4 +109,8 @@ namespace gen {
     Number operator-(const Number& a) {
         return a.negate();
     }
+
+    float Number::toFloat() const {
+        return std::visit([](const auto& a) { return static_cast<float>(a); }, m_number);
+    }
 } // namespace gen

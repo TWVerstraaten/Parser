@@ -5,7 +5,10 @@
 #ifndef PARSER_CENTRALWIDGET_H
 #define PARSER_CENTRALWIDGET_H
 
+#include "FormulaSurfaceInterface.h"
+
 #include <QWidget>
+#include <memory>
 
 class QHBoxLayout;
 
@@ -22,9 +25,10 @@ namespace app {
         void keyPressEvent(QKeyEvent* event) override;
 
       private:
-        FormulaSideBar* m_formulaSideBar = nullptr;
-        OpenGlWidget*   m_openGlWidget   = nullptr;
-        QHBoxLayout*    m_layout         = nullptr;
+        OpenGlWidget*                            m_openGlWidget   = nullptr;
+        FormulaSideBar*                          m_formulaSideBar = nullptr;
+        QHBoxLayout*                             m_layout         = nullptr;
+        std::unique_ptr<FormulaSurfaceInterface> m_formulaSurfaceInterface;
     };
 } // namespace app
 #endif // PARSER_CENTRALWIDGET_H

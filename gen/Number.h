@@ -17,6 +17,7 @@ namespace gen {
         explicit Number(long long value);
         explicit Number(double value);
 
+        [[nodiscard]] float                                      toFloat() const;
         [[nodiscard]] Number                                     negate() const;
         [[nodiscard]] const std::variant<long long int, double>& number() const;
         [[nodiscard]] std::string                                toString() const;

@@ -22,12 +22,13 @@ namespace app {
       public:
         explicit FormulaWidget(QWidget* parent = nullptr);
 
-        [[nodiscard]] size_t     index() const;
-        [[nodiscard]] QLineEdit* lineEdit();
+        [[nodiscard]] size_t              index() const;
+        [[nodiscard]] QLineEdit*          lineEdit();
+        [[nodiscard]] const fml::Formula* formula() const;
 
       signals:
         void deleteClicked(size_t index);
-        void updated();
+        void updated(size_t index);
 
       private slots:
         void setFormula(const QString& string);

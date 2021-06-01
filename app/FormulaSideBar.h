@@ -21,16 +21,19 @@ namespace app {
       public:
         explicit FormulaSideBar(QWidget* parent = nullptr);
 
-        FormulaWidget* fromIndex(size_t index);
+        [[nodiscard]] FormulaWidget*                     fromIndex(size_t index);
+        [[nodiscard]] const std::vector<FormulaWidget*>& formulaWidgets() const;
 
       signals:
-        void updated();
+        void sendUpdate();
 
       private slots:
         void RemoveFormulaWidget(size_t indexOfWidget);
         void addNewFormulaWidget();
 
       private:
+        void updateAt(size_t index);
+
         std::vector<FormulaWidget*> m_formulaWidgets;
         QPushButton*                m_newFormulaPushButton;
         QScrollArea*                m_scrollArea;

@@ -24,6 +24,7 @@ namespace app {
             m_surfaces.push_back(std::make_unique<Surface>());
         };
 
+        void clear();
         void add(std::unique_ptr<Surface>&& surface);
         void remove(size_t indexOfSurface);
         void draw(QOpenGLShaderProgram* program);

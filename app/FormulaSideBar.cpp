@@ -13,6 +13,7 @@
 #include <QPushButton>
 #include <QScrollArea>
 #include <QVBoxLayout>
+#include <iostream>
 
 namespace app {
     FormulaSideBar::FormulaSideBar(QWidget* parent) : QWidget(parent) {
@@ -42,12 +43,13 @@ namespace app {
     }
 
     void FormulaSideBar::addNewFormulaWidget() {
-        auto* newFormulaWidget = new FormulaWidget(m_scrollArea->widget());
-        connect(newFormulaWidget, &FormulaWidget::updated, [this]() { emit updated(); });
+        auto*      newFormulaWidget = new FormulaWidget(m_scrollArea->widget());
+        const auto newFormulaIndex  = newFormulaWidget->index();
+        connect(newFormulaWidget, &FormulaWidget::updated, [this](size_t index) { updateAt(index); });
+        connect(newFormulaWidget, &FormulaWidget::deleteClicked, this, &FormulaSideBar::RemoveFormulaWidget);
 
         m_formulaWidgets.push_back(newFormulaWidget);
-        UndoRedoHandler::push(new cmd::NewFormulaWidgetCommand(this, newFormulaWidget->index()));
-        connect(newFormulaWidget, &FormulaWidget::deleteClicked, this, &FormulaSideBar::RemoveFormulaWidget);
+        UndoRedoHandler::push(new cmd::NewFormulaWidgetCommand(this, newFormulaIndex));
 
         m_layout->removeWidget(m_newFormulaPushButton);
         m_layout->addWidget(m_formulaWidgets.back());
@@ -61,6 +63,16 @@ namespace app {
 
     void FormulaSideBar::RemoveFormulaWidget(size_t indexOfWidget) {
         UndoRedoHandler::push(new cmd::RemoveFormulaWidgetCommand(this, indexOfWidget));
+    }
+
+    void FormulaSideBar::updateAt(size_t index) {
+        std::cout << index << '\n';
+
+        emit sendUpdate();
+    }
+
+    const std::vector<FormulaWidget*>& FormulaSideBar::formulaWidgets() const {
+        return m_formulaWidgets;
     }
 
 } // namespace app

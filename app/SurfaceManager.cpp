@@ -36,3 +36,7 @@ void app::SurfaceManager::remove(size_t indexOfSurface) {
         m_surfaces.erase(it);
     }
 }
+
+void app::SurfaceManager::clear() {
+    m_surfaces.clear();
+}

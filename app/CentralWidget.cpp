@@ -12,8 +12,10 @@
 #include <QSplitter>
 
 app::CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent) {
-    m_formulaSideBar = new FormulaSideBar(this);
     m_openGlWidget   = new OpenGlWidget(this);
+    m_formulaSideBar = new FormulaSideBar(this);
+
+    m_formulaSurfaceInterface = std::make_unique<FormulaSurfaceInterface>(m_openGlWidget, m_formulaSideBar);
 
     m_layout = new QHBoxLayout(this);
 

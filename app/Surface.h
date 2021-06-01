@@ -10,6 +10,10 @@
 
 class QOpenGLShaderProgram;
 
+namespace fml {
+    class Formula;
+}
+
 namespace app {
     class Surface : protected QOpenGLFunctions {
       public:
@@ -19,12 +23,13 @@ namespace app {
         void draw(QOpenGLShaderProgram* program);
         void hide();
         void show();
+        void fillBuffers(const fml::Formula& formula);
 
         [[nodiscard]] size_t index() const;
         [[nodiscard]] bool   isHidden() const;
 
       private:
-        void fillBuffers();
+        void fillBuffers_testSurface();
 
         inline static size_t m_maxIndex = 0;
         const size_t         m_index;

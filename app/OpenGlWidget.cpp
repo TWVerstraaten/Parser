@@ -5,10 +5,11 @@
 #include "OpenGlWidget.h"
 
 #include <QMouseEvent>
+#include <memory>
 
 namespace app {
     OpenGlWidget::OpenGlWidget(QWidget* parent) : QOpenGLWidget(parent) {
-        m_cameraManager.reset(new CameraManager(this));
+        m_cameraManager = std::make_unique<CameraManager>(this);
     }
 
     void OpenGlWidget::mousePressEvent(QMouseEvent* e) {
@@ -97,6 +98,10 @@ namespace app {
 
     CameraManager& OpenGlWidget::cameraWidget() {
         return *m_cameraManager;
+    }
+
+    SurfaceManager* OpenGlWidget::surfaceManager() const {
+        return m_surfaceManager.get();
     }
 
 } // namespace app

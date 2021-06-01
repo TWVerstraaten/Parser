@@ -23,14 +23,17 @@ namespace fml {
     }
 
     Formula::Formula(std::string string) : m_string(std::move(string)) {
-        if (containsIllegalCharacters()) {
+        if (setErrorIf(containsIllegalCharacters(), "Contains Illegal characters")) {
             return;
         }
-
+        if (setErrorIf(m_string.empty(), "Empty Formula")) {
+            return;
+        }
         const auto parts = alg::BoostWrapper::trimAndSplit(m_string, "=");
         if (setErrorIf(parts.size() == 1, "Does not contain '=' sign")) {
             return;
-        } else if (setErrorIf(parts.size() > 2, "Too many '=' signs")) {
+        }
+        if (setErrorIf(parts.size() > 2, "Too many '=' signs")) {
             return;
         }
         if (not parseFormulaHeader(parts.at(0)) || not parseAst(parts.at(1))) {

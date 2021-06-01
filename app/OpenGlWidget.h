@@ -12,7 +12,6 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLWidget>
 #include <QVector2D>
-#include <memory>
 
 namespace app {
     class OpenGlWidget : public QOpenGLWidget, protected QOpenGLFunctions {
@@ -22,7 +21,8 @@ namespace app {
         explicit OpenGlWidget(QWidget* parent = nullptr);
         ~OpenGlWidget() override = default;
 
-        [[nodiscard]] CameraManager& cameraWidget();
+        [[nodiscard]] CameraManager&  cameraWidget();
+        [[nodiscard]] SurfaceManager* surfaceManager() const;
 
       protected:
         void mousePressEvent(QMouseEvent* e) override;
