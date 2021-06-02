@@ -4,15 +4,56 @@
 
 #include "AstNodeFunction.h"
 
-#include <algorithm>
+#include "../alg/BoostWrapper.h"
+#include "../fml/prs/ParserException.h"
+#include "ReservedFunction1.h"
+#include "ReservedFunction2.h"
+
 #include <cassert>
+#include <cmath>
 #include <iterator>
+#include <memory>
 #include <sstream>
 
 namespace ast {
 
     AstNodeFunction::AstNodeFunction(std::string functionName, std::vector<u_ptr_AstNode>&& arguments)
         : m_functionName(std::move(functionName)), m_arguments(std::move(arguments)) {
+
+        assert(m_functionName == alg::BoostWrapper::trim(m_functionName));
+
+        if (m_reservedFunctions.find(m_functionName) != m_reservedFunctions.end()) {
+            if (m_arguments.size() != m_reservedFunctions.at(m_functionName)) {
+                throw fml::prs::ParserException(fml::prs::ParserException::PARSER_ERROR::RESERVED_FUNCTION_WRONG_ARG_COUNT,
+                                                ": " + m_functionName + " should have " +
+                                                    std::to_string(m_reservedFunctions.at(m_functionName)) + " arguments");
+            }
+
+#define TT_RESERVED_CAST_1_(x) std::make_unique<ReservedFunction1>([](const auto& a) { return x(a); })
+#define TT_RESERVED_CAST_2_(x) std::make_unique<ReservedFunction2>([](const auto& a, const auto& b) { return x(a, b); })
+            if (m_functionName == "sin") {
+                m_reservedFunction = TT_RESERVED_CAST_1_(std::sin);
+            } else if (m_functionName == "cos") {
+                m_reservedFunction = TT_RESERVED_CAST_1_(std::cos);
+            } else if (m_functionName == "tan") {
+                m_reservedFunction = TT_RESERVED_CAST_1_(std::tan);
+            } else if (m_functionName == "exp") {
+                m_reservedFunction = TT_RESERVED_CAST_1_(std::exp);
+            } else if (m_functionName == "asin") {
+                m_reservedFunction = TT_RESERVED_CAST_1_(std::asin);
+            } else if (m_functionName == "acos") {
+                m_reservedFunction = TT_RESERVED_CAST_1_(std::acos);
+            } else if (m_functionName == "atan") {
+                m_reservedFunction = TT_RESERVED_CAST_1_(std::atan);
+            } else if (m_functionName == "atan2") {
+                m_reservedFunction = TT_RESERVED_CAST_2_(std::atan2);
+            } else {
+                throw fml::prs::ParserException(fml::prs::ParserException::PARSER_ERROR::RESERVED_FUNCTION_NOT_IMPLEMENTED,
+                                                ": " + m_functionName);
+            }
+#undef TT_RESERVED_CAST_1_
+#undef TT_RESERVED_CAST_2_
+        }
     }
 
     std::string AstNodeFunction::toString() const {
@@ -90,6 +131,7 @@ namespace ast {
     u_ptr_AstNode AstNodeFunction::differentiate(const std::string& variable) const {
         return makeError();
     }
+
     std::set<std::string> AstNodeFunction::collectVariables() const {
         std::set<std::string> result;
         for (const auto& arg : m_arguments) {
@@ -98,8 +140,22 @@ namespace ast {
         }
         return result;
     }
+
     gen::Number AstNodeFunction::eval(const std::map<std::string, gen::Number>& arguments) const {
-        assert(false);
+        if (isReserved()) {
+            switch (m_arguments.size()) {
+                case 1:
+                    return m_reservedFunction->eval(m_arguments.at(0)->eval(arguments));
+                case 2:
+                    return m_reservedFunction->eval(m_arguments.at(0)->eval(arguments), m_arguments.at(1)->eval(arguments));
+                default:
+                    assert(false);
+            }
+        }
         return gen::Number(0ll);
+    }
+
+    bool AstNodeFunction::isReserved() const {
+        return m_reservedFunction != nullptr;
     }
 } // namespace ast

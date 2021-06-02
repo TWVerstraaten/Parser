@@ -10,6 +10,7 @@ namespace app {
         m_undoView  = std::make_unique<QUndoView>(m_undoStack.get());
         m_undoView->show();
         m_initialized = true;
+        m_undoStack->setUndoLimit(250);
     }
 
     void UndoRedoHandler::undo() {

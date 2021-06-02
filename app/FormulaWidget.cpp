@@ -16,10 +16,8 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QToolTip>
-#include <iostream>
 
 namespace app {
-
     static void setTextColor(QWidget* widget, const QColor& color) {
         auto* palette = new QPalette();
         palette->setColor(QPalette::Text, color);
@@ -30,21 +28,19 @@ namespace app {
         ++m_maxIndex;
 
         initPointers();
-
         initButtons();
 
-        m_layout->addWidget(m_deleteButton, 0, 2);
         m_layout->addWidget(m_activeCheckBox, 0, 0);
         m_layout->addWidget(m_lineEdit, 0, 1);
+        m_layout->addWidget(m_deleteButton, 0, 2);
+        m_layout->addWidget(m_colorButton, 0, 3);
+
         m_layout->addWidget(m_collapseButton, 1, 0, 1, 3);
-        m_layout->addWidget(new QLabel("Var:"), 2, 0);
-        m_layout->addWidget(m_variableLabel, 2, 1);
-        m_layout->addWidget(new QLabel("Spf:"), 3, 0);
-        m_layout->addWidget(m_simplifiedLabel, 4, 1);
-        m_layout->addWidget(new QLabel("Msg:"), 4, 0);
-        m_layout->addWidget(m_messageLabel, 4, 1);
-        m_layout->addWidget(new QLabel("Idx:"), 5, 0);
-        m_layout->addWidget(m_indexLabel, 5, 1);
+
+        m_layout->addWidget(new QLabel("Msg:"), 2, 0);
+        m_layout->addWidget(m_messageLabel, 2, 1);
+        m_layout->addWidget(new QLabel("Idx:"), 3, 0);
+        m_layout->addWidget(m_indexLabel, 3, 1);
 
         connectSignals();
         m_lineEdit->installEventFilter(UndoRedoConsumer::undoRedoConsumer());
@@ -64,16 +60,12 @@ namespace app {
 
     void FormulaWidget::setTextColor(const QColor& color) {
         ::app::setTextColor(m_lineEdit, color);
-        ::app::setTextColor(m_variableLabel, color);
         ::app::setTextColor(m_messageLabel, color);
     }
 
     void FormulaWidget::handleCorrectFormula() {
         setTextColor(Qt::black);
-        m_variableLabel->setText("<font color=\"green\">" +
-                                 QString::fromStdString(alg::StringAlg::setToString(m_formula->declaredVariables())));
         m_messageLabel->setText("");
-        m_simplifiedLabel->setText(QString::fromStdString(m_formula->ast().toString()));
         QToolTip::hideText();
 
         if (const auto hint = m_formula->getHints(); not hint.empty()) {
@@ -84,7 +76,6 @@ namespace app {
 
     void FormulaWidget::handleWrongFormula(const std::string& errorMessage) {
         setTextColor(Qt::red);
-        m_variableLabel->setText("");
         m_messageLabel->setText(QString::fromStdString(errorMessage));
 
         showToolTipAtLineEdit(16449536, QString::fromStdString(errorMessage));
@@ -113,15 +104,14 @@ namespace app {
 
     void FormulaWidget::initPointers() {
         m_layout         = new QGridLayout(this);
+        m_colorButton    = new QPushButton(this);
         m_activeCheckBox = new QCheckBox(this);
         m_activeCheckBox->setChecked(true);
-        m_lineEdit        = new QLineEdit(this);
-        m_variableLabel   = new QLabel("_", this);
-        m_messageLabel    = new QLabel("_", this);
-        m_simplifiedLabel = new QLabel("_", this);
-        m_indexLabel      = new QLabel(QString::number(m_index), this);
-        m_deleteButton    = new QPushButton{this};
-        m_collapseButton  = new QPushButton(this);
+        m_lineEdit       = new QLineEdit(this);
+        m_messageLabel   = new QLabel("_", this);
+        m_indexLabel     = new QLabel(QString::number(m_index), this);
+        m_deleteButton   = new QPushButton{this};
+        m_collapseButton = new QPushButton(this);
     }
 
     void FormulaWidget::initButtons() {

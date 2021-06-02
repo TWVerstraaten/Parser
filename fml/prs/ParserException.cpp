@@ -27,6 +27,10 @@ namespace fml::prs {
                 return "Formula not terminated";
             case ParserException::PARSER_ERROR::BRACKET_MISMATCH:
                 return "Brackets do not match";
+            case ParserException::PARSER_ERROR::RESERVED_FUNCTION_WRONG_ARG_COUNT:
+                return "Wrong argument count";
+            case ParserException::PARSER_ERROR::RESERVED_FUNCTION_NOT_IMPLEMENTED:
+                return "Reserved function not implemented";
         }
         return "";
     }

@@ -6,14 +6,20 @@
 #define PARSER_ASTNODEFUNCTION_H
 
 #include "AstNode.h"
+#include "ReservedFunction.h"
 
 #include <vector>
 
 namespace ast {
     class AstNodeFunction : public AstNode {
+
+        inline static const std::map<std::string, size_t> m_reservedFunctions{{"sin", 1},  {"cos", 1},  {"tan", 1},  {"exp", 1},
+                                                                              {"asin", 1}, {"acos", 1}, {"atan", 1}, {"atan2", 2}};
+
       public:
         AstNodeFunction(std::string functionName, std::vector<u_ptr_AstNode>&& arguments);
 
+        [[nodiscard]] bool                  isReserved() const;
         [[nodiscard]] bool                  compareEqualType(const AstNode* rhs) const override;
         [[nodiscard]] size_t                childCount() const override;
         [[nodiscard]] NODE_TYPE             type() const override;
@@ -29,6 +35,8 @@ namespace ast {
         [[nodiscard]] bool equals(const AstNode& other) const override;
 
       private:
+        std::unique_ptr<ReservedFunction> m_reservedFunction{nullptr};
+
         std::string                m_functionName;
         std::vector<u_ptr_AstNode> m_arguments;
     };

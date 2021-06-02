@@ -50,11 +50,10 @@ namespace app {
         QGridLayout*                  m_layout          = nullptr;
         QCheckBox*                    m_activeCheckBox  = nullptr;
         QLineEdit*                    m_lineEdit        = nullptr;
-        QLabel*                       m_variableLabel   = nullptr;
         QLabel*                       m_messageLabel    = nullptr;
         QLabel*                       m_indexLabel      = nullptr;
-        QLabel*                       m_simplifiedLabel = nullptr;
         QPushButton*                  m_deleteButton    = nullptr;
+        QPushButton*                  m_colorButton     = nullptr;
         QPushButton*                  m_collapseButton  = nullptr;
         QString                       m_oldFormula      = "";
         std::unique_ptr<fml::Formula> m_formula;

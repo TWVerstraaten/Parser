@@ -34,5 +34,5 @@ void app::FormulaSurfaceInterface::updateSurfaces() {
             }
         }
     }
-    std::cout << "Update\n";
+    m_openGlWidget->repaint();
 }

@@ -18,6 +18,8 @@ namespace fml::prs {
             VALUE_TYPE_READ,
             INVALID_TERM_OP,
             INVALID_FACTOR_OP,
+            RESERVED_FUNCTION_WRONG_ARG_COUNT,
+            RESERVED_FUNCTION_NOT_IMPLEMENTED,
             INVALID_EXPR_OP,
             UNTERMINATED,
             BRACKET_MISMATCH
