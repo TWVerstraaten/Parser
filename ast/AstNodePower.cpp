@@ -6,6 +6,7 @@
 
 #include <cassert>
 #include <cmath>
+#include <unordered_set>
 
 namespace ast {
     AstNodePower::AstNodePower(u_ptr_AstNode&& base, u_ptr_AstNode&& exponent) : m_base(std::move(base)), m_exponent(std::move(exponent)) {
@@ -74,13 +75,19 @@ namespace ast {
         return makeError();
     }
 
-    std::set<std::string> AstNodePower::collectVariables() const {
-        auto result = m_base->collectVariables();
-        result.merge(m_exponent->collectVariables());
+    std::set<std::string> AstNodePower::usedVariables() const {
+        auto result = m_base->usedVariables();
+        result.merge(m_exponent->usedVariables());
         return result;
     }
 
     gen::Number AstNodePower::eval(const std::map<std::string, gen::Number>& arguments) const {
         return m_base->eval(arguments) ^ m_exponent->eval(arguments);
+    }
+
+    std::set<FunctionSignature> AstNodePower::functionDependencies() const {
+        auto result = m_base->functionDependencies();
+        result.merge(m_exponent->functionDependencies());
+        return result;
     }
 } // namespace ast

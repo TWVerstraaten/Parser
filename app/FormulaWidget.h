@@ -16,7 +16,7 @@ class QPushButton;
 class QLineEdit;
 
 namespace app {
-    class FormulaWidget : public QWidget {
+    class FormulaWidget : public QWidget, public gen::ErrorBase {
         Q_OBJECT
 
       public:
@@ -25,6 +25,7 @@ namespace app {
         [[nodiscard]] size_t              index() const;
         [[nodiscard]] QLineEdit*          lineEdit();
         [[nodiscard]] const fml::Formula* formula() const;
+        [[nodiscard]] bool                formulaParsed() const;
 
       signals:
         void deleteClicked(size_t index);

@@ -5,6 +5,7 @@
 #include "AstNodeVar.h"
 
 #include <cassert>
+#include <unordered_set>
 
 namespace ast {
     AstNodeVar::AstNodeVar(std::string value) : m_variableName(std::move(value)) {
@@ -50,12 +51,16 @@ namespace ast {
         return variable == m_variableName ? makeOneNode() : makeZeroNode();
     }
 
-    std::set<std::string> AstNodeVar::collectVariables() const {
+    std::set<std::string> AstNodeVar::usedVariables() const {
         return {m_variableName};
     }
 
     gen::Number AstNodeVar::eval(const std::map<std::string, gen::Number>& arguments) const {
         assert(arguments.find(m_variableName) != arguments.end());
         return arguments.at(m_variableName);
+    }
+
+    std::set<FunctionSignature> AstNodeVar::functionDependencies() const {
+        return {};
     }
 } // namespace ast

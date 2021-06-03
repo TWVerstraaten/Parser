@@ -17,11 +17,12 @@ namespace ast {
       public:
         explicit Ast(std::string string);
 
-        [[nodiscard]] std::string           toString() const;
-        [[nodiscard]] Ast                   simplify() const;
-        [[nodiscard]] Ast                   differentiate(const std::string& variable) const;
-        [[nodiscard]] std::set<std::string> variables() const;
-        [[nodiscard]] gen::Number           eval(const std::map<std::string, gen::Number>& arguments) const;
+        [[nodiscard]] std::string                 toString() const;
+        [[nodiscard]] Ast                         simplify() const;
+        [[nodiscard]] Ast                         differentiate(const std::string& variable) const;
+        [[nodiscard]] std::set<std::string>       variables() const;
+        [[nodiscard]] gen::Number                 eval(const std::map<std::string, gen::Number>& arguments) const;
+        [[nodiscard]] std::set<FunctionSignature> functionDependencies() const;
 
       private:
         Ast() = default;

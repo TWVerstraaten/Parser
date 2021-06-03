@@ -5,6 +5,7 @@
 #include "AstNodeNumber.h"
 
 #include <cassert>
+#include <unordered_set>
 
 namespace ast {
     AstNodeNumber::AstNodeNumber(const std::string& string) : m_value(string) {
@@ -64,11 +65,15 @@ namespace ast {
         return makeZeroNode();
     }
 
-    std::set<std::string> AstNodeNumber::collectVariables() const {
+    std::set<std::string> AstNodeNumber::usedVariables() const {
         return {};
     }
 
     gen::Number AstNodeNumber::eval(const std::map<std::string, gen::Number>& arguments) const {
         return m_value;
+    }
+
+    std::set<FunctionSignature> AstNodeNumber::functionDependencies() const {
+        return std::set<FunctionSignature>{};
     }
 } // namespace ast

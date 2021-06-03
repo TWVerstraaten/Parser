@@ -5,6 +5,7 @@
 #include "AstNodeSubtract.h"
 
 #include <cassert>
+#include <unordered_set>
 
 namespace ast {
     AstNodeSubtract::AstNodeSubtract(u_ptr_AstNode&& left, u_ptr_AstNode&& right)
@@ -59,13 +60,19 @@ namespace ast {
         return m_leftNode->differentiate(variable) - m_rightNode->differentiate(variable);
     }
 
-    std::set<std::string> AstNodeSubtract::collectVariables() const {
-        auto result = m_rightNode->collectVariables();
-        result.merge(m_leftNode->collectVariables());
+    std::set<std::string> AstNodeSubtract::usedVariables() const {
+        auto result = m_rightNode->usedVariables();
+        result.merge(m_leftNode->usedVariables());
         return result;
     }
 
     gen::Number AstNodeSubtract::eval(const std::map<std::string, gen::Number>& arguments) const {
         return m_leftNode->eval(arguments) - m_rightNode->eval(arguments);
+    }
+
+    std::set<FunctionSignature> AstNodeSubtract::functionDependencies() const {
+        auto result = m_rightNode->functionDependencies();
+        result.merge(m_leftNode->functionDependencies());
+        return result;
     }
 } // namespace ast

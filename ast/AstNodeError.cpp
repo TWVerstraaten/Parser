@@ -5,6 +5,7 @@
 #include "AstNodeError.h"
 
 #include <cassert>
+#include <unordered_set>
 
 namespace ast {
     AstNodeError::AstNodeError(AstNodeError::ERROR_TYPE errorType) : m_errorType(errorType) {
@@ -54,11 +55,15 @@ namespace ast {
         return u_ptr_AstNode(new AstNodeError());
     }
 
-    std::set<std::string> AstNodeError::collectVariables() const {
+    std::set<std::string> AstNodeError::usedVariables() const {
         return {};
     }
     gen::Number AstNodeError::eval(const std::map<std::string, gen::Number>& arguments) const {
         assert(false);
         return gen::Number(0ll);
+    }
+
+    std::set<FunctionSignature> AstNodeError::functionDependencies() const {
+        return {};
     }
 } // namespace ast

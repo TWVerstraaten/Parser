@@ -12,7 +12,6 @@
 #include <cassert>
 #include <cmath>
 #include <iterator>
-#include <memory>
 #include <sstream>
 
 namespace ast {
@@ -132,10 +131,10 @@ namespace ast {
         return makeError();
     }
 
-    std::set<std::string> AstNodeFunction::collectVariables() const {
+    std::set<std::string> AstNodeFunction::usedVariables() const {
         std::set<std::string> result;
         for (const auto& arg : m_arguments) {
-            const auto temp = arg->collectVariables();
+            const auto temp = arg->usedVariables();
             result.insert(temp.begin(), temp.end());
         }
         return result;
@@ -157,5 +156,16 @@ namespace ast {
 
     bool AstNodeFunction::isReserved() const {
         return m_reservedFunction != nullptr;
+    }
+
+    std::set<FunctionSignature> AstNodeFunction::functionDependencies() const {
+        std::set<FunctionSignature> result;
+        for (const auto& argument : m_arguments) {
+            result.merge(argument->functionDependencies());
+        }
+        if (not isReserved()) {
+            result.insert({FunctionSignature{m_functionName, m_arguments.size()}});
+        }
+        return result;
     }
 } // namespace ast

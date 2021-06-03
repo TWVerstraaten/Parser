@@ -4,6 +4,7 @@
 
 #include "FormulaSideBar.h"
 
+#include "../ast/Ast.h"
 #include "FormulaWidget.h"
 #include "UndoRedoConsumer.h"
 #include "UndoRedoHandler.h"
@@ -67,11 +68,24 @@ namespace app {
 
     void FormulaSideBar::updateAt(size_t index) {
         std::cout << index << '\n';
-
         emit sendUpdate();
     }
 
     const std::vector<FormulaWidget*>& FormulaSideBar::formulaWidgets() const {
+        std::set<ast::FunctionSignature> functionDependencies;
+        for (const auto& formulaWidget : m_formulaWidgets) {
+            if (not formulaWidget->formulaParsed()) {
+                continue;
+            }
+            const auto& formula             = formulaWidget->formula();
+            const auto& localDependencies   = formula->ast().functionDependencies();
+            const auto& currentFunctionName = formula->formulaHeader().name();
+            if (std::find_if(localDependencies.begin(), localDependencies.end(),
+                             [&](const auto& a) { return currentFunctionName == a.functionName(); }) != localDependencies.end()) {
+                std::cout << "Circular Dependency: " << currentFunctionName << "\n";
+            }
+        }
+
         return m_formulaWidgets;
     }
 

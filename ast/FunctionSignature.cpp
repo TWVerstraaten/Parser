@@ -15,3 +15,9 @@ const std::string& ast::FunctionSignature::functionName() const {
 size_t ast::FunctionSignature::argumentCount() const {
     return m_argumentCount;
 }
+bool ast::FunctionSignature::operator<(const ast::FunctionSignature& rhs) const {
+    if (m_functionName != rhs.m_functionName) {
+        return m_functionName < rhs.m_functionName;
+    }
+    return m_argumentCount < rhs.m_argumentCount;
+}

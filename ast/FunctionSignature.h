@@ -17,9 +17,11 @@ namespace ast {
         [[nodiscard]] const std::string& functionName() const;
         [[nodiscard]] size_t             argumentCount() const;
 
+        bool operator<(const FunctionSignature& rhs) const;
+
       private:
-        const std::string m_functionName;
-        const size_t      m_argumentCount;
+        std::string m_functionName;
+        size_t      m_argumentCount;
     };
 
 } // namespace ast

@@ -37,10 +37,14 @@ namespace ast {
     }
 
     std::set<std::string> Ast::variables() const {
-        return m_rootNode->collectVariables();
+        return m_rootNode->usedVariables();
     }
 
     gen::Number Ast::eval(const std::map<std::string, gen::Number>& arguments) const {
         return m_rootNode->eval(arguments);
+    }
+
+    std::set<FunctionSignature> Ast::functionDependencies() const {
+        return m_rootNode->functionDependencies();
     }
 } // namespace ast

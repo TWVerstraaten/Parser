@@ -7,6 +7,8 @@
 
 #include "AstNode.h"
 
+#include <unordered_set>
+
 namespace ast {
     class AstNodeSubtract : public AstNode {
 
@@ -20,8 +22,9 @@ namespace ast {
         [[nodiscard]] u_ptr_AstNode         copy() const override;
         [[nodiscard]] u_ptr_AstNode         simplify() const override;
         [[nodiscard]] u_ptr_AstNode         differentiate(const std::string& variable) const override;
-        [[nodiscard]] std::set<std::string> collectVariables() const override;
+        [[nodiscard]] std::set<std::string> usedVariables() const override;
         [[nodiscard]] gen::Number           eval(const std::map<std::string, gen::Number>& arguments) const override;
+        std::set<FunctionSignature>         functionDependencies() const override;
 
       protected:
         [[nodiscard]] bool compareEqualType(const AstNode* rhs) const override;

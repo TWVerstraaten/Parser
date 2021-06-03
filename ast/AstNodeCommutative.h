@@ -10,6 +10,7 @@
 
 #include <functional>
 #include <set>
+#include <unordered_set>
 #include <vector>
 
 namespace ast {
@@ -21,12 +22,12 @@ namespace ast {
     class AstNodeCommutative : public AstNode {
 
       public:
-        void   addNode(u_ptr_AstNode node);
-        void   removeNode(const AstNode* nodeToRemove);
+        void addNode(u_ptr_AstNode node);
+        void removeNode(const AstNode* nodeToRemove);
 
-        [[nodiscard]] const AstNode* childAt(size_t index) const final;
-
-        [[nodiscard]] std::set<std::string> collectVariables() const override;
+        [[nodiscard]] const AstNode*              childAt(size_t index) const final;
+        [[nodiscard]] std::set<std::string>       usedVariables() const override;
+        [[nodiscard]] std::set<FunctionSignature> functionDependencies() const override;
 
       protected:
         AstNodeCommutative(std::function<gen::Number(const gen::Number&, const gen::Number&)> accumulator,

@@ -147,4 +147,11 @@ namespace app {
         return m_formula.get();
     }
 
+    bool FormulaWidget::formulaParsed() const {
+        if (not m_formula) {
+            return false;
+        }
+        return m_formula->success();
+    }
+
 } // namespace app

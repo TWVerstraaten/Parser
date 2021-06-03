@@ -7,6 +7,7 @@
 #include "AstNodeAdd.h"
 
 #include <cassert>
+#include <unordered_set>
 
 namespace ast {
     AstNodeUnaryMinus::AstNodeUnaryMinus(u_ptr_AstNode&& value) : m_value(std::move(value)) {
@@ -59,11 +60,15 @@ namespace ast {
         return -m_value->differentiate(variable);
     }
 
-    std::set<std::string> AstNodeUnaryMinus::collectVariables() const {
-        return m_value->collectVariables();
+    std::set<std::string> AstNodeUnaryMinus::usedVariables() const {
+        return m_value->usedVariables();
     }
 
     gen::Number AstNodeUnaryMinus::eval(const std::map<std::string, gen::Number>& arguments) const {
         return -m_value->eval(arguments);
+    }
+
+    std::set<FunctionSignature> AstNodeUnaryMinus::functionDependencies() const {
+        return m_value->functionDependencies();
     }
 } // namespace ast

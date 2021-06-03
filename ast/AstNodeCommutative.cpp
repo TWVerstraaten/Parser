@@ -7,6 +7,7 @@
 #include "AstNodeNumber.h"
 
 #include <cassert>
+#include <unordered_set>
 
 namespace ast {
     AstNodeCommutative::AstNodeCommutative(std::function<gen::Number(const gen::Number&, const gen::Number&)> accumulator,
@@ -129,10 +130,18 @@ namespace ast {
         return *m_nodes[index];
     }
 
-    std::set<std::string> AstNodeCommutative::collectVariables() const {
+    std::set<std::string> AstNodeCommutative::usedVariables() const {
         std::set<std::string> result;
         for (const auto& node : m_nodes) {
-            result.merge(node->collectVariables());
+            result.merge(node->usedVariables());
+        }
+        return result;
+    }
+
+    std::set<FunctionSignature> AstNodeCommutative::functionDependencies() const {
+        std::set<FunctionSignature> result;
+        for (const auto& node : m_nodes) {
+            result.merge(node->functionDependencies());
         }
         return result;
     }

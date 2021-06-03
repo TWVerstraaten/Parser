@@ -71,13 +71,19 @@ namespace ast {
         return makeError();
     }
 
-    std::set<std::string> AstNodeDiv::collectVariables() const {
-        auto result = m_numerator->collectVariables();
-        result.merge(m_denominator->collectVariables());
+    std::set<std::string> AstNodeDiv::usedVariables() const {
+        auto result = m_numerator->usedVariables();
+        result.merge(m_denominator->usedVariables());
         return result;
     }
 
     gen::Number AstNodeDiv::eval(const std::map<std::string, gen::Number>& arguments) const {
         return m_numerator->eval(arguments) / m_denominator->eval(arguments);
+    }
+
+    std::set<FunctionSignature> AstNodeDiv::functionDependencies() const {
+        auto result = m_numerator->functionDependencies();
+        result.merge(m_denominator->functionDependencies());
+        return result;
     }
 } // namespace ast
