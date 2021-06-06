@@ -44,6 +44,9 @@ namespace fml {
             return;
         }
         m_name = alg::BoostWrapper::trim(parts.at(0));
+        assert(m_name == alg::BoostWrapper::trim(m_name));
+
+
         if (setErrorIf(not checkIdentifier(m_name), "Invalid function name: " + m_name)) {
             return;
         }

@@ -25,13 +25,14 @@ void app::FormulaSurfaceInterface::updateSurfaces() {
     surfaceManager->clear();
 
     for (const auto& formulaWidget : formulaWidgets) {
+        if (formulaWidget->isHidden() || not formulaWidget->isActive() || not formulaWidget->success()) {
+            continue;
+        }
         const auto* formula = formulaWidget->formula();
-        if (formulaWidget->formula() && formula->success()) {
-            if (formula->declaredVariables().size() == 2) {
-                std::unique_ptr<Surface> newSurface = std::make_unique<Surface>();
-                newSurface->fillBuffers(*formula);
-                surfaceManager->add(std::move(newSurface));
-            }
+        if (formula->declaredVariables().size() == 2) {
+            std::unique_ptr<Surface> newSurface = std::make_unique<Surface>();
+            newSurface->fillBuffers(*formula);
+            surfaceManager->add(std::move(newSurface));
         }
     }
     m_openGlWidget->repaint();

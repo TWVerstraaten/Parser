@@ -30,9 +30,13 @@ namespace app {
       private slots:
         void RemoveFormulaWidget(size_t indexOfWidget);
         void addNewFormulaWidget();
+        void checkReDeclaration();
 
       private:
+        void checkFormulaWidgetsParsed();
         void updateAt(size_t index);
+        void addNewFormulaWidgetButton();
+        void makeScrollArea();
 
         std::vector<FormulaWidget*> m_formulaWidgets;
         QPushButton*                m_newFormulaPushButton;

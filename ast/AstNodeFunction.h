@@ -10,11 +10,12 @@
 
 #include <vector>
 
+namespace fml {
+    class FormulaHeader;
+}
+
 namespace ast {
     class AstNodeFunction : public AstNode {
-
-        inline static const std::map<std::string, size_t> m_reservedFunctions{{"sin", 1},  {"cos", 1},  {"tan", 1},  {"exp", 1},
-                                                                              {"asin", 1}, {"acos", 1}, {"atan", 1}, {"atan2", 2}};
 
       public:
         AstNodeFunction(std::string functionName, std::vector<u_ptr_AstNode>&& arguments);

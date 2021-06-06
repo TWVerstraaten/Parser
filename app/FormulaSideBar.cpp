@@ -18,28 +18,18 @@
 
 namespace app {
     FormulaSideBar::FormulaSideBar(QWidget* parent) : QWidget(parent) {
-        m_layout     = new QVBoxLayout();
-        m_scrollArea = new QScrollArea(this);
-        auto* widget = new QWidget();
-        m_scrollArea->setWidgetResizable(true);
-        widget->setLayout(m_layout);
-        m_scrollArea->setWidget(widget);
-        auto* layout = new QHBoxLayout(this);
-        layout->addWidget(m_scrollArea);
-        setLayout(layout);
+        m_layout = new QVBoxLayout();
+        makeScrollArea();
 
-        m_newFormulaPushButton = new QPushButton(m_scrollArea->widget());
-        m_newFormulaPushButton->setText("+");
-        connect(m_newFormulaPushButton, &QPushButton::clicked, this, &FormulaSideBar::addNewFormulaWidget);
-        m_layout->addWidget(m_newFormulaPushButton);
-        m_layout->setAlignment(Qt::AlignTop);
+        addNewFormulaWidgetButton();
 
         UndoRedoHandler::setPushBlocked(true);
         addNewFormulaWidget();
         addNewFormulaWidget();
         UndoRedoHandler::setPushBlocked(false);
 
-        setBaseSize({300, 800});
+        m_layout->setAlignment(Qt::AlignTop);
+        setBaseSize({400, 800});
         installEventFilter(UndoRedoConsumer::undoRedoConsumer());
     }
 
@@ -64,29 +54,91 @@ namespace app {
 
     void FormulaSideBar::RemoveFormulaWidget(size_t indexOfWidget) {
         UndoRedoHandler::push(new cmd::RemoveFormulaWidgetCommand(this, indexOfWidget));
+        updateAt(indexOfWidget);
     }
 
     void FormulaSideBar::updateAt(size_t index) {
-        std::cout << index << '\n';
+        checkFormulaWidgetsParsed();
+        checkReDeclaration();
+        //        std::set<ast::FunctionSignature> functionDependencies;
+        //        std::set<std::string>            functionsSeen;
+        //        for (const auto& formulaWidget : m_formulaWidgets) {
+        //            if (not formulaWidget->success() || formulaWidget->isHidden()) {
+        //                continue;
+        //            }
+        //            const auto& formula             = formulaWidget->formula();
+        //            const auto& currentFunctionName = formula->formulaHeader().name();
+        //            if (functionsSeen.find(currentFunctionName) != functionsSeen.end()) {
+        //                formulaWidget->setError("Redefinition of " + currentFunctionName);
+        //                formulaWidget->updateWidget();
+        //            } else {
+        //                functionsSeen.insert(currentFunctionName);
+        //                const auto& localDependencies = formula->ast().functionDependencies();
+        //                if (std::find_if(localDependencies.begin(), localDependencies.end(),
+        //                                 [&](const auto& a) { return currentFunctionName == a.functionName(); }) !=
+        //                                 localDependencies.end()) {
+        //                    formulaWidget->setError("Circular Dependency");
+        //                    formulaWidget->updateWidget();
+        //                }
+        //            }
+        //        }
+
+        for (auto& formulaWidget : m_formulaWidgets) {
+            formulaWidget->updateWidget();
+        }
         emit sendUpdate();
     }
 
     const std::vector<FormulaWidget*>& FormulaSideBar::formulaWidgets() const {
-        std::set<ast::FunctionSignature> functionDependencies;
-        for (const auto& formulaWidget : m_formulaWidgets) {
-            if (not formulaWidget->formulaParsed()) {
+        return m_formulaWidgets;
+    }
+
+    void FormulaSideBar::addNewFormulaWidgetButton() {
+        m_newFormulaPushButton = new QPushButton(m_scrollArea->widget());
+        m_newFormulaPushButton->setText("+");
+        connect(m_newFormulaPushButton, &QPushButton::clicked, this, &FormulaSideBar::addNewFormulaWidget);
+        m_layout->addWidget(m_newFormulaPushButton);
+    }
+
+    void FormulaSideBar::makeScrollArea() {
+        m_scrollArea = new QScrollArea(this);
+        m_scrollArea->setWidgetResizable(true);
+        auto* widget = new QWidget();
+        widget->setLayout(m_layout);
+        m_scrollArea->setWidget(widget);
+        auto* layout = new QHBoxLayout(this);
+        layout->addWidget(m_scrollArea);
+        setLayout(layout);
+    }
+
+    void FormulaSideBar::checkReDeclaration() {
+        if (m_formulaWidgets.size() == 1) {
+            return;
+        }
+        for (auto it = m_formulaWidgets.begin(); it != m_formulaWidgets.end(); ++it) {
+            if (not(*it)->success()) {
                 continue;
             }
-            const auto& formula             = formulaWidget->formula();
-            const auto& localDependencies   = formula->ast().functionDependencies();
-            const auto& currentFunctionName = formula->formulaHeader().name();
-            if (std::find_if(localDependencies.begin(), localDependencies.end(),
-                             [&](const auto& a) { return currentFunctionName == a.functionName(); }) != localDependencies.end()) {
-                std::cout << "Circular Dependency: " << currentFunctionName << "\n";
+            auto it2 = std::find_if(m_formulaWidgets.begin(), m_formulaWidgets.end(), [&](const auto& a) {
+                return a->formula() && (*it)->formula()->formulaHeader().name() == a->formula()->formulaHeader().name();
+            });
+            if (it2 != it) {
+                (*it)->setError("Redeclaration");
+                (*it2)->setError("Redeclaration");
             }
         }
+    }
 
-        return m_formulaWidgets;
+    void FormulaSideBar::checkFormulaWidgetsParsed() {
+        for (auto& formulaWidget : m_formulaWidgets) {
+            if (not formulaWidget->formula()) {
+                formulaWidget->setError("");
+            } else if (not formulaWidget->formula()->success()) {
+                formulaWidget->setError(formulaWidget->formula()->errorString());
+            } else {
+                formulaWidget->setSuccess(true);
+            }
+        }
     }
 
 } // namespace app

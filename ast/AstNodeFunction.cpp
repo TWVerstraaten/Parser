@@ -5,6 +5,7 @@
 #include "AstNodeFunction.h"
 
 #include "../alg/BoostWrapper.h"
+#include "../fml/ReservedIdentifiers.h"
 #include "../fml/prs/ParserException.h"
 #include "ReservedFunction1.h"
 #include "ReservedFunction2.h"
@@ -21,11 +22,12 @@ namespace ast {
 
         assert(m_functionName == alg::BoostWrapper::trim(m_functionName));
 
-        if (m_reservedFunctions.find(m_functionName) != m_reservedFunctions.end()) {
-            if (m_arguments.size() != m_reservedFunctions.at(m_functionName)) {
+        if (fml::ReservedIdentifiers::isReservedFunctionName(m_functionName)) {
+            const size_t expectedArgumentCount = fml::ReservedIdentifiers::argumentCountOfReservedFunction(m_functionName);
+            if (m_arguments.size() != expectedArgumentCount) {
                 throw fml::prs::ParserException(fml::prs::ParserException::PARSER_ERROR::RESERVED_FUNCTION_WRONG_ARG_COUNT,
-                                                ": " + m_functionName + " should have " +
-                                                    std::to_string(m_reservedFunctions.at(m_functionName)) + " arguments");
+                                                ": " + m_functionName + " should have " + std::to_string(expectedArgumentCount) +
+                                                    " arguments");
             }
 
 #define TT_RESERVED_CAST_1_(x) std::make_unique<ReservedFunction1>([](const auto& a) { return x(a); })

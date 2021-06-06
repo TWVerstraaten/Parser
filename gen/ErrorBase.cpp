@@ -20,4 +20,16 @@ namespace gen {
         }
         return b;
     }
+
+    void ErrorBase::setError(const std::string& string) {
+        m_success     = false;
+        m_errorString = string;
+    }
+
+    void ErrorBase::setSuccess(bool b) {
+        m_success = b;
+        if (m_success) {
+            m_errorString = "";
+        }
+    }
 } // namespace gen
