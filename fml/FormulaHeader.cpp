@@ -5,9 +5,11 @@
 #include "FormulaHeader.h"
 
 #include "../alg/BoostWrapper.h"
+#include "../alg/StringAlg.h"
 #include "prs/Tokenizer.h"
 
 #include <boost/tokenizer.hpp>
+#include <set>
 
 namespace fml {
     static std::set<char> findIllegalCharactersInHeader(const std::string& string) {
@@ -46,7 +48,6 @@ namespace fml {
         m_name = alg::BoostWrapper::trim(parts.at(0));
         assert(m_name == alg::BoostWrapper::trim(m_name));
 
-
         if (setErrorIf(not checkIdentifier(m_name), "Invalid function name: " + m_name)) {
             return;
         }
@@ -63,13 +64,24 @@ namespace fml {
             return;
         }
 
-        boost::tokenizer<> tokenizer(argumentString);
+        boost::tokenizer<>    tokenizer(argumentString);
+        std::set<std::string> declaredVariableSet;
+        std::set<std::string> duplicateVariableSet;
         for (boost::tokenizer<>::iterator token = tokenizer.begin(); token != tokenizer.end(); ++token) {
             std::string next = alg::BoostWrapper::trim(*token);
             if (setErrorIf(not checkIdentifier(next), "Invalid variable name: " + next)) {
                 return;
             }
-            m_variables.insert(next);
+            m_variables.push_back(next);
+            if (declaredVariableSet.find(next) != declaredVariableSet.end()) {
+                duplicateVariableSet.insert(next);
+            } else {
+                declaredVariableSet.insert(next);
+            }
+        }
+        if (not duplicateVariableSet.empty()) {
+            m_success     = false;
+            m_errorString = "Duplicate variables: " + alg::StringAlg::setToString(duplicateVariableSet);
         }
     }
 
@@ -77,7 +89,7 @@ namespace fml {
         return m_name;
     }
 
-    const std::set<std::string>& FormulaHeader::variables() const {
+    const std::vector<std::string>& FormulaHeader::variables() const {
         return m_variables;
     }
 

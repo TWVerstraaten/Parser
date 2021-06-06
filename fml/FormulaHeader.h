@@ -7,8 +7,8 @@
 
 #include "../gen/ErrorBase.h"
 
-#include <set>
 #include <string>
+#include <vector>
 
 namespace fml {
     class FormulaHeader : public gen::ErrorBase {
@@ -16,17 +16,17 @@ namespace fml {
       public:
         explicit FormulaHeader(std::string headerString);
 
-        [[nodiscard]] const std::string&           name() const;
-        [[nodiscard]] const std::string&           headerString() const;
-        [[nodiscard]] const std::set<std::string>& variables() const;
+        [[nodiscard]] const std::string&              name() const;
+        [[nodiscard]] const std::string&              headerString() const;
+        [[nodiscard]] const std::vector<std::string>& variables() const;
 
       private:
         bool containsIllegalCharacters();
         void parseArguments(const std::string& argumentString);
 
-        std::string           m_name;
-        std::set<std::string> m_variables;
-        std::string           m_headerString;
+        std::string              m_name;
+        std::vector<std::string> m_variables;
+        std::string              m_headerString;
     };
 } // namespace fml
 

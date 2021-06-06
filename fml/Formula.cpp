@@ -88,7 +88,7 @@ namespace fml {
         return true;
     }
 
-    const std::set<std::string>& Formula::declaredVariables() const {
+    const std::vector<std::string>& Formula::declaredVariables() const {
         return m_formulaHeader->variables();
     }
 
@@ -98,8 +98,9 @@ namespace fml {
 
     std::set<std::string> Formula::unusedVariables() const {
         std::set<std::string> result;
-        const auto&           declared   = declaredVariables();
-        const auto&           referenced = referencedVariables();
+        auto                  declared = declaredVariables();
+        std::sort(declared.begin(), declared.end());
+        const auto& referenced = referencedVariables();
 
         std::set_difference(declared.begin(), declared.end(), referenced.begin(), referenced.end(), std::inserter(result, result.begin()));
         return result;
@@ -107,8 +108,9 @@ namespace fml {
 
     std::set<std::string> Formula::undeclaredVariables() const {
         std::set<std::string> result;
-        const auto&           declared   = declaredVariables();
-        const auto&           referenced = referencedVariables();
+        auto                  declared = declaredVariables();
+        std::sort(declared.begin(), declared.end());
+        const auto& referenced = referencedVariables();
 
         std::set_difference(referenced.begin(), referenced.end(), declared.begin(), declared.end(), std::inserter(result, result.begin()));
         return result;

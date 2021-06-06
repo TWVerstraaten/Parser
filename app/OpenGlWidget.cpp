@@ -13,6 +13,7 @@ namespace app {
     }
 
     void OpenGlWidget::mousePressEvent(QMouseEvent* e) {
+        setFocus();
         m_mousePressPosition = QVector2D(e->localPos());
         const auto button    = e->button();
         m_clickState         = button == Qt::LeftButton   ? CLICK_STATE::LEFT

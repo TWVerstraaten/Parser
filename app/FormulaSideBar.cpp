@@ -5,6 +5,7 @@
 #include "FormulaSideBar.h"
 
 #include "../ast/Ast.h"
+#include "../gen/DependencyGraph.h"
 #include "FormulaWidget.h"
 #include "UndoRedoConsumer.h"
 #include "UndoRedoHandler.h"
@@ -60,29 +61,8 @@ namespace app {
     void FormulaSideBar::updateAt(size_t index) {
         checkFormulaWidgetsParsed();
         checkForRedeclarations();
-        checkReferenceToUndefined();
-        //        std::set<ast::FunctionSignature> functionDependencies;
-        //        std::set<std::string>            functionsSeen;
-        //        for (const auto& formulaWidget : m_formulaWidgets) {
-        //            if (not formulaWidget->success() || formulaWidget->isHidden()) {
-        //                continue;
-        //            }
-        //            const auto& formula             = formulaWidget->formula();
-        //            const auto& currentFunctionName = formula->formulaHeader().name();
-        //            if (functionsSeen.find(currentFunctionName) != functionsSeen.end()) {
-        //                formulaWidget->setError("Redefinition of " + currentFunctionName);
-        //                formulaWidget->updateWidget();
-        //            } else {
-        //                functionsSeen.insert(currentFunctionName);
-        //                const auto& localDependencies = formula->ast().functionDependencies();
-        //                if (std::find_if(localDependencies.begin(), localDependencies.end(),
-        //                                 [&](const auto& a) { return currentFunctionName == a.functionName(); }) !=
-        //                                 localDependencies.end()) {
-        //                    formulaWidget->setError("Circular Dependency");
-        //                    formulaWidget->updateWidget();
-        //                }
-        //            }
-        //        }
+        //        checkReferenceToUndefined();
+        checkCircularDependenciesAndUndefined();
 
         for (auto& formulaWidget : m_formulaWidgets) {
             formulaWidget->updateWidget();
@@ -162,6 +142,17 @@ namespace app {
                 errorMessage += el.functionName() + "(" + std::to_string(el.argumentCount()) + ") ";
             }
             formulaWidget->setError(errorMessage);
+        }
+    }
+
+    void FormulaSideBar::checkCircularDependenciesAndUndefined() {
+        gen::DependencyGraph             g;
+        std::set<fml::FunctionSignature> declaredFunctions;
+        for (const auto& formulaWidget : m_formulaWidgets) {
+            if (not formulaWidget->success()) {
+                continue;
+            }
+            const auto currentName = formulaWidget->formula()->formulaHeader().name();
         }
     }
 } // namespace app

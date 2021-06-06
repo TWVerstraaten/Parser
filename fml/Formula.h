@@ -20,17 +20,17 @@ namespace fml {
       public:
         explicit Formula(std::string string);
 
-        [[nodiscard]] const ast::Ast&              ast() const;
-        [[nodiscard]] const FormulaHeader&         formulaHeader() const;
-        [[nodiscard]] const std::set<std::string>& declaredVariables() const;
-        [[nodiscard]] std::set<std::string>        referencedVariables() const;
-        [[nodiscard]] std::set<std::string>        unusedVariables() const;
-        [[nodiscard]] std::set<std::string>        undeclaredVariables() const;
-        [[nodiscard]] std::string                  getHints() const;
-        [[nodiscard]] gen::Number                  eval(const std::map<std::string, gen::Number>& arguments) const;
-        [[nodiscard]] const std::string&           toString() const;
-        [[nodiscard]] std::string                  toProcessedString() const;
-        [[nodiscard]] FunctionSignature            getSignature() const;
+        [[nodiscard]] const ast::Ast&                 ast() const;
+        [[nodiscard]] const FormulaHeader&            formulaHeader() const;
+        [[nodiscard]] const std::vector<std::string>& declaredVariables() const;
+        [[nodiscard]] std::set<std::string>           referencedVariables() const;
+        [[nodiscard]] std::set<std::string>           unusedVariables() const;
+        [[nodiscard]] std::set<std::string>           undeclaredVariables() const;
+        [[nodiscard]] std::string                     getHints() const;
+        [[nodiscard]] gen::Number                     eval(const std::map<std::string, gen::Number>& arguments) const;
+        [[nodiscard]] const std::string&              toString() const;
+        [[nodiscard]] std::string                     toProcessedString() const;
+        [[nodiscard]] FunctionSignature               getSignature() const;
 
       private:
         bool containsIllegalCharacters();
