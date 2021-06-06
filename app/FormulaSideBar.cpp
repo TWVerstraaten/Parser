@@ -59,7 +59,7 @@ namespace app {
 
     void FormulaSideBar::updateAt(size_t index) {
         checkFormulaWidgetsParsed();
-        checkReDeclaration();
+        checkForRedeclarations();
         //        std::set<ast::FunctionSignature> functionDependencies;
         //        std::set<std::string>            functionsSeen;
         //        for (const auto& formulaWidget : m_formulaWidgets) {
@@ -111,10 +111,7 @@ namespace app {
         setLayout(layout);
     }
 
-    void FormulaSideBar::checkReDeclaration() {
-        if (m_formulaWidgets.size() == 1) {
-            return;
-        }
+    void FormulaSideBar::checkForRedeclarations() {
         for (auto it = m_formulaWidgets.begin(); it != m_formulaWidgets.end(); ++it) {
             if (not(*it)->success()) {
                 continue;

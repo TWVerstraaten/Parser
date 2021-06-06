@@ -13,10 +13,16 @@ class QScrollArea;
 class QPushButton;
 
 namespace app {
+    namespace cmd {
+        class RemoveFormulaWidgetCommand;
+    }
+
     class FormulaWidget;
 
     class FormulaSideBar : public QWidget {
         Q_OBJECT
+
+        friend class cmd::RemoveFormulaWidgetCommand;
 
       public:
         explicit FormulaSideBar(QWidget* parent = nullptr);
@@ -30,7 +36,7 @@ namespace app {
       private slots:
         void RemoveFormulaWidget(size_t indexOfWidget);
         void addNewFormulaWidget();
-        void checkReDeclaration();
+        void checkForRedeclarations();
 
       private:
         void checkFormulaWidgetsParsed();

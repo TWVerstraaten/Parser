@@ -14,9 +14,11 @@ namespace app::cmd {
 
     void RemoveFormulaWidgetCommand::undo() {
         m_formulaSideBar->fromIndex(m_indexOfRemovedFormulaWidget)->show();
+        m_formulaSideBar->updateAt(m_indexOfRemovedFormulaWidget);
     }
 
     void RemoveFormulaWidgetCommand::redo() {
         m_formulaSideBar->fromIndex(m_indexOfRemovedFormulaWidget)->hide();
+        m_formulaSideBar->updateAt(m_indexOfRemovedFormulaWidget);
     }
 } // namespace app::cmd
