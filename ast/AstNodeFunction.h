@@ -31,7 +31,7 @@ namespace ast {
         [[nodiscard]] gen::Number                 eval(const std::map<std::string, gen::Number>& arguments) const override;
         [[nodiscard]] std::string                 toString() const override;
         [[nodiscard]] std::set<std::string>       usedVariables() const override;
-        [[nodiscard]] std::set<FunctionSignature> functionDependencies() const override;
+        [[nodiscard]] std::set<fml::FunctionSignature> functionDependencies() const override;
 
       protected:
         [[nodiscard]] bool equals(const AstNode& other) const override;

@@ -63,7 +63,7 @@ namespace ast {
         return gen::Number(0ll);
     }
 
-    std::set<FunctionSignature> AstNodeError::functionDependencies() const {
+    std::set<fml::FunctionSignature> AstNodeError::functionDependencies() const {
         return {};
     }
 } // namespace ast

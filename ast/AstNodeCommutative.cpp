@@ -138,8 +138,8 @@ namespace ast {
         return result;
     }
 
-    std::set<FunctionSignature> AstNodeCommutative::functionDependencies() const {
-        std::set<FunctionSignature> result;
+    std::set<fml::FunctionSignature> AstNodeCommutative::functionDependencies() const {
+        std::set<fml::FunctionSignature> result;
         for (const auto& node : m_nodes) {
             result.merge(node->functionDependencies());
         }

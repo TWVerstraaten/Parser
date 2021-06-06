@@ -70,7 +70,7 @@ namespace ast {
         return m_leftNode->eval(arguments) - m_rightNode->eval(arguments);
     }
 
-    std::set<FunctionSignature> AstNodeSubtract::functionDependencies() const {
+    std::set<fml::FunctionSignature> AstNodeSubtract::functionDependencies() const {
         auto result = m_rightNode->functionDependencies();
         result.merge(m_leftNode->functionDependencies());
         return result;

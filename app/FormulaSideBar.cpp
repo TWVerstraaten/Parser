@@ -60,6 +60,7 @@ namespace app {
     void FormulaSideBar::updateAt(size_t index) {
         checkFormulaWidgetsParsed();
         checkForRedeclarations();
+        checkReferenceToUndefined();
         //        std::set<ast::FunctionSignature> functionDependencies;
         //        std::set<std::string>            functionsSeen;
         //        for (const auto& formulaWidget : m_formulaWidgets) {
@@ -120,8 +121,8 @@ namespace app {
                 return a->formula() && (*it)->formula()->formulaHeader().name() == a->formula()->formulaHeader().name();
             });
             if (it2 != it) {
-                (*it)->setError("Redeclaration");
-                (*it2)->setError("Redeclaration");
+                (*it)->setError("Multiple declaration of " + (*it)->formula()->formulaHeader().name());
+                (*it2)->setError("Multiple declaration of " + (*it)->formula()->formulaHeader().name());
             }
         }
     }
@@ -138,4 +139,29 @@ namespace app {
         }
     }
 
+    void FormulaSideBar::checkReferenceToUndefined() {
+        std::set<fml::FunctionSignature> declaredFunctions;
+        for (const auto& formulaWidget : m_formulaWidgets) {
+            if (formulaWidget->success()) {
+                declaredFunctions.insert(formulaWidget->formula()->getSignature());
+            }
+        }
+        for (const auto& formulaWidget : m_formulaWidgets) {
+            if (not formulaWidget->success()) {
+                continue;
+            }
+            const auto&                      dependencies = formulaWidget->formula()->ast().functionDependencies();
+            std::set<fml::FunctionSignature> undefined;
+            std::set_difference(dependencies.begin(), dependencies.end(), declaredFunctions.begin(), declaredFunctions.end(),
+                                std::inserter(undefined, undefined.begin()));
+            if (undefined.empty()) {
+                continue;
+            }
+            std::string errorMessage = "Undefined functions: ";
+            for (const auto& el : undefined) {
+                errorMessage += el.functionName() + "(" + std::to_string(el.argumentCount()) + ") ";
+            }
+            formulaWidget->setError(errorMessage);
+        }
+    }
 } // namespace app

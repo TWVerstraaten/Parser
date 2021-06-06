@@ -134,4 +134,12 @@ namespace fml {
 
         return result;
     }
+
+    FunctionSignature Formula::getSignature() const {
+        if (m_success) {
+            return {m_formulaHeader->name(), m_formulaHeader->variables().size()};
+        } else {
+            return {"", 0};
+        }
+    }
 } // namespace fml

@@ -30,6 +30,7 @@ namespace fml {
         [[nodiscard]] gen::Number                  eval(const std::map<std::string, gen::Number>& arguments) const;
         [[nodiscard]] const std::string&           toString() const;
         [[nodiscard]] std::string                  toProcessedString() const;
+        [[nodiscard]] FunctionSignature            getSignature() const;
 
       private:
         bool containsIllegalCharacters();

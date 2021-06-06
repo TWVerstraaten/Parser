@@ -44,7 +44,7 @@ namespace ast {
         return m_rootNode->eval(arguments);
     }
 
-    std::set<FunctionSignature> Ast::functionDependencies() const {
+    std::set<fml::FunctionSignature> Ast::functionDependencies() const {
         return m_rootNode->functionDependencies();
     }
 } // namespace ast

@@ -22,7 +22,7 @@ namespace ast {
         [[nodiscard]] Ast                         differentiate(const std::string& variable) const;
         [[nodiscard]] std::set<std::string>       variables() const;
         [[nodiscard]] gen::Number                 eval(const std::map<std::string, gen::Number>& arguments) const;
-        [[nodiscard]] std::set<FunctionSignature> functionDependencies() const;
+        [[nodiscard]] std::set<fml::FunctionSignature> functionDependencies() const;
 
       private:
         Ast() = default;

@@ -27,7 +27,7 @@ namespace ast {
 
         [[nodiscard]] const AstNode*              childAt(size_t index) const final;
         [[nodiscard]] std::set<std::string>       usedVariables() const override;
-        [[nodiscard]] std::set<FunctionSignature> functionDependencies() const override;
+        [[nodiscard]] std::set<fml::FunctionSignature> functionDependencies() const override;
 
       protected:
         AstNodeCommutative(std::function<gen::Number(const gen::Number&, const gen::Number&)> accumulator,

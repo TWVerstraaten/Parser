@@ -85,7 +85,7 @@ namespace ast {
         return m_base->eval(arguments) ^ m_exponent->eval(arguments);
     }
 
-    std::set<FunctionSignature> AstNodePower::functionDependencies() const {
+    std::set<fml::FunctionSignature> AstNodePower::functionDependencies() const {
         auto result = m_base->functionDependencies();
         result.merge(m_exponent->functionDependencies());
         return result;

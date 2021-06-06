@@ -68,7 +68,7 @@ namespace ast {
         return -m_value->eval(arguments);
     }
 
-    std::set<FunctionSignature> AstNodeUnaryMinus::functionDependencies() const {
+    std::set<fml::FunctionSignature> AstNodeUnaryMinus::functionDependencies() const {
         return m_value->functionDependencies();
     }
 } // namespace ast

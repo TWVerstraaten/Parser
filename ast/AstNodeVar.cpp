@@ -60,7 +60,7 @@ namespace ast {
         return arguments.at(m_variableName);
     }
 
-    std::set<FunctionSignature> AstNodeVar::functionDependencies() const {
+    std::set<fml::FunctionSignature> AstNodeVar::functionDependencies() const {
         return {};
     }
 } // namespace ast

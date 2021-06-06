@@ -160,13 +160,13 @@ namespace ast {
         return m_reservedFunction != nullptr;
     }
 
-    std::set<FunctionSignature> AstNodeFunction::functionDependencies() const {
-        std::set<FunctionSignature> result;
+    std::set<fml::FunctionSignature> AstNodeFunction::functionDependencies() const {
+        std::set<fml::FunctionSignature> result;
         for (const auto& argument : m_arguments) {
             result.merge(argument->functionDependencies());
         }
         if (not isReserved()) {
-            result.insert({FunctionSignature{m_functionName, m_arguments.size()}});
+            result.insert({fml::FunctionSignature{m_functionName, m_arguments.size()}});
         }
         return result;
     }

@@ -5,8 +5,8 @@
 #ifndef PARSER_ASTNODE_H
 #define PARSER_ASTNODE_H
 
+#include "../fml/FunctionSignature.h"
 #include "../gen/Number.h"
-#include "FunctionSignature.h"
 
 #include <map>
 #include <memory>
@@ -39,16 +39,16 @@ namespace ast {
         static u_ptr_AstNode makeNumber(const gen::Number& val);
         static u_ptr_AstNode makeError();
 
-        [[nodiscard]] virtual size_t                      childCount() const                                              = 0;
-        [[nodiscard]] virtual NODE_TYPE                   type() const                                                    = 0;
-        [[nodiscard]] virtual std::string                 toString() const                                                = 0;
-        [[nodiscard]] virtual const AstNode*              childAt(size_t index) const                                     = 0;
-        [[nodiscard]] virtual u_ptr_AstNode               simplify() const                                                = 0;
-        [[nodiscard]] virtual u_ptr_AstNode               copy() const                                                    = 0;
-        [[nodiscard]] virtual u_ptr_AstNode               differentiate(const std::string& variable) const                = 0;
-        [[nodiscard]] virtual std::set<std::string>       usedVariables() const                                           = 0;
-        [[nodiscard]] virtual gen::Number                 eval(const std::map<std::string, gen::Number>& arguments) const = 0;
-        [[nodiscard]] virtual std::set<FunctionSignature> functionDependencies() const                                    = 0;
+        [[nodiscard]] virtual size_t                           childCount() const                                              = 0;
+        [[nodiscard]] virtual NODE_TYPE                        type() const                                                    = 0;
+        [[nodiscard]] virtual std::string                      toString() const                                                = 0;
+        [[nodiscard]] virtual const AstNode*                   childAt(size_t index) const                                     = 0;
+        [[nodiscard]] virtual u_ptr_AstNode                    simplify() const                                                = 0;
+        [[nodiscard]] virtual u_ptr_AstNode                    copy() const                                                    = 0;
+        [[nodiscard]] virtual u_ptr_AstNode                    differentiate(const std::string& variable) const                = 0;
+        [[nodiscard]] virtual std::set<std::string>            usedVariables() const                                           = 0;
+        [[nodiscard]] virtual gen::Number                      eval(const std::map<std::string, gen::Number>& arguments) const = 0;
+        [[nodiscard]] virtual std::set<fml::FunctionSignature> functionDependencies() const                                    = 0;
 
         static bool          compare(const AstNode* lhs, const AstNode* rhs);
         static u_ptr_AstNode copy(const u_ptr_AstNode& node);

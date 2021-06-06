@@ -7,7 +7,7 @@
 
 #include <string>
 
-namespace ast {
+namespace fml {
 
     class FunctionSignature {
 

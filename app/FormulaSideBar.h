@@ -40,6 +40,7 @@ namespace app {
 
       private:
         void checkFormulaWidgetsParsed();
+        void checkReferenceToUndefined();
         void updateAt(size_t index);
         void addNewFormulaWidgetButton();
         void makeScrollArea();

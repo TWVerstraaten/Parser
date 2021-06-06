@@ -34,7 +34,8 @@ namespace app {
         m_layout->addWidget(m_activeCheckBox, 0, 0);
         m_layout->addWidget(m_lineEdit, 0, 1);
         m_layout->addWidget(m_deleteButton, 0, 2);
-        m_layout->addWidget(m_collapseButton, 1, 0, 1, 3);
+        m_layout->addWidget(m_errorMessageLabel, 1, 0, 1, 3);
+        m_layout->addWidget(m_collapseButton, 2, 0, 1, 3);
 
         connectSignals();
         m_lineEdit->installEventFilter(UndoRedoConsumer::undoRedoConsumer());
@@ -58,14 +59,20 @@ namespace app {
         QToolTip::hideText();
 
         if (const auto hint = m_formula->getHints(); not hint.empty()) {
-            showToolTipAtLineEdit(251, QString::fromStdString(hint));
+            //            showToolTipAtLineEdit(251, QString::fromStdString(hint));
+            m_errorMessageLabel->setText(QString::fromStdString(hint));
+            m_errorMessageLabel->setStyleSheet("QLabel { color : rgb(0,0,251); }");
+        } else {
+            m_errorMessageLabel->setText("");
         }
         update();
     }
 
     void FormulaWidget::handleWrongFormula() {
         setTextColor(m_lineEdit, Qt::red);
-        showToolTipAtLineEdit(16449536, QString::fromStdString(m_errorString));
+        //        showToolTipAtLineEdit(16449536, QString::fromStdString(m_errorString));
+        m_errorMessageLabel->setText(QString::fromStdString(m_errorString));
+        m_errorMessageLabel->setStyleSheet("QLabel { color : rgb(251,0,0); }");
         update();
     }
 
@@ -93,9 +100,10 @@ namespace app {
         m_layout         = new QGridLayout(this);
         m_activeCheckBox = new QCheckBox(this);
         m_activeCheckBox->setChecked(true);
-        m_lineEdit       = new QLineEdit(this);
-        m_deleteButton   = new QPushButton{this};
-        m_collapseButton = new QPushButton(this);
+        m_lineEdit          = new QLineEdit(this);
+        m_deleteButton      = new QPushButton{this};
+        m_collapseButton    = new QPushButton(this);
+        m_errorMessageLabel = new QLabel(this);
     }
 
     void FormulaWidget::initButtons() {

@@ -63,6 +63,7 @@ namespace app {
         QLineEdit*                    m_lineEdit          = nullptr;
         QPushButton*                  m_deleteButton      = nullptr;
         QPushButton*                  m_collapseButton    = nullptr;
+        QLabel*                       m_errorMessageLabel = nullptr;
         QString                       m_oldFormula        = "";
         std::unique_ptr<fml::Formula> m_formula;
     };

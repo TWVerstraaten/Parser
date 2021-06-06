@@ -81,7 +81,7 @@ namespace ast {
         return m_numerator->eval(arguments) / m_denominator->eval(arguments);
     }
 
-    std::set<FunctionSignature> AstNodeDiv::functionDependencies() const {
+    std::set<fml::FunctionSignature> AstNodeDiv::functionDependencies() const {
         auto result = m_numerator->functionDependencies();
         result.merge(m_denominator->functionDependencies());
         return result;
