@@ -33,6 +33,7 @@ namespace fml {
         [[nodiscard]] FunctionSignature               getSignature() const;
 
       private:
+        void initialCheck();
         bool containsIllegalCharacters();
         bool checkForUndeclaredArguments();
         bool parseAst(const std::string& string);

@@ -81,7 +81,7 @@ namespace fml {
         }
         if (not duplicateVariableSet.empty()) {
             m_success     = false;
-            m_errorString = "Duplicate variables: " + alg::StringAlg::setToString(duplicateVariableSet);
+            m_errorString = "Duplicate variables: " + alg::StringAlg::concatenateStrings(duplicateVariableSet);
         }
     }
 

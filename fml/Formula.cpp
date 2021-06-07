@@ -23,10 +23,8 @@ namespace fml {
     }
 
     Formula::Formula(std::string string) : m_string(std::move(string)) {
-        if (setErrorIf(containsIllegalCharacters(), "Contains Illegal characters")) {
-            return;
-        }
-        if (setErrorIf(m_string.empty(), "Empty Formula")) {
+        initialCheck();
+        if (not m_success) {
             return;
         }
         const auto parts = alg::BoostWrapper::trimAndSplit(m_string, "=");
@@ -40,6 +38,15 @@ namespace fml {
             return;
         }
         checkForUndeclaredArguments();
+    }
+
+    void Formula::initialCheck() {
+        if (setErrorIf(containsIllegalCharacters(), "Contains Illegal characters")) {
+            return;
+        }
+        if (setErrorIf(m_string.empty(), "Empty Formula")) {
+            return;
+        }
     }
 
     const ast::Ast& Formula::ast() const {
@@ -66,7 +73,7 @@ namespace fml {
 
     bool Formula::checkForUndeclaredArguments() {
         const auto undeclared = undeclaredVariables();
-        if (setErrorIf(not undeclared.empty(), "Undeclared arguments: " + alg::StringAlg::setToString(undeclared))) {
+        if (setErrorIf(not undeclared.empty(), "Undeclared arguments: " + alg::StringAlg::concatenateStrings(undeclared))) {
             return true;
         }
         return false;
@@ -118,7 +125,7 @@ namespace fml {
 
     std::string Formula::getHints() const {
         const auto unused = unusedVariables();
-        return unused.empty() ? "" : "Unused variables: " + alg::StringAlg::setToString(unused);
+        return unused.empty() ? "" : "Unused variables: " + alg::StringAlg::concatenateStrings(unused);
     }
 
     gen::Number Formula::eval(const std::map<std::string, gen::Number>& arguments) const {
@@ -131,12 +138,11 @@ namespace fml {
 
     std::string Formula::toProcessedString() const {
         std::string result;
-        result += m_formulaHeader->name() + ": " + alg::StringAlg::setToString(m_formulaHeader->variables()) + "\n";
+        result += m_formulaHeader->name() + ": " + alg::StringAlg::concatenateStrings(m_formulaHeader->variables()) + "\n";
         result += m_ast->toString() + "\n";
 
         return result;
     }
-
     FunctionSignature Formula::getSignature() const {
         if (m_success) {
             return {m_formulaHeader->name(), m_formulaHeader->variables().size()};

@@ -14,7 +14,7 @@ namespace alg {
     class StringAlg {
       public:
         template <class Container>
-        static std::string setToString(const Container& set) {
+        static std::string concatenateStrings(const Container& set) {
             std::ostringstream stream;
             std::copy(set.begin(), set.end(), std::ostream_iterator<std::string>(stream, ","));
             std::string result = stream.str();

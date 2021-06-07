@@ -1,10 +1,23 @@
-#include "app/CentralWidget.h"
-#include "gen/DependencyGraph.h"
+//#include "app/CentralWidget.h"
+//#include "gen/DependencyGraph.h"
+//
+//#include <QApplication>
+#include "prs/Tokenizer.h"
 
-#include <QApplication>
 #include <iostream>
 
 int main(int argc, char* argv[]) {
+    Tokenizer tok("f2f (x + tt + 2,y + 9)");
+    if (not tok.success()) {
+        std::cout << tok.string() << '\n';
+        const auto& errors = tok.errors();
+        for (const auto& er : errors) {
+            std::cout << er.toString() << '\n';
+        }
+    } else {
+        std::cout << tok.structuralTokensToString() << '\n';
+    }
+
     //    gen::DependencyGraph g;
     //
     //    g.addDependsOn("f", "h");
@@ -33,8 +46,8 @@ int main(int argc, char* argv[]) {
     //    g.addDependsOn("k", "k");
     //    std::cout << g.edgeCount() << '\n';
 
-    QApplication       a(argc, argv);
-    app::CentralWidget w;
-    w.show();
-    return a.exec();
+    //    QApplication       a(argc, argv);
+    //    app::CentralWidget w;
+    //    w.show();
+    //    return a.exec();
 }
