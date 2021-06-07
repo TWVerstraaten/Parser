@@ -15,37 +15,44 @@ class StructuralToken {
 
     friend class Tokenizer;
 
-    struct Bracketed {
-        std::list<StructuralToken> m_tokenList;
-    };
-
     struct MultiBracketed {
         std::vector<std::list<StructuralToken>> m_tokenLists;
     };
 
     struct Function {
-        std::string                             m_name;
-        std::variant<Bracketed, MultiBracketed> m_arguments;
+        std::string    m_name;
+        MultiBracketed m_arguments;
     };
 
   public:
     explicit StructuralToken(const Token& token);
-    explicit StructuralToken(const MultiBracketed& multiBracketed);
-    explicit StructuralToken(const Bracketed& bracketed);
-    explicit StructuralToken(const Function& function);
+
+    StructuralToken(const std::string& variable, size_t startIndex, size_t endIndex);
+    StructuralToken(double number, size_t startIndex, size_t endIndex);
+    StructuralToken(long long number, size_t startIndex, size_t endIndex);
+
+    [[nodiscard]] static StructuralToken makeFromCommaSeparated(std::list<StructuralToken>&& tokenList);
 
     [[nodiscard]] bool        isRawTokenOfType(Token::TOKEN_TYPE type) const;
+    [[nodiscard]] bool        isString() const;
     [[nodiscard]] std::string toString() const;
 
   private:
+    explicit StructuralToken(MultiBracketed&& multiBracketed, size_t startIndex, size_t endIndex);
+    explicit StructuralToken(Function&& function, size_t startIndex, size_t endIndex);
+
     [[nodiscard]] std::string toString(const Token& token) const;
-    [[nodiscard]] std::string toString(const Bracketed& token) const;
     [[nodiscard]] std::string toString(const MultiBracketed& token) const;
     [[nodiscard]] std::string toString(const Function& token) const;
+    [[nodiscard]] std::string toString(const std::string& token) const;
+    [[nodiscard]] std::string toString(double token) const;
+    [[nodiscard]] std::string toString(long long token) const;
 
-    std::variant<Token, Bracketed, MultiBracketed, Function> m_token;
-    size_t                                                   m_startIndexInString;
-    size_t                                                   m_endIndexInString;
+    [[nodiscard]] static MultiBracketed makeBracketed(std::list<StructuralToken>& tokenList);
+
+    std::variant<Token, MultiBracketed, Function, std::string, double, long long> m_token;
+    size_t                                                                        m_startIndex;
+    size_t                                                                        m_endIndex;
 };
 
 #endif // PARSER_STRUCTURALTOKEN_H

@@ -9,7 +9,15 @@
 class ParserError {
 
   public:
-    enum class ERROR_TYPE { ILLEGAL_CHARACTER, UNMATCHED_CLOSING_BR, UNMATCHED_OPEN_BR, TOO_MANY_EQUALS, ILLEGAL_SEQUENCE };
+    enum class ERROR_TYPE {
+        ILLEGAL_CHARACTER,
+        UNMATCHED_CLOSING_BR,
+        UNMATCHED_OPEN_BR,
+        TOO_MANY_EQUALS,
+        ILLEGAL_SEQUENCE,
+        IDENTIFIER_ERROR,
+        NUMBER_ERROR
+    };
 
     ParserError(ERROR_TYPE  type,
                 std::string message,

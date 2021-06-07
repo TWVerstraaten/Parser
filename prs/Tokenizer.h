@@ -10,6 +10,7 @@
 #include "Token.h"
 
 #include <list>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -37,6 +38,12 @@ class Tokenizer {
     void checkRepeatedOperators();
     void initializeStructuralTokens();
     void extractFunctionsAndBracketsFromStructuralTokens();
+
+    void addStringTokenToStructuralTokens(const Token& token);
+    void addNumberTokenToStructuralTokens(const Token& token);
+
+    [[nodiscard]] static std::optional<std::string>                     parseIdentifierToken(const Token& token);
+    [[nodiscard]] static std::optional<std::variant<double, long long>> parseNumberToken(const Token& token);
 
     static StructuralToken listToStructuralToken(std::list<StructuralToken> structuralTokenList);
 

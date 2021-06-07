@@ -13,7 +13,7 @@ class Token {
     friend class StructuralToken;
 
   public:
-    enum class TOKEN_TYPE { PLUS, MINUS, UNARY_MINUS, POWER, DIVIDE, TIMES, LEFT_BR, RIGHT_BR, COMMA, NUM, IDENTIFIER, EQUALS };
+    enum class TOKEN_TYPE { PLUS, MINUS, UNARY_MINUS, POWER, DIVIDE, TIMES, LEFT_BR, RIGHT_BR, COMMA, NUMBER, IDENTIFIER, EQUALS };
 
     Token(TOKEN_TYPE  type,
           std::string value,
@@ -28,8 +28,8 @@ class Token {
   private:
     TOKEN_TYPE  m_type;
     std::string m_string;
-    size_t      m_startIndexInString;
-    size_t      m_endIndexInString;
+    size_t      m_startIndex;
+    size_t      m_endIndex;
     size_t      m_additional;
 };
 

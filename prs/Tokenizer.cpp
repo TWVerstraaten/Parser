@@ -95,7 +95,7 @@ void Tokenizer::tokenize() {
                     while (j < m_string.size() && (isdigit(m_string.at(j)) || m_string.at(j) == '.')) {
                         ++j;
                     }
-                    m_tokenList.emplace_back(Token{Token::TOKEN_TYPE::NUM, m_string.substr(i, j - i), i, j});
+                    m_tokenList.emplace_back(Token{Token::TOKEN_TYPE::NUMBER, m_string.substr(i, j - i), i, j});
                     i = j - 1;
                 } else {
                     if (not isspace(c)) {
@@ -116,7 +116,7 @@ void Tokenizer::replaceUnaryMinuses() {
         } else
             switch (token.m_type) {
                 case Token::TOKEN_TYPE::LEFT_BR:
-                    // [[fallthrough]]
+                    [[fallthrough]];
                 case Token::TOKEN_TYPE::EQUALS:
                     nextMinusIsUnary = true;
                     break;
@@ -146,8 +146,7 @@ void Tokenizer::checkBrackets() {
         } else if (token.m_type == Token::TOKEN_TYPE::RIGHT_BR) {
             if (bracketDepth == 0) {
                 m_success = false;
-                m_errors.emplace_back(
-                    ParserError{ParserError::ERROR_TYPE::UNMATCHED_CLOSING_BR, "", token.m_startIndexInString, token.m_endIndexInString});
+                m_errors.emplace_back(ParserError{ParserError::ERROR_TYPE::UNMATCHED_CLOSING_BR, "", token.m_startIndex, token.m_endIndex});
                 return;
             }
             --bracketDepth;
@@ -158,8 +157,7 @@ void Tokenizer::checkBrackets() {
         auto it = std::find_if(m_tokenList.rbegin(), m_tokenList.rend(), TT_LAMBDA(a, return a.m_type == Token::TOKEN_TYPE::LEFT_BR;));
         assert(it != m_tokenList.rend());
         m_success = false;
-        m_errors.emplace_back(
-            ParserError{ParserError::ERROR_TYPE::UNMATCHED_OPEN_BR, "", it->m_startIndexInString, it->m_endIndexInString});
+        m_errors.emplace_back(ParserError{ParserError::ERROR_TYPE::UNMATCHED_OPEN_BR, "", it->m_startIndex, it->m_endIndex});
     }
 }
 
@@ -183,7 +181,7 @@ void Tokenizer::checkDoubleEquals() {
     it = std::find_if(std::next(it), m_tokenList.end(), TT_LAMBDA(a, return a.m_type == Token::TOKEN_TYPE::EQUALS;));
     if (it != m_tokenList.end()) {
         m_success = false;
-        m_errors.emplace_back(ParserError{ParserError::ERROR_TYPE::TOO_MANY_EQUALS, "", it->m_startIndexInString, it->m_endIndexInString});
+        m_errors.emplace_back(ParserError{ParserError::ERROR_TYPE::TOO_MANY_EQUALS, "", it->m_startIndex, it->m_endIndex});
     }
 }
 
@@ -195,7 +193,7 @@ void Tokenizer::checkRepeatedOperators() {
                                                     Token::TOKEN_TYPE::DIVIDE,
                                                     Token::TOKEN_TYPE::UNARY_MINUS};
     const std::set<Token::TOKEN_TYPE> allowedAfterOperator = {
-        Token::TOKEN_TYPE::IDENTIFIER, Token::TOKEN_TYPE::NUM, Token::TOKEN_TYPE::LEFT_BR};
+        Token::TOKEN_TYPE::IDENTIFIER, Token::TOKEN_TYPE::NUMBER, Token::TOKEN_TYPE::LEFT_BR};
 
     for (auto it = m_tokenList.begin(); std::next(it) != m_tokenList.end(); ++it) {
         const auto currentType = it->m_type;
@@ -204,8 +202,8 @@ void Tokenizer::checkRepeatedOperators() {
             if (allowedAfterOperator.find(nextType) == allowedAfterOperator.end()) {
                 m_errors.emplace_back(ParserError{ParserError::ERROR_TYPE::ILLEGAL_SEQUENCE,
                                                   it->m_string + " " + std::next(it)->m_string,
-                                                  it->m_startIndexInString,
-                                                  std::next(it)->m_endIndexInString});
+                                                  it->m_startIndex,
+                                                  std::next(it)->m_endIndex});
             }
         }
     }
@@ -218,8 +216,8 @@ void Tokenizer::checkRepeatedCommas() {
             if (lastWasComma) {
                 assert(it != m_tokenList.begin());
                 m_success = false;
-                m_errors.emplace_back(ParserError{
-                    ParserError::ERROR_TYPE::ILLEGAL_SEQUENCE, ", ,", std::prev(it)->m_startIndexInString, it->m_endIndexInString});
+                m_errors.emplace_back(
+                    ParserError{ParserError::ERROR_TYPE::ILLEGAL_SEQUENCE, ", ,", std::prev(it)->m_startIndex, it->m_endIndex});
             } else {
                 lastWasComma = true;
             }
@@ -229,9 +227,66 @@ void Tokenizer::checkRepeatedCommas() {
     }
 }
 
+std::optional<std::string> Tokenizer::parseIdentifierToken(const Token& token) {
+    assert(token.m_type == Token::TOKEN_TYPE::IDENTIFIER);
+    const auto& string = token.m_string;
+    if (string.empty() || not isalpha(string.front()) ||
+        std::find_if(TT_IT(string), TT_LAMBDA(a, return not(isalnum(a));)) != string.end()) {
+        return {};
+    }
+    return string;
+}
+
+std::optional<std::variant<double, long long>> Tokenizer::parseNumberToken(const Token& token) {
+    assert(token.m_type == Token::TOKEN_TYPE::NUMBER);
+    const auto&  string   = token.m_string;
+    const size_t dotCount = std::count_if(TT_IT(string), TT_LAMBDA(a, return a == '.';));
+
+    if (string.empty() || std::find_if(TT_IT(string), TT_LAMBDA(a, return not(isdigit(a) || a == '.');)) != string.end() || dotCount > 1) {
+        return {};
+    }
+    try {
+        return dotCount == 0 ? std::variant<double, long long>(std::stoll(string)) : std::stod(string);
+    } catch (...) { return {}; }
+}
+
+void Tokenizer::addStringTokenToStructuralTokens(const Token& token) {
+    const auto parsedIdentifier = parseIdentifierToken(token);
+    if (parsedIdentifier.has_value()) {
+        m_structuralTokenList.emplace_back(StructuralToken{parsedIdentifier.value(), token.m_startIndex, token.m_endIndex});
+    } else {
+        m_success = false;
+        m_errors.emplace_back(ParserError{ParserError::ERROR_TYPE::IDENTIFIER_ERROR, token.m_string, token.m_startIndex, token.m_endIndex});
+    }
+}
+
+void Tokenizer::addNumberTokenToStructuralTokens(const Token& token) {
+    const auto parsedNumber = parseNumberToken(token);
+    if (parsedNumber.has_value()) {
+        std::visit(
+            [&](auto a) {
+                m_structuralTokenList.emplace_back(StructuralToken{a, token.m_startIndex, token.m_endIndex});
+            },
+            parsedNumber.value());
+    } else {
+        m_success = false;
+        m_errors.emplace_back(ParserError{ParserError::ERROR_TYPE::NUMBER_ERROR, token.m_string, token.m_startIndex, token.m_endIndex});
+    }
+}
+
 void Tokenizer::initializeStructuralTokens() {
     for (const auto& token : m_tokenList) {
-        m_structuralTokenList.emplace_back(token);
+        switch (token.m_type) {
+            case Token::TOKEN_TYPE::NUMBER:
+                addNumberTokenToStructuralTokens(token);
+                break;
+            case Token::TOKEN_TYPE::IDENTIFIER:
+                addStringTokenToStructuralTokens(token);
+                break;
+            default:
+                m_structuralTokenList.emplace_back(token);
+                break;
+        }
     }
 }
 
@@ -246,22 +301,21 @@ std::string Tokenizer::structuralTokensToString() const {
 }
 
 void Tokenizer::extractFunctionsAndBracketsFromStructuralTokens() {
-    auto rightIt = std::find_if(TT_IT(m_structuralTokenList), TT_LAMBDA(a, return a.isRawTokenOfType(Token::TOKEN_TYPE::RIGHT_BR);));
-    while (rightIt != m_structuralTokenList.end()) {
-        auto leftIt = rightIt;
+    const size_t bracketCount =
+        std::count_if(TT_IT(m_structuralTokenList), TT_LAMBDA(a, return a.isRawTokenOfType(Token::TOKEN_TYPE::RIGHT_BR);));
+    for (size_t dummy = 0; dummy != bracketCount; ++dummy) {
+        auto rightIt = std::find_if(TT_IT(m_structuralTokenList), TT_LAMBDA(a, return a.isRawTokenOfType(Token::TOKEN_TYPE::RIGHT_BR);));
+        auto leftIt  = rightIt;
         while (not((--leftIt)->isRawTokenOfType(Token::TOKEN_TYPE::LEFT_BR))) {}
-
         assert(std::get<Token>(leftIt->m_token).m_additional == std::get<Token>(rightIt->m_token).m_additional);
 
-        auto                       insertPosition = std::next(rightIt);
-        std::list<StructuralToken> listInBrackets;
-        if (leftIt != m_structuralTokenList.begin() && std::prev(leftIt)->isRawTokenOfType(Token::TOKEN_TYPE::IDENTIFIER)) {
+        if (leftIt != m_structuralTokenList.begin() && std::prev(leftIt)->isString()) {
             --leftIt;
         }
+        auto                       insertPosition = std::next(rightIt);
+        std::list<StructuralToken> listInBrackets;
         listInBrackets.splice(listInBrackets.begin(), m_structuralTokenList, leftIt, std::next(rightIt));
-        m_structuralTokenList.insert(insertPosition, listToStructuralToken(listInBrackets));
-
-        rightIt = std::find_if(TT_IT(m_structuralTokenList), TT_LAMBDA(a, return a.isRawTokenOfType(Token::TOKEN_TYPE::RIGHT_BR);));
+        m_structuralTokenList.insert(insertPosition, StructuralToken::makeFromCommaSeparated(std::move(listInBrackets)));
     }
 }
 
@@ -273,27 +327,18 @@ std::string Tokenizer::toString(const std::list<StructuralToken>& structuralToke
     ss << '\n';
     return ss.str();
 }
-
-StructuralToken Tokenizer::listToStructuralToken(std::list<StructuralToken> structuralTokenList) {
-    bool isFunction = false;
-    if (structuralTokenList.front().isRawTokenOfType(Token::TOKEN_TYPE::IDENTIFIER)) {
-        isFunction = true;
-    }
-    auto commaIt = std::find_if(TT_IT(structuralTokenList), TT_LAMBDA(a, return a.isRawTokenOfType(Token::TOKEN_TYPE::COMMA);));
-    if (commaIt == structuralTokenList.end()) {
-        return isFunction ? StructuralToken{StructuralToken::Function{"", StructuralToken::Bracketed{structuralTokenList}}}
-                          : StructuralToken{StructuralToken::Bracketed{structuralTokenList}};
-    }
-    std::vector<std::list<StructuralToken>> commaSeparatedGroups;
-    while (commaIt != structuralTokenList.end()) {
-        commaSeparatedGroups.emplace_back();
-        commaSeparatedGroups.back().splice(commaSeparatedGroups.back().begin(), structuralTokenList, structuralTokenList.begin(), commaIt);
-        structuralTokenList.pop_front();
-        commaIt = std::find_if(TT_IT(structuralTokenList), TT_LAMBDA(a, return a.isRawTokenOfType(Token::TOKEN_TYPE::COMMA);));
-    }
-    std::list<StructuralToken> tokenList;
-    tokenList.splice(tokenList.begin(), structuralTokenList, structuralTokenList.begin(), structuralTokenList.end());
-    commaSeparatedGroups.emplace_back(std::move(tokenList));
-    return isFunction ? StructuralToken{StructuralToken::Function{"", StructuralToken::MultiBracketed{std::move(commaSeparatedGroups)}}}
-                      : StructuralToken{StructuralToken::MultiBracketed{std::move(commaSeparatedGroups)}};
-}
+//
+// StructuralToken Tokenizer::listToStructuralToken(std::list<StructuralToken> structuralTokenList) {
+//    bool         isFunction = structuralTokenList.front().isRawTokenOfType(Token::TOKEN_TYPE::IDENTIFIER);
+//    const size_t commaCount = std::count_if(TT_IT(structuralTokenList), TT_LAMBDA(a, return
+//    a.isRawTokenOfType(Token::TOKEN_TYPE::COMMA);)); std::vector<std::list<StructuralToken>> commaSeparatedGroups(commaCount + 1); for
+//    (size_t i = 0; i != commaCount + 1; ++i) {
+//        const auto commaIt = std::find_if(TT_IT(structuralTokenList), TT_LAMBDA(a, return a.isRawTokenOfType(Token::TOKEN_TYPE::COMMA);));
+//        commaSeparatedGroups[i].splice(commaSeparatedGroups[i].begin(), structuralTokenList, structuralTokenList.begin(), commaIt);
+//        if (not structuralTokenList.empty()) {
+//            structuralTokenList.pop_front();
+//        }
+//    }
+//    return isFunction ? StructuralToken{StructuralToken::Function{"", StructuralToken::MultiBracketed{std::move(commaSeparatedGroups)}}}
+//                      : StructuralToken{StructuralToken::MultiBracketed{std::move(commaSeparatedGroups)}};
+//}

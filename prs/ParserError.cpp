@@ -23,6 +23,12 @@ std::string ParserError::toString() const {
         case ERROR_TYPE::ILLEGAL_SEQUENCE:
             return "Illegal sequence " + m_message + " from " + std::to_string(m_startIndexInString) + " to " +
                    std::to_string(m_endIndexInString);
+        case ERROR_TYPE::IDENTIFIER_ERROR:
+            return "Can't parse identifier " + m_message + " from " + std::to_string(m_startIndexInString) + " to " +
+                   std::to_string(m_endIndexInString);
+        case ERROR_TYPE::NUMBER_ERROR:
+            return "Can't parse number " + m_message + " from " + std::to_string(m_startIndexInString) + " to " +
+                   std::to_string(m_endIndexInString);
     }
     assert(false);
     return "";

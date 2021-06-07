@@ -7,7 +7,7 @@
 #include <iostream>
 
 int main(int argc, char* argv[]) {
-    Tokenizer tok("f2f (x + tt + 2,y + 9)");
+    Tokenizer tok("f(1.2,2)");
     if (not tok.success()) {
         std::cout << tok.string() << '\n';
         const auto& errors = tok.errors();
@@ -16,6 +16,7 @@ int main(int argc, char* argv[]) {
         }
     } else {
         std::cout << tok.structuralTokensToString() << '\n';
+        //        std::cout << tok.tokensToString(false) << '\n';
     }
 
     //    gen::DependencyGraph g;
