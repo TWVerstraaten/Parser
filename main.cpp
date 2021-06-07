@@ -2,22 +2,11 @@
 //#include "gen/DependencyGraph.h"
 //
 //#include <QApplication>
-#include "prs/Tokenizer.h"
 
-#include <iostream>
+#include "prs/Parser.h"
 
 int main(int argc, char* argv[]) {
-    Tokenizer tok("f(1.2,2)");
-    if (not tok.success()) {
-        std::cout << tok.string() << '\n';
-        const auto& errors = tok.errors();
-        for (const auto& er : errors) {
-            std::cout << er.toString() << '\n';
-        }
-    } else {
-        std::cout << tok.structuralTokensToString() << '\n';
-        //        std::cout << tok.tokensToString(false) << '\n';
-    }
+    Parser parser("f() + g(x +y)");
 
     //    gen::DependencyGraph g;
     //

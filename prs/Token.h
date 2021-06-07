@@ -10,6 +10,7 @@
 class Token {
 
     friend class Tokenizer;
+    friend class StructuralTokenizer;
     friend class StructuralToken;
 
   public:

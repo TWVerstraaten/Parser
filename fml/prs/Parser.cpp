@@ -221,13 +221,13 @@ namespace fml::prs {
                 currentArgument.clear();
                 currentArgument.splice(currentArgument.begin(), expressionInBrackets, expressionInBrackets.begin(), commaIt);
                 arguments.push_back(parse(currentArgument));
-                //                std::cout << tokensToString(currentArgument) << '\n';
+                //                std::cout << toString(currentArgument) << '\n';
                 assert(expressionInBrackets.front().m_type == Tokenizer::TOKEN_TYPE::COMMA);
                 expressionInBrackets.pop_front();
                 commaIt = std::find_if(expressionInBrackets.begin(), expressionInBrackets.end(),
                                        [](const Token& token) { return token.m_type == TOKEN_TYPE::COMMA; });
             }
-            //            std::cout << tokensToString(expressionInBrackets) << '\n';
+            //            std::cout << toString(expressionInBrackets) << '\n';
             arguments.push_back(parse(expressionInBrackets));
             m_subExpressionList[indexOfNewExpression] = std::make_unique<ast::AstNodeFunction>(functionName, std::move(arguments));
         }

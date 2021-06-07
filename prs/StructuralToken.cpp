@@ -8,12 +8,12 @@
 
 #include <algorithm>
 #include <cassert>
+#include <sstream>
 
-StructuralToken::StructuralToken(const Token& token)
-    : m_token(token), m_startIndex(token.m_startIndex), m_endIndex(token.m_endIndex) {
+StructuralToken::StructuralToken(const Token& token) : m_token(token), m_startIndex(token.m_startIndex), m_endIndex(token.m_endIndex) {
 }
 
-StructuralToken::StructuralToken(MultiBracketed&& multiBracketed, size_t startIndex, size_t endIndex)
+StructuralToken::StructuralToken(Bracketed&& multiBracketed, size_t startIndex, size_t endIndex)
     : m_token(multiBracketed), m_startIndex(startIndex), m_endIndex(endIndex) {
 }
 
@@ -38,43 +38,42 @@ std::string StructuralToken::toString() const {
 }
 
 std::string StructuralToken::toString(const Token& token) const {
-    return token.toString(true);
+    return "t[" + std::to_string(m_startIndex) + "," + std::to_string(m_endIndex) + "](" + token.toString(true) + ")";
 }
 
 std::string StructuralToken::toString(const std::string& token) const {
-    return "Var[" + std::to_string(m_startIndex) + ", " + std::to_string(m_endIndex) + "](" + token + ")";
+    return "x[" + std::to_string(m_startIndex) + "," + std::to_string(m_endIndex) + "](" + token + ")";
 }
 
 std::string StructuralToken::toString(double token) const {
-    return "Dbl(" + std::to_string(token) + ")";
+    return "d[" + std::to_string(m_startIndex) + "," + std::to_string(m_endIndex) + "](" + std::to_string(token) + ")";
 }
 
 std::string StructuralToken::toString(long long token) const {
-    return "Int(" + std::to_string(token) + ")";
+    return "n[" + std::to_string(m_startIndex) + "," + std::to_string(m_endIndex) + "](" + std::to_string(token) + ")";
 }
 
-std::string StructuralToken::toString(const MultiBracketed& token) const {
-    std::string result           = "MultiBr[" + std::to_string(m_startIndex) + ", " + std::to_string(m_endIndex) + "](";
-    bool        superfluousComma = false;
+std::string StructuralToken::toString(const Bracketed& token) const {
+    std::stringstream ss;
+    ss << "Br[" << std::to_string(m_startIndex) << "," << std::to_string(m_endIndex) << "](";
+    bool writeComma = false;
     for (const auto& list : token.m_tokenLists) {
-        superfluousComma = true;
-        for (const auto& el : list) {
-            result += el.toString();
+        if (writeComma) {
+            ss << ", ";
         }
-        result += +", ";
+        writeComma = true;
+        std::for_each(TT_IT(list), [&](const auto& a) { ss << a.toString(); });
     }
-    if (superfluousComma) {
-        result = result.substr(0, result.length() - 2);
-    }
-    result += ")";
-    return result;
+    ss << ")";
+    return ss.str();
 }
 
 std::string StructuralToken::toString(const Function& token) const {
-    std::string result = "Fun_@[" + std::to_string(m_startIndex) + ", " + std::to_string(m_endIndex) + "]" + token.m_name + "(";
-    result += toString(token.m_arguments);
-    result += ")";
-    return result;
+    std::stringstream ss;
+    ss << "F[" + std::to_string(m_startIndex) << "," << std::to_string(m_endIndex) << "]" << token.m_name << "(";
+    ss << toString(token.m_arguments);
+    ss << ")";
+    return ss.str();
 }
 
 bool StructuralToken::isRawTokenOfType(Token::TOKEN_TYPE type) const {
@@ -109,9 +108,9 @@ StructuralToken StructuralToken::makeFromCommaSeparated(std::list<StructuralToke
     }
 }
 
-StructuralToken::MultiBracketed StructuralToken::makeBracketed(std::list<StructuralToken>& tokenList) {
+StructuralToken::Bracketed StructuralToken::makeBracketed(std::list<StructuralToken>& tokenList) {
     if (tokenList.empty()) {
-        return MultiBracketed{{}};
+        return Bracketed{{}};
     }
 
     const size_t commaCount = std::count_if(TT_IT(tokenList), TT_LAMBDA(a, return a.isRawTokenOfType(Token::TOKEN_TYPE::COMMA);));
@@ -124,5 +123,5 @@ StructuralToken::MultiBracketed StructuralToken::makeBracketed(std::list<Structu
             tokenList.pop_front();
         }
     }
-    return StructuralToken::MultiBracketed{std::move(commaSeparatedGroups)};
+    return StructuralToken::Bracketed{std::move(commaSeparatedGroups)};
 }

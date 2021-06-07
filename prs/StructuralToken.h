@@ -12,16 +12,17 @@
 #include <vector>
 
 class StructuralToken {
-
+    // ToDo remove first friend
     friend class Tokenizer;
+    friend class StructuralTokenizer;
 
-    struct MultiBracketed {
+    struct Bracketed {
         std::vector<std::list<StructuralToken>> m_tokenLists;
     };
 
     struct Function {
-        std::string    m_name;
-        MultiBracketed m_arguments;
+        std::string m_name;
+        Bracketed   m_arguments;
     };
 
   public:
@@ -38,21 +39,21 @@ class StructuralToken {
     [[nodiscard]] std::string toString() const;
 
   private:
-    explicit StructuralToken(MultiBracketed&& multiBracketed, size_t startIndex, size_t endIndex);
+    explicit StructuralToken(Bracketed&& multiBracketed, size_t startIndex, size_t endIndex);
     explicit StructuralToken(Function&& function, size_t startIndex, size_t endIndex);
 
     [[nodiscard]] std::string toString(const Token& token) const;
-    [[nodiscard]] std::string toString(const MultiBracketed& token) const;
+    [[nodiscard]] std::string toString(const Bracketed& token) const;
     [[nodiscard]] std::string toString(const Function& token) const;
     [[nodiscard]] std::string toString(const std::string& token) const;
     [[nodiscard]] std::string toString(double token) const;
     [[nodiscard]] std::string toString(long long token) const;
 
-    [[nodiscard]] static MultiBracketed makeBracketed(std::list<StructuralToken>& tokenList);
+    [[nodiscard]] static Bracketed makeBracketed(std::list<StructuralToken>& tokenList);
 
-    std::variant<Token, MultiBracketed, Function, std::string, double, long long> m_token;
-    size_t                                                                        m_startIndex;
-    size_t                                                                        m_endIndex;
+    std::variant<Token, Bracketed, Function, std::string, double, long long> m_token;
+    size_t                                                                   m_startIndex;
+    size_t                                                                   m_endIndex;
 };
 
 #endif // PARSER_STRUCTURALTOKEN_H
