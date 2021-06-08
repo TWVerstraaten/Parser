@@ -3,10 +3,11 @@
 //
 //#include <QApplication>
 
+#include "prs/Ast.h"
 #include "prs/Parser.h"
 
 int main(int argc, char* argv[]) {
-    Parser parser("a2.2   f(.2) 3");
+    Ast ast("a2.2   f(.2) 3");
 
     //    gen::DependencyGraph g;
     //
