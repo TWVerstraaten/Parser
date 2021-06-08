@@ -5,7 +5,6 @@
 #ifndef PARSER_STRUCTURALTOKENIZER_H
 #define PARSER_STRUCTURALTOKENIZER_H
 
-#include "ParserInfo.h"
 #include "StructuralToken.h"
 #include "Token.h"
 
@@ -14,13 +13,16 @@
 #include <string>
 #include <vector>
 
+class ParserInfo;
+
 class StructuralTokenizer {
 
   public:
     StructuralTokenizer(const std::list<Token>& m_rawTokenList, ParserInfo& info);
 
-    void                      extractFunctionsAndBracketsFromStructuralTokens();
-    [[nodiscard]] std::string toString() const;
+    void                                            extractFunctionsAndBracketsFromStructuralTokens();
+    [[nodiscard]] std::string                       toString() const;
+    [[nodiscard]] const std::list<StructuralToken>& tokenList() const;
 
     [[nodiscard]] static std::string toString(const std::list<StructuralToken>& structuralTokenList);
 

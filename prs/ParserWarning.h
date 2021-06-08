@@ -5,7 +5,10 @@
 #ifndef PARSER_PARSERWARNING_H
 #define PARSER_PARSERWARNING_H
 
+#include "Range.h"
+
 #include <string>
+
 class ParserWarning {
 
   public:
@@ -13,13 +16,12 @@ class ParserWarning {
 
     [[nodiscard]] std::string toString() const;
 
-    ParserWarning(WARNING_TYPE type, std::string message, size_t startIndexInString, size_t endIndexInString);
+    ParserWarning(WARNING_TYPE type, std::string message, Range range);
 
   private:
     WARNING_TYPE m_type;
     std::string  m_message;
-    size_t       m_startIndexInString = std::numeric_limits<size_t>::max();
-    size_t       m_endIndexInString   = std::numeric_limits<size_t>::max();
+    Range        m_range;
 };
 
 #endif // PARSER_PARSERWARNING_H

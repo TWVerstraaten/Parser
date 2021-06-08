@@ -5,6 +5,8 @@
 #ifndef PARSER_TOKEN_H
 #define PARSER_TOKEN_H
 
+#include "Range.h"
+
 #include <string>
 
 class Token {
@@ -12,26 +14,19 @@ class Token {
     friend class Tokenizer;
     friend class StructuralTokenizer;
     friend class StructuralToken;
+    friend class AstToken;
 
   public:
     enum class TOKEN_TYPE { PLUS, MINUS, UNARY_MINUS, POWER, DIVIDE, TIMES, LEFT_BR, RIGHT_BR, COMMA, NUMBER, IDENTIFIER, EQUALS };
 
-    Token(TOKEN_TYPE  type,
-          std::string value,
-          size_t      startIndexInString,
-          size_t      endIndexInString,
-          size_t      additional = std::numeric_limits<size_t>::max());
-
-    void setAdditional(size_t additional);
+    Token(TOKEN_TYPE type, std::string value, Range range);
 
     [[nodiscard]] std::string toString(bool readable = true) const;
 
   private:
     TOKEN_TYPE  m_type;
     std::string m_string;
-    size_t      m_startIndex;
-    size_t      m_endIndex;
-    size_t      m_additional;
+    Range       m_range;
 };
 
 #endif // PARSER_TOKEN_H

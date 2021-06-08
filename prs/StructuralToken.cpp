@@ -10,27 +10,22 @@
 #include <cassert>
 #include <sstream>
 
-StructuralToken::StructuralToken(const Token& token) : m_token(token), m_startIndex(token.m_startIndex), m_endIndex(token.m_endIndex) {
+StructuralToken::StructuralToken(const Token& token) : m_token(token), m_range(token.m_range) {
 }
 
-StructuralToken::StructuralToken(Bracketed&& multiBracketed, size_t startIndex, size_t endIndex)
-    : m_token(multiBracketed), m_startIndex(startIndex), m_endIndex(endIndex) {
+StructuralToken::StructuralToken(Bracketed&& multiBracketed, Range range) : m_token(multiBracketed), m_range(range) {
 }
 
-StructuralToken::StructuralToken(Function&& function, size_t startIndex, size_t endIndex)
-    : m_token(function), m_startIndex(startIndex), m_endIndex(endIndex) {
+StructuralToken::StructuralToken(Function&& function, Range range) : m_token(function), m_range(range) {
 }
 
-StructuralToken::StructuralToken(const std::string& variable, size_t startIndex, size_t endIndex)
-    : m_token(variable), m_startIndex(startIndex), m_endIndex(endIndex) {
+StructuralToken::StructuralToken(const std::string& variable, Range range) : m_token(variable), m_range(range) {
 }
 
-StructuralToken::StructuralToken(double number, size_t startIndex, size_t endIndex)
-    : m_token(number), m_startIndex(startIndex), m_endIndex(endIndex) {
+StructuralToken::StructuralToken(double number, Range range) : m_token(number), m_range(range) {
 }
 
-StructuralToken::StructuralToken(long long number, size_t startIndex, size_t endIndex)
-    : m_token(number), m_startIndex(startIndex), m_endIndex(endIndex) {
+StructuralToken::StructuralToken(long long number, Range range) : m_token(number), m_range(range) {
 }
 
 std::string StructuralToken::toString() const {
@@ -38,24 +33,24 @@ std::string StructuralToken::toString() const {
 }
 
 std::string StructuralToken::toString(const Token& token) const {
-    return "t[" + std::to_string(m_startIndex) + "," + std::to_string(m_endIndex) + "](" + token.toString(true) + ")";
+    return "t" + m_range.toString() + "(" + token.toString(true) + ")";
 }
 
 std::string StructuralToken::toString(const std::string& token) const {
-    return "x[" + std::to_string(m_startIndex) + "," + std::to_string(m_endIndex) + "](" + token + ")";
+    return "x" + m_range.toString() + "(" + token + ")";
 }
 
 std::string StructuralToken::toString(double token) const {
-    return "d[" + std::to_string(m_startIndex) + "," + std::to_string(m_endIndex) + "](" + std::to_string(token) + ")";
+    return "d" + m_range.toString() + "(" + std::to_string(token) + ")";
 }
 
 std::string StructuralToken::toString(long long token) const {
-    return "n[" + std::to_string(m_startIndex) + "," + std::to_string(m_endIndex) + "](" + std::to_string(token) + ")";
+    return "n" + m_range.toString() + "(" + std::to_string(token) + ")";
 }
 
 std::string StructuralToken::toString(const Bracketed& token) const {
     std::stringstream ss;
-    ss << "Br[" << std::to_string(m_startIndex) << "," << std::to_string(m_endIndex) << "](";
+    ss << "Br" << m_range.toString() << "(";
     bool writeComma = false;
     for (const auto& list : token.m_tokenLists) {
         if (writeComma) {
@@ -70,7 +65,7 @@ std::string StructuralToken::toString(const Bracketed& token) const {
 
 std::string StructuralToken::toString(const Function& token) const {
     std::stringstream ss;
-    ss << "F[" + std::to_string(m_startIndex) << "," << std::to_string(m_endIndex) << "]" << token.m_name << "(";
+    ss << "F" << m_range.toString() << token.m_name << "(";
     ss << toString(token.m_arguments);
     ss << ")";
     return ss.str();
@@ -88,8 +83,8 @@ StructuralToken StructuralToken::makeFromCommaSeparated(std::list<StructuralToke
     assert(tokenList.size() > 1);
     assert(tokenList.back().isRawTokenOfType(Token::TOKEN_TYPE::RIGHT_BR));
 
-    const size_t startIndex   = tokenList.front().m_startIndex;
-    const size_t endIndex     = tokenList.back().m_endIndex;
+    const size_t startIndex   = tokenList.front().m_range.m_startIndex;
+    const size_t endIndex     = tokenList.back().m_range.m_endIndex;
     bool         isFunction   = tokenList.front().isString();
     std::string  functionName = isFunction ? std::get<std::string>(tokenList.front().m_token) : "";
     assert(isFunction != (functionName.empty()));
@@ -101,18 +96,11 @@ StructuralToken StructuralToken::makeFromCommaSeparated(std::list<StructuralToke
     }
     tokenList.pop_front();
     tokenList.pop_back();
-    if (isFunction) {
-        return StructuralToken{StructuralToken::Function{functionName, makeBracketed(tokenList)}, startIndex, endIndex};
-    } else {
-        return StructuralToken{makeBracketed(tokenList), startIndex, endIndex};
-    }
+    return isFunction ? StructuralToken{StructuralToken::Function{functionName, makeBracketed(tokenList)}, {startIndex, endIndex}}
+                      : StructuralToken{makeBracketed(tokenList), {startIndex, endIndex}};
 }
 
 StructuralToken::Bracketed StructuralToken::makeBracketed(std::list<StructuralToken>& tokenList) {
-    if (tokenList.empty()) {
-        return Bracketed{{}};
-    }
-
     const size_t commaCount = std::count_if(TT_IT(tokenList), TT_LAMBDA(a, return a.isRawTokenOfType(Token::TOKEN_TYPE::COMMA);));
     std::vector<std::list<StructuralToken>> commaSeparatedGroups(commaCount + 1);
 

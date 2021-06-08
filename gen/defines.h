@@ -7,5 +7,6 @@
 
 #define TT_IT(x) x.begin(), x.end()
 #define TT_LAMBDA(a, x) [](const auto &a){ x }
+#define TT_LAMBDA_REF(a, x) [&](const auto &a){ x }
 
 #endif // PARSER_DEFINES_H

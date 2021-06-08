@@ -5,13 +5,17 @@
 #include "StructuralTokenizer.h"
 
 #include "../gen/defines.h"
-#include "Token.h"
+#include "ParserInfo.h"
 
 #include <algorithm>
 #include <cassert>
 #include <sstream>
 
 StructuralTokenizer::StructuralTokenizer(const std::list<Token>& m_rawTokenList, ParserInfo& info) : m_info(info) {
+    if (not m_info.success()) {
+        return;
+    }
+
     for (const auto& token : m_rawTokenList) {
         switch (token.m_type) {
             case Token::TOKEN_TYPE::NUMBER:
@@ -31,9 +35,9 @@ StructuralTokenizer::StructuralTokenizer(const std::list<Token>& m_rawTokenList,
 void StructuralTokenizer::addStringTokenToStructuralTokens(const Token& token) {
     const auto parsedIdentifier = parseIdentifierToken(token);
     if (parsedIdentifier.has_value()) {
-        m_tokenList.emplace_back(StructuralToken{parsedIdentifier.value(), token.m_startIndex, token.m_endIndex});
+        m_tokenList.emplace_back(StructuralToken{parsedIdentifier.value(), token.m_range});
     } else {
-        m_info.addError(ParserError{ParserError::ERROR_TYPE::IDENTIFIER_ERROR, token.m_string, token.m_startIndex, token.m_endIndex});
+        m_info.addError(ParserError{ParserError::ERROR_TYPE::IDENTIFIER_ERROR, token.m_string, token.m_range});
     }
 }
 
@@ -43,7 +47,6 @@ void StructuralTokenizer::extractFunctionsAndBracketsFromStructuralTokens() {
         auto rightIt = std::find_if(TT_IT(m_tokenList), TT_LAMBDA(a, return a.isRawTokenOfType(Token::TOKEN_TYPE::RIGHT_BR);));
         auto leftIt  = rightIt;
         while (not((--leftIt)->isRawTokenOfType(Token::TOKEN_TYPE::LEFT_BR))) {}
-        assert(std::get<Token>(leftIt->m_token).m_additional == std::get<Token>(rightIt->m_token).m_additional);
 
         if (leftIt != m_tokenList.begin() && std::prev(leftIt)->isString()) {
             --leftIt;
@@ -58,13 +61,9 @@ void StructuralTokenizer::extractFunctionsAndBracketsFromStructuralTokens() {
 void StructuralTokenizer::addNumberTokenToStructuralTokens(const Token& token) {
     const auto parsedNumber = parseNumberToken(token);
     if (parsedNumber.has_value()) {
-        std::visit(
-            [&](auto a) {
-                m_tokenList.emplace_back(StructuralToken{a, token.m_startIndex, token.m_endIndex});
-            },
-            parsedNumber.value());
+        std::visit([&](auto a) { m_tokenList.emplace_back(StructuralToken{a, token.m_range}); }, parsedNumber.value());
     } else {
-        m_info.addError(ParserError{ParserError::ERROR_TYPE::NUMBER_ERROR, token.m_string, token.m_startIndex, token.m_endIndex});
+        m_info.addError(ParserError{ParserError::ERROR_TYPE::NUMBER_ERROR, token.m_string, token.m_range});
     }
 }
 
@@ -102,4 +101,8 @@ std::string StructuralTokenizer::toString(const std::list<StructuralToken>& stru
 
 std::string StructuralTokenizer::toString() const {
     return toString(m_tokenList);
+}
+
+const std::list<StructuralToken>& StructuralTokenizer::tokenList() const {
+    return m_tokenList;
 }

@@ -5,15 +5,13 @@
 #ifndef PARSER_TOKENIZER_H
 #define PARSER_TOKENIZER_H
 
-#include "ParserError.h"
-#include "ParserInfo.h"
-#include "ParserWarning.h"
-#include "StructuralToken.h"
 #include "Token.h"
 
 #include <list>
 #include <string>
 #include <vector>
+
+class ParserInfo;
 
 class Tokenizer {
 

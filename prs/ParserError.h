@@ -5,7 +5,10 @@
 #ifndef PARSER_PARSERERROR_H
 #define PARSER_PARSERERROR_H
 
+#include "Range.h"
+
 #include <string>
+
 class ParserError {
 
   public:
@@ -19,18 +22,14 @@ class ParserError {
         NUMBER_ERROR
     };
 
-    ParserError(ERROR_TYPE  type,
-                std::string message,
-                size_t      startIndexInString = std::numeric_limits<size_t>::max(),
-                size_t      endIndexInString   = std::numeric_limits<size_t>::max());
+    ParserError(ERROR_TYPE type, std::string message, Range range);
 
     [[nodiscard]] std::string toString() const;
 
   private:
     ERROR_TYPE  m_type;
     std::string m_message;
-    size_t      m_startIndexInString = std::numeric_limits<size_t>::max();
-    size_t      m_endIndexInString   = std::numeric_limits<size_t>::max();
+    Range       m_range;
 };
 
 #endif // PARSER_PARSERERROR_H

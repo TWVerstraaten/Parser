@@ -4,6 +4,7 @@
 
 #include "Parser.h"
 
+#include "AstToken.h"
 #include "StructuralTokenizer.h"
 #include "Tokenizer.h"
 
@@ -13,6 +14,7 @@
 Parser::Parser(std::string string) : m_string(std::move(string)) {
     Tokenizer           tok(m_string, m_info);
     StructuralTokenizer structuralTokenizer(tok.tokenList(), m_info);
+    AstToken            astToken(structuralTokenizer.tokenList());
 
     if (not success()) {
         std::cout << originalString() << '\n';
@@ -21,7 +23,7 @@ Parser::Parser(std::string string) : m_string(std::move(string)) {
         }
     } else {
         std::cout << originalString() << '\n';
-        std::cout << structuralTokenizer.toString() << '\n';
+        astToken.printTree();
         if (hasWarnings()) {
             for (const auto& er : m_info.warnings()) {
                 qWarning() << QString::fromStdString(er.toString());
