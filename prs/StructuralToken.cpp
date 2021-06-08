@@ -10,6 +10,7 @@
 #include <cassert>
 #include <sstream>
 
+
 StructuralToken::StructuralToken(const Token& token) : m_token(token), m_range(token.m_range) {
 }
 

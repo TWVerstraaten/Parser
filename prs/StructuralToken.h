@@ -42,7 +42,6 @@ class StructuralToken {
     explicit StructuralToken(Bracketed&& multiBracketed, Range range);
     explicit StructuralToken(Function&& function, Range range);
 
-
     [[nodiscard]] std::string toString(const Token& token) const;
     [[nodiscard]] std::string toString(const Bracketed& token) const;
     [[nodiscard]] std::string toString(const Function& token) const;

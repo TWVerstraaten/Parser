@@ -4,7 +4,7 @@
 
 #include "AstNodeFunction.h"
 
-#include "../alg/BoostWrapper.h"
+#include "../alg/StringAlg.h"
 #include "../fml/ReservedIdentifiers.h"
 #include "../fml/prs/ParserException.h"
 #include "ReservedFunction1.h"
@@ -20,7 +20,7 @@ namespace ast {
     AstNodeFunction::AstNodeFunction(std::string functionName, std::vector<u_ptr_AstNode>&& arguments)
         : m_functionName(std::move(functionName)), m_arguments(std::move(arguments)) {
 
-        assert(m_functionName == alg::BoostWrapper::trim(m_functionName));
+        assert(m_functionName == alg::StringAlg::trim(m_functionName));
 
         if (fml::ReservedIdentifiers::isReservedFunctionName(m_functionName)) {
             const size_t expectedArgumentCount = fml::ReservedIdentifiers::argumentCountOfReservedFunction(m_functionName);
@@ -97,8 +97,10 @@ namespace ast {
             if (cast.m_functionName != m_functionName || childCount() != other.childCount()) {
                 return false;
             }
-            return std::equal(m_arguments.begin(), m_arguments.end(), cast.m_arguments.begin(), cast.m_arguments.end(),
-                              [](const auto& a, const auto& b) { return *a == *b; });
+            return std::equal(
+                m_arguments.begin(), m_arguments.end(), cast.m_arguments.begin(), cast.m_arguments.end(), [](const auto& a, const auto& b) {
+                    return *a == *b;
+                });
         }
         return false;
     }

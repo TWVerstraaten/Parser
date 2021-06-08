@@ -9,6 +9,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <vector>
 
 namespace alg {
     class StringAlg {
@@ -20,6 +21,9 @@ namespace alg {
             std::string result = stream.str();
             return result.empty() ? "" : result.substr(0, result.length() - 1);
         }
+
+        static std::vector<std::string> trimAndSplit(std::string string, const std::string& splitCharacters);
+        static std::string              trim(std::string string);
     };
 } // namespace alg
 

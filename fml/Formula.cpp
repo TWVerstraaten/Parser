@@ -4,7 +4,6 @@
 
 #include "Formula.h"
 
-#include "../alg/BoostWrapper.h"
 #include "../alg/StringAlg.h"
 
 #include <algorithm>
@@ -27,7 +26,7 @@ namespace fml {
         if (not m_success) {
             return;
         }
-        const auto parts = alg::BoostWrapper::trimAndSplit(m_string, "=");
+        const auto parts = alg::StringAlg::trimAndSplit(m_string, "=");
         if (setErrorIf(parts.size() == 1, "Does not contain '=' sign")) {
             return;
         }

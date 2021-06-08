@@ -2,8 +2,8 @@
 // Created by pc on 19-11-20.
 //
 
-#ifndef PARSER_TOKENIZER_H
-#define PARSER_TOKENIZER_H
+#ifndef PRS_TOKENIZER_H
+#define PRS_TOKENIZER_H
 
 #include <list>
 #include <string>
@@ -55,4 +55,4 @@ namespace fml::prs {
     }
 } // namespace fml::prs
 
-#endif // PARSER_TOKENIZER_H
+#endif // PRS_TOKENIZER_H

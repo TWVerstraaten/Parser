@@ -2,8 +2,8 @@
 // Created by pc on 02-06-21.
 //
 
-#ifndef PARSER_RESERVEDFUNCTION_H
-#define PARSER_RESERVEDFUNCTION_H
+#ifndef PRS_RESERVEDFUNCTION_H
+#define PRS_RESERVEDFUNCTION_H
 
 #include "../gen/Number.h"
 
@@ -22,4 +22,4 @@ namespace ast {
 
 } // namespace ast
 
-#endif // PARSER_RESERVEDFUNCTION_H
+#endif // PRS_RESERVEDFUNCTION_H

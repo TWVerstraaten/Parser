@@ -4,7 +4,6 @@
 
 #include "FormulaHeader.h"
 
-#include "../alg/BoostWrapper.h"
 #include "../alg/StringAlg.h"
 #include "prs/Tokenizer.h"
 
@@ -24,7 +23,7 @@ namespace fml {
     }
 
     static bool checkIdentifier(const std::string& string) {
-        auto trimmedString = alg::BoostWrapper::trim(string);
+        auto trimmedString = alg::StringAlg::trim(string);
         assert(trimmedString == string);
         if (trimmedString.empty()) {
             return false;
@@ -41,12 +40,12 @@ namespace fml {
         if ((containsIllegalCharacters())) {
             return;
         }
-        const auto parts = alg::BoostWrapper::trimAndSplit(m_headerString, "(");
+        const auto parts = alg::StringAlg::trimAndSplit(m_headerString, "(");
         if (setErrorIf(parts.empty(), "Empty function header") || setErrorIf(parts.size() > 2, "Too many opening brackets")) {
             return;
         }
-        m_name = alg::BoostWrapper::trim(parts.at(0));
-        assert(m_name == alg::BoostWrapper::trim(m_name));
+        m_name = alg::StringAlg::trim(parts.at(0));
+        assert(m_name == alg::StringAlg::trim(m_name));
 
         if (setErrorIf(not checkIdentifier(m_name), "Invalid function name: " + m_name)) {
             return;
@@ -68,7 +67,7 @@ namespace fml {
         std::set<std::string> declaredVariableSet;
         std::set<std::string> duplicateVariableSet;
         for (boost::tokenizer<>::iterator token = tokenizer.begin(); token != tokenizer.end(); ++token) {
-            std::string next = alg::BoostWrapper::trim(*token);
+            std::string next = alg::StringAlg::trim(*token);
             if (setErrorIf(not checkIdentifier(next), "Invalid variable name: " + next)) {
                 return;
             }

@@ -4,7 +4,7 @@
 
 #include "Tokenizer.h"
 
-#include "../../alg/BoostWrapper.h"
+#include "../../alg/StringAlg.h"
 
 #include <cassert>
 
@@ -24,7 +24,7 @@ namespace fml::prs {
     }
 
     Tokenizer::Tokenizer(const std::string& string) {
-        auto                        trimmedString = alg::BoostWrapper::trim(string);
+        auto                        trimmedString = alg::StringAlg::trim(string);
         bool                        minusIsUnary  = true;
         std::string::const_iterator it            = trimmedString.cbegin();
 

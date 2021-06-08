@@ -2,8 +2,8 @@
 // Created by pc on 19-11-20.
 //
 
-#ifndef PARSER_PARSER_H
-#define PARSER_PARSER_H
+#ifndef PRS_PARSER_H
+#define PRS_PARSER_H
 
 #include "../../ast/AstNode.h"
 #include "Tokenizer.h"
@@ -34,4 +34,4 @@ namespace fml::prs {
     };
 } // namespace fml::prs
 
-#endif // PARSER_PARSER_H
+#endif // PRS_PARSER_H

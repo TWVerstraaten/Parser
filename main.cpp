@@ -3,11 +3,15 @@
 //
 //#include <QApplication>
 
+#include "gen/defines.h"
 #include "prs/Ast.h"
 #include "prs/Parser.h"
+#include "prs/ReservedFunction.h"
+
+#include <iostream>
 
 int main(int argc, char* argv[]) {
-    Ast ast("a2.2   f(.2) 3");
+    Ast ast("(sin(-atan2(x,y)))");
 
     //    gen::DependencyGraph g;
     //

@@ -2,8 +2,8 @@
 // Created by pc on 19-11-20.
 //
 
-#ifndef PARSER_AST_H
-#define PARSER_AST_H
+#ifndef PRS_AST_H
+#define PRS_AST_H
 
 #include "../gen/ErrorBase.h"
 #include "AstNode.h"
@@ -31,4 +31,4 @@ namespace ast {
         std::unique_ptr<const AstNode> m_rootNode;
     };
 } // namespace ast
-#endif // PARSER_AST_H
+#endif // PRS_AST_H
