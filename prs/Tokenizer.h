@@ -2,8 +2,8 @@
 // Created by pc on 06-06-21.
 //
 
-#ifndef PARSER_TOKENIZER_H
-#define PARSER_TOKENIZER_H
+#ifndef PRS_TOKENIZER_H
+#define PRS_TOKENIZER_H
 
 #include "Token.h"
 
@@ -36,4 +36,4 @@ class Tokenizer {
     ParserInfo&       m_info;
 };
 
-#endif // PARSER_TOKENIZER_H
+#endif // PRS_TOKENIZER_H

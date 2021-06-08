@@ -2,8 +2,8 @@
 // Created by pc on 07-06-21.
 //
 
-#ifndef PARSER_PARSERINFO_H
-#define PARSER_PARSERINFO_H
+#ifndef PRS_PARSERINFO_H
+#define PRS_PARSERINFO_H
 
 #include "ParserError.h"
 #include "ParserMessage.h"
@@ -34,4 +34,4 @@ class ParserInfo {
     std::vector<ParserMessage> m_messages;
 };
 
-#endif // PARSER_PARSERINFO_H
+#endif // PRS_PARSERINFO_H

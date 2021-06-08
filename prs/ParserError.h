@@ -2,14 +2,18 @@
 // Created by pc on 06-06-21.
 //
 
-#ifndef PARSER_PARSERERROR_H
-#define PARSER_PARSERERROR_H
+#ifndef PRS_PARSERERROR_H
+#define PRS_PARSERERROR_H
 
 #include "Range.h"
 
 #include <string>
 
-struct ParserError {
+class ParserError {
+
+    friend class Tokenizer;
+    friend class StructuralTokenizer;
+    friend class AstToken;
 
     enum class TYPE {
         ILLEGAL_CHARACTER,
@@ -18,14 +22,20 @@ struct ParserError {
         TOO_MANY_EQUALS,
         ILLEGAL_SEQUENCE,
         IDENTIFIER_ERROR,
-        NUMBER_ERROR
+        WRONG_ARGUMENT_COUNT_RESERVED,
+        NUMBER_ERROR,
+        GENERIC
     };
+
+  public:
+    ParserError(TYPE type, const std::string& message, Range range = {});
 
     [[nodiscard]] std::string toString() const;
 
+  private:
     const TYPE        m_type;
     const std::string m_message;
     const Range       m_range;
 };
 
-#endif // PARSER_PARSERERROR_H
+#endif // PRS_PARSERERROR_H

@@ -2,8 +2,8 @@
 // Created by pc on 08-06-21.
 //
 
-#ifndef PARSER_AST_H
-#define PARSER_AST_H
+#ifndef PRS_AST_H
+#define PRS_AST_H
 
 #include "AstToken.h"
 #include "ParserInfo.h"
@@ -21,6 +21,8 @@ class Ast {
   private:
     ParserInfo                m_info;
     std::unique_ptr<AstToken> m_rootNode;
+    std::unique_ptr<AstToken> m_simplifiedNode;
+    std::set<CustomFunction>  m_dependsOn;
 };
 
-#endif // PARSER_AST_H
+#endif // PRS_AST_H

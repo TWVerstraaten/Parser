@@ -2,8 +2,8 @@
 // Created by pc on 07-06-21.
 //
 
-#ifndef PARSER_PARSER_H
-#define PARSER_PARSER_H
+#ifndef PRS_PARSER_H
+#define PRS_PARSER_H
 
 #include "AstToken.h"
 
@@ -18,4 +18,4 @@ class Parser {
     static std::unique_ptr<AstToken> parse(const std::string& string, ParserInfo& info);
 };
 
-#endif // PARSER_PARSER_H
+#endif // PRS_PARSER_H

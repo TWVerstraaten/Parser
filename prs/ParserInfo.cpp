@@ -47,19 +47,22 @@ const std::vector<ParserMessage>& ParserInfo::messages() const {
 }
 
 void ParserInfo::printAll() const {
+    std::cout << "Error count \t" << m_errors.size() << '\n';
     if (hasErrors()) {
         for (const auto& el : m_errors) {
-            std::cout << el.toString() << '\n';
+            std::cout << std::string(5, '-') << el.toString() << '\n';
         }
     }
+    std::cout << "Warning count \t" << m_warnings.size() << '\n';
     if (hasWarnings()) {
         for (const auto& el : m_warnings) {
-            std::cout << el.toString() << '\n';
+            std::cout << std::string(5, '-') << el.toString() << '\n';
         }
     }
+    std::cout << "Message count \t" << m_messages.size() << '\n';
     if (hasMessages()) {
         for (const auto& el : m_messages) {
-            std::cout << el.toString() << '\n';
+            std::cout << std::string(5, '-') << el.toString() << '\n';
         }
     }
 }

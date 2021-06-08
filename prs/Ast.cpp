@@ -12,6 +12,10 @@ Ast::Ast(const std::string& string) : m_rootNode(Parser::parse(string, m_info)) 
     std::cout << "Parsed\t" << string << '\n';
     if (success()) {
         m_rootNode->printTree();
+        m_dependsOn = m_rootNode->dependsOn();
+        for (const auto& el : m_dependsOn) {
+            std::cout << el.m_name << '\n';
+        }
     }
     m_info.printAll();
 }

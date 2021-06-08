@@ -71,7 +71,7 @@ std::string StructuralToken::toString(const Function& token) const {
     return ss.str();
 }
 
-bool StructuralToken::isRawTokenOfType(Token::TOKEN_TYPE type) const {
+bool StructuralToken::isRawTokenOfType(Token::TYPE type) const {
     return std::holds_alternative<Token>(m_token) && std::get<Token>(m_token).m_type == type;
 }
 
@@ -81,15 +81,15 @@ bool StructuralToken::isString() const {
 
 StructuralToken StructuralToken::makeFromCommaSeparated(std::list<StructuralToken>&& tokenList) {
     assert(tokenList.size() > 1);
-    assert(tokenList.back().isRawTokenOfType(Token::TOKEN_TYPE::RIGHT_BR));
+    assert(tokenList.back().isRawTokenOfType(Token::TYPE::RIGHT_BR));
 
-    const size_t startIndex   = tokenList.front().m_range.m_startIndex;
-    const size_t endIndex     = tokenList.back().m_range.m_endIndex;
+    const size_t startIndex   = tokenList.front().m_range.startIndex();
+    const size_t endIndex     = tokenList.back().m_range.endIndex();
     bool         isFunction   = tokenList.front().isString();
     std::string  functionName = isFunction ? std::get<std::string>(tokenList.front().m_token) : "";
     assert(isFunction != (functionName.empty()));
-    assert(isFunction ? std::next(tokenList.begin())->isRawTokenOfType(Token::TOKEN_TYPE::LEFT_BR)
-                      : tokenList.front().isRawTokenOfType(Token::TOKEN_TYPE::LEFT_BR));
+    assert(isFunction ? std::next(tokenList.begin())->isRawTokenOfType(Token::TYPE::LEFT_BR)
+                      : tokenList.front().isRawTokenOfType(Token::TYPE::LEFT_BR));
 
     if (isFunction) {
         tokenList.pop_front();
@@ -101,11 +101,11 @@ StructuralToken StructuralToken::makeFromCommaSeparated(std::list<StructuralToke
 }
 
 StructuralToken::Bracketed StructuralToken::makeBracketed(std::list<StructuralToken>& tokenList) {
-    const size_t commaCount = std::count_if(TT_IT(tokenList), TT_LAMBDA(a, return a.isRawTokenOfType(Token::TOKEN_TYPE::COMMA);));
+    const size_t commaCount = std::count_if(TT_IT(tokenList), TT_LAMBDA(a, return a.isRawTokenOfType(Token::TYPE::COMMA);));
     std::vector<std::list<StructuralToken>> commaSeparatedGroups(commaCount + 1);
 
     for (size_t i = 0; i != commaCount + 1; ++i) {
-        const auto commaIt = std::find_if(TT_IT(tokenList), TT_LAMBDA(a, return a.isRawTokenOfType(Token::TOKEN_TYPE::COMMA);));
+        const auto commaIt = std::find_if(TT_IT(tokenList), TT_LAMBDA(a, return a.isRawTokenOfType(Token::TYPE::COMMA);));
         commaSeparatedGroups[i].splice(commaSeparatedGroups[i].begin(), tokenList, tokenList.begin(), commaIt);
         if (not tokenList.empty()) {
             tokenList.pop_front();

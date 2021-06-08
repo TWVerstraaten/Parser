@@ -4,7 +4,7 @@
 
 #include "Token.h"
 
-Token::Token(Token::TOKEN_TYPE type, std::string value, Range range) : m_type(type), m_string(std::move(value)), m_range(range) {
+Token::Token(Token::TYPE type, std::string value, Range range) : m_type(type), m_string(std::move(value)), m_range(range) {
 }
 
 std::string Token::toString(bool readable) const {
@@ -12,15 +12,19 @@ std::string Token::toString(bool readable) const {
         return m_string;
     } else {
         switch (m_type) {
-            case TOKEN_TYPE::NUMBER:
+            case TYPE::NUMBER:
                 return "_Num[" + m_string + "] ";
-            case TOKEN_TYPE::IDENTIFIER:
+            case TYPE::IDENTIFIER:
                 return "_Id" + m_range.toString() + "(" + m_string + ") ";
-            case TOKEN_TYPE::UNARY_MINUS:
+            case TYPE::UNARY_MINUS:
                 return "_Un[-] ";
             default:
                 break;
         }
         return "[" + m_string + "] ";
     }
+}
+
+Token::TYPE Token::type() const {
+    return m_type;
 }

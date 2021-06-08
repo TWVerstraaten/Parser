@@ -2,8 +2,8 @@
 // Created by pc on 07-06-21.
 //
 
-#ifndef PARSER_STRUCTURALTOKEN_H
-#define PARSER_STRUCTURALTOKEN_H
+#ifndef PRS_STRUCTURALTOKEN_H
+#define PRS_STRUCTURALTOKEN_H
 
 #include "Token.h"
 
@@ -21,8 +21,8 @@ class StructuralToken {
     };
 
     struct Function {
-        const std::string m_name;
-        Bracketed         m_arguments;
+        std::string m_name;
+        Bracketed   m_arguments;
     };
 
   public:
@@ -34,13 +34,14 @@ class StructuralToken {
 
     [[nodiscard]] static StructuralToken makeFromCommaSeparated(std::list<StructuralToken>&& tokenList);
 
-    [[nodiscard]] bool        isRawTokenOfType(Token::TOKEN_TYPE type) const;
+    [[nodiscard]] bool        isRawTokenOfType(Token::TYPE type) const;
     [[nodiscard]] bool        isString() const;
     [[nodiscard]] std::string toString() const;
 
   private:
     explicit StructuralToken(Bracketed&& multiBracketed, Range range);
     explicit StructuralToken(Function&& function, Range range);
+
 
     [[nodiscard]] std::string toString(const Token& token) const;
     [[nodiscard]] std::string toString(const Bracketed& token) const;
@@ -55,4 +56,4 @@ class StructuralToken {
     Range                                                                    m_range;
 };
 
-#endif // PARSER_STRUCTURALTOKEN_H
+#endif // PRS_STRUCTURALTOKEN_H

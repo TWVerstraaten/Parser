@@ -4,6 +4,7 @@
 
 #include "StructuralTokenizer.h"
 
+#include "../gen/Overloaded.h"
 #include "../gen/defines.h"
 #include "ParserInfo.h"
 
@@ -11,17 +12,17 @@
 #include <cassert>
 #include <sstream>
 
-StructuralTokenizer::StructuralTokenizer(const std::list<Token>& m_rawTokenList, ParserInfo& info) : m_info(info) {
+StructuralTokenizer::StructuralTokenizer(const std::list<Token>& rawTokenList, ParserInfo& info) : m_info(info) {
     if (not m_info.success()) {
         return;
     }
 
-    for (const auto& token : m_rawTokenList) {
+    for (const auto& token : rawTokenList) {
         switch (token.m_type) {
-            case Token::TOKEN_TYPE::NUMBER:
+            case Token::TYPE::NUMBER:
                 addNumberTokenToStructuralTokens(token);
                 break;
-            case Token::TOKEN_TYPE::IDENTIFIER:
+            case Token::TYPE::IDENTIFIER:
                 addStringTokenToStructuralTokens(token);
                 break;
             default:
@@ -29,8 +30,10 @@ StructuralTokenizer::StructuralTokenizer(const std::list<Token>& m_rawTokenList,
                 break;
         }
     }
-    extractFunctionsAndBracketsFromStructuralTokens();
-    insertMultiplicationWhereNeeded();
+    if (info.success()) {
+        extractFunctionsAndBracketsFromStructuralTokens();
+        insertMultiplicationWhereNeeded(m_tokenList);
+    }
 }
 
 void StructuralTokenizer::addStringTokenToStructuralTokens(const Token& token) {
@@ -43,11 +46,11 @@ void StructuralTokenizer::addStringTokenToStructuralTokens(const Token& token) {
 }
 
 void StructuralTokenizer::extractFunctionsAndBracketsFromStructuralTokens() {
-    const size_t bracketCount = std::count_if(TT_IT(m_tokenList), TT_LAMBDA(a, return a.isRawTokenOfType(Token::TOKEN_TYPE::RIGHT_BR);));
+    const size_t bracketCount = std::count_if(TT_IT(m_tokenList), TT_LAMBDA(a, return a.isRawTokenOfType(Token::TYPE::RIGHT_BR);));
     for (size_t dummy = 0; dummy != bracketCount; ++dummy) {
-        auto rightIt = std::find_if(TT_IT(m_tokenList), TT_LAMBDA(a, return a.isRawTokenOfType(Token::TOKEN_TYPE::RIGHT_BR);));
+        auto rightIt = std::find_if(TT_IT(m_tokenList), TT_LAMBDA(a, return a.isRawTokenOfType(Token::TYPE::RIGHT_BR);));
         auto leftIt  = rightIt;
-        while (not((--leftIt)->isRawTokenOfType(Token::TOKEN_TYPE::LEFT_BR))) {}
+        while (not((--leftIt)->isRawTokenOfType(Token::TYPE::LEFT_BR))) {}
 
         if (leftIt != m_tokenList.begin() && std::prev(leftIt)->isString()) {
             --leftIt;
@@ -69,7 +72,7 @@ void StructuralTokenizer::addNumberTokenToStructuralTokens(const Token& token) {
 }
 
 std::optional<std::string> StructuralTokenizer::parseIdentifierToken(const Token& token) {
-    assert(token.m_type == Token::TOKEN_TYPE::IDENTIFIER);
+    assert(token.m_type == Token::TYPE::IDENTIFIER);
     const auto& string = token.m_string;
     if (string.empty() || not isalpha(string.front()) ||
         std::find_if(TT_IT(string), TT_LAMBDA(a, return not(isalnum(a));)) != string.end()) {
@@ -79,7 +82,7 @@ std::optional<std::string> StructuralTokenizer::parseIdentifierToken(const Token
 }
 
 std::optional<std::variant<double, long long>> StructuralTokenizer::parseNumberToken(const Token& token) {
-    assert(token.m_type == Token::TOKEN_TYPE::NUMBER);
+    assert(token.m_type == Token::TYPE::NUMBER);
     const auto&  string   = token.m_string;
     const size_t dotCount = std::count_if(TT_IT(string), TT_LAMBDA(a, return a == '.';));
 
@@ -108,14 +111,24 @@ const std::list<StructuralToken>& StructuralTokenizer::tokenList() const {
     return m_tokenList;
 }
 
-void StructuralTokenizer::insertMultiplicationWhereNeeded() {
-    if (m_tokenList.empty()) {
+void StructuralTokenizer::insertMultiplicationWhereNeeded(std::list<StructuralToken>& structuralTokens) {
+    if (structuralTokens.empty()) {
         return;
     }
-    for (auto it = m_tokenList.begin(); std::next(it) != m_tokenList.end(); ++it) {
-        if (not(std::holds_alternative<Token>((*it).m_token) || std::holds_alternative<Token>((*std::next(it)).m_token))) {
-            m_info.addMessage({ParserMessage::TYPE::INSERT_MULTIPLICATION, "", {it->m_range.m_endIndex + 1, it->m_range.m_endIndex + 1}});
-            it = m_tokenList.insert(std::next(it), StructuralToken{Token{Token::TOKEN_TYPE::TIMES, "* (inferred)", {}}});
+    for (auto it = structuralTokens.begin(); it != structuralTokens.end(); ++it) {
+        if (std::next(it) != structuralTokens.end() &&
+            not(std::holds_alternative<Token>((*it).m_token) || std::holds_alternative<Token>((*std::next(it)).m_token))) {
+            m_info.addMessage({ParserMessage::TYPE::INSERT_MULTIPLICATION, "", {it->m_range.endIndex() + 1, it->m_range.endIndex() + 1}});
+            it = structuralTokens.insert(std::next(it), StructuralToken{Token{Token::TYPE::TIMES, "* (inferred)", {}}});
         }
+        std::visit(Overloaded{[this](StructuralToken::Function& function) {
+                                  std::for_each(TT_IT(function.m_arguments.m_tokenLists),
+                                                [this](auto& a) { insertMultiplicationWhereNeeded(a); });
+                              },
+                              [this](StructuralToken::Bracketed& bracketed) {
+                                  std::for_each(TT_IT(bracketed.m_tokenLists), [this](auto& a) { insertMultiplicationWhereNeeded(a); });
+                              },
+                              [](const auto) {}},
+                   (*it).m_token);
     }
 }
