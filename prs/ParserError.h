@@ -9,10 +9,9 @@
 
 #include <string>
 
-class ParserError {
+struct ParserError {
 
-  public:
-    enum class ERROR_TYPE {
+    enum class TYPE {
         ILLEGAL_CHARACTER,
         UNMATCHED_CLOSING_BR,
         UNMATCHED_OPEN_BR,
@@ -22,14 +21,11 @@ class ParserError {
         NUMBER_ERROR
     };
 
-    ParserError(ERROR_TYPE type, std::string message, Range range);
-
     [[nodiscard]] std::string toString() const;
 
-  private:
-    ERROR_TYPE  m_type;
-    std::string m_message;
-    Range       m_range;
+    const TYPE        m_type;
+    const std::string m_message;
+    const Range       m_range;
 };
 
 #endif // PARSER_PARSERERROR_H

@@ -6,7 +6,7 @@
 #include "prs/Parser.h"
 
 int main(int argc, char* argv[]) {
-    Parser parser("2*3^(y*4)");
+    Parser parser("a2.2   f(.2) 3");
 
     //    gen::DependencyGraph g;
     //

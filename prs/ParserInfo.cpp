@@ -4,6 +4,8 @@
 
 #include "ParserInfo.h"
 
+#include <iostream>
+
 void ParserInfo::addError(ParserError&& error) {
     m_errors.emplace_back(std::move(error));
 }
@@ -12,12 +14,24 @@ void ParserInfo::addWarning(ParserWarning&& warning) {
     m_warnings.emplace_back(std::move(warning));
 }
 
+void ParserInfo::addMessage(ParserMessage&& warning) {
+    m_messages.emplace_back(std::move(warning));
+}
+
 bool ParserInfo::success() const {
     return m_errors.empty();
 }
 
-bool ParserInfo::hasWarning() const {
+bool ParserInfo::hasErrors() const {
+    return not m_errors.empty();
+}
+
+bool ParserInfo::hasWarnings() const {
     return not m_warnings.empty();
+}
+
+bool ParserInfo::hasMessages() const {
+    return not m_messages.empty();
 }
 
 const std::vector<ParserError>& ParserInfo::errors() const {
@@ -26,4 +40,26 @@ const std::vector<ParserError>& ParserInfo::errors() const {
 
 const std::vector<ParserWarning>& ParserInfo::warnings() const {
     return m_warnings;
+}
+
+const std::vector<ParserMessage>& ParserInfo::messages() const {
+    return m_messages;
+}
+
+void ParserInfo::printAll() const {
+    if (hasErrors()) {
+        for (const auto& el : m_errors) {
+            std::cout << el.toString() << '\n';
+        }
+    }
+    if (hasWarnings()) {
+        for (const auto& el : m_warnings) {
+            std::cout << el.toString() << '\n';
+        }
+    }
+    if (hasMessages()) {
+        for (const auto& el : m_messages) {
+            std::cout << el.toString() << '\n';
+        }
+    }
 }

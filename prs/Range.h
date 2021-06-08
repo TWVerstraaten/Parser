@@ -12,8 +12,8 @@ struct Range {
 
     [[nodiscard]] std::string toString() const;
 
-    size_t m_startIndex;
-    size_t m_endIndex;
+    size_t m_startIndex = std::numeric_limits<size_t>::max();
+    size_t m_endIndex   = std::numeric_limits<size_t>::max();
 };
 
 #endif // PARSER_RANGE_H

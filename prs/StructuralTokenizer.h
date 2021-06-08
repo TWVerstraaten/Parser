@@ -27,6 +27,7 @@ class StructuralTokenizer {
     [[nodiscard]] static std::string toString(const std::list<StructuralToken>& structuralTokenList);
 
   private:
+    void insertMultiplicationWhereNeeded();
     void addStringTokenToStructuralTokens(const Token& token);
     void addNumberTokenToStructuralTokens(const Token& token);
 

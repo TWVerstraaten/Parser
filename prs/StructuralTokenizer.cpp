@@ -30,6 +30,7 @@ StructuralTokenizer::StructuralTokenizer(const std::list<Token>& m_rawTokenList,
         }
     }
     extractFunctionsAndBracketsFromStructuralTokens();
+    insertMultiplicationWhereNeeded();
 }
 
 void StructuralTokenizer::addStringTokenToStructuralTokens(const Token& token) {
@@ -37,7 +38,7 @@ void StructuralTokenizer::addStringTokenToStructuralTokens(const Token& token) {
     if (parsedIdentifier.has_value()) {
         m_tokenList.emplace_back(StructuralToken{parsedIdentifier.value(), token.m_range});
     } else {
-        m_info.addError(ParserError{ParserError::ERROR_TYPE::IDENTIFIER_ERROR, token.m_string, token.m_range});
+        m_info.addError(ParserError{ParserError::TYPE::IDENTIFIER_ERROR, token.m_string, token.m_range});
     }
 }
 
@@ -63,7 +64,7 @@ void StructuralTokenizer::addNumberTokenToStructuralTokens(const Token& token) {
     if (parsedNumber.has_value()) {
         std::visit([&](auto a) { m_tokenList.emplace_back(StructuralToken{a, token.m_range}); }, parsedNumber.value());
     } else {
-        m_info.addError(ParserError{ParserError::ERROR_TYPE::NUMBER_ERROR, token.m_string, token.m_range});
+        m_info.addError(ParserError{ParserError::TYPE::NUMBER_ERROR, token.m_string, token.m_range});
     }
 }
 
@@ -105,4 +106,16 @@ std::string StructuralTokenizer::toString() const {
 
 const std::list<StructuralToken>& StructuralTokenizer::tokenList() const {
     return m_tokenList;
+}
+
+void StructuralTokenizer::insertMultiplicationWhereNeeded() {
+    if (m_tokenList.empty()) {
+        return;
+    }
+    for (auto it = m_tokenList.begin(); std::next(it) != m_tokenList.end(); ++it) {
+        if (not(std::holds_alternative<Token>((*it).m_token) || std::holds_alternative<Token>((*std::next(it)).m_token))) {
+            m_info.addMessage({ParserMessage::TYPE::INSERT_MULTIPLICATION, "", {it->m_range.m_endIndex + 1, it->m_range.m_endIndex + 1}});
+            it = m_tokenList.insert(std::next(it), StructuralToken{Token{Token::TOKEN_TYPE::TIMES, "* (inferred)", {}}});
+        }
+    }
 }

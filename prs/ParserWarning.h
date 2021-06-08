@@ -9,19 +9,15 @@
 
 #include <string>
 
-class ParserWarning {
+struct ParserWarning {
 
-  public:
-    enum WARNING_TYPE { SUSPICIOUS_IDENTIFIER_NUM_PATTERN };
+    enum TYPE { SUSPICIOUS_IDENTIFIER_NUM_PATTERN };
 
     [[nodiscard]] std::string toString() const;
 
-    ParserWarning(WARNING_TYPE type, std::string message, Range range);
-
-  private:
-    WARNING_TYPE m_type;
-    std::string  m_message;
-    Range        m_range;
+    const TYPE        m_type;
+    const std::string m_message;
+    const Range       m_range;
 };
 
 #endif // PARSER_PARSERWARNING_H

@@ -37,7 +37,7 @@ void Tokenizer::findIllegalCharacters() {
     for (size_t i = 0; i != m_string.size(); ++i) {
         const char c = m_string.at(i);
         if (not isalnum(c) && allowedSpecialCharacters.find_first_of(c) == std::string::npos) {
-            m_info.addError({ParserError::ERROR_TYPE::ILLEGAL_CHARACTER, std::string(1, c), {i, i}});
+            m_info.addError({ParserError::TYPE::ILLEGAL_CHARACTER, std::string(1, c), {i, i}});
         }
     }
 }
@@ -137,7 +137,7 @@ void Tokenizer::checkBrackets() {
             ++bracketDepth;
         } else if (token.m_type == Token::TOKEN_TYPE::RIGHT_BR) {
             if (bracketDepth == 0) {
-                m_info.addError({ParserError::ERROR_TYPE::UNMATCHED_CLOSING_BR, "", token.m_range});
+                m_info.addError({ParserError::TYPE::UNMATCHED_CLOSING_BR, "", token.m_range});
                 return;
             }
             --bracketDepth;
@@ -146,7 +146,7 @@ void Tokenizer::checkBrackets() {
     if (bracketDepth != 0) {
         auto it = std::find_if(m_tokenList.rbegin(), m_tokenList.rend(), TT_LAMBDA(a, return a.m_type == Token::TOKEN_TYPE::LEFT_BR;));
         assert(it != m_tokenList.rend());
-        m_info.addError({ParserError::ERROR_TYPE::UNMATCHED_OPEN_BR, "", it->m_range});
+        m_info.addError({ParserError::TYPE::UNMATCHED_OPEN_BR, "", it->m_range});
     }
 }
 
@@ -157,7 +157,7 @@ void Tokenizer::checkDoubleEquals() {
     }
     it = std::find_if(std::next(it), m_tokenList.end(), TT_LAMBDA(a, return a.m_type == Token::TOKEN_TYPE::EQUALS;));
     if (it != m_tokenList.end()) {
-        m_info.addError({ParserError::ERROR_TYPE::TOO_MANY_EQUALS, "", it->m_range});
+        m_info.addError({ParserError::TYPE::TOO_MANY_EQUALS, "", it->m_range});
     }
 }
 
@@ -176,7 +176,7 @@ void Tokenizer::checkRepeatedOperators() {
         if (operatorTypes.find(currentType) != operatorTypes.end()) {
             const auto nextType = std::next(it)->m_type;
             if (allowedAfterOperator.find(nextType) == allowedAfterOperator.end()) {
-                m_info.addError({ParserError::ERROR_TYPE::ILLEGAL_SEQUENCE,
+                m_info.addError({ParserError::TYPE::ILLEGAL_SEQUENCE,
                                  it->m_string + " " + std::next(it)->m_string,
                                  {it->m_range.m_startIndex, std::next(it)->m_range.m_endIndex}});
             }
@@ -190,7 +190,7 @@ void Tokenizer::checkRepeatedCommas() {
         if (it->m_type == Token::TOKEN_TYPE::COMMA) {
             if (lastWasComma) {
                 assert(it != m_tokenList.begin());
-                m_info.addError({ParserError::ERROR_TYPE::ILLEGAL_SEQUENCE,
+                m_info.addError({ParserError::TYPE::ILLEGAL_SEQUENCE,
                                  ", ,",
                                  {std::prev(it)->m_range.m_startIndex, it->m_range.m_endIndex}});
             } else {
@@ -210,7 +210,7 @@ void Tokenizer::checkIdentifierNumberPatternWithNoSpace() {
         auto next = std::next(it);
         if (it->m_type == Token::TOKEN_TYPE::IDENTIFIER && next->m_type == Token::TOKEN_TYPE::NUMBER) {
             if (it->m_range.m_endIndex + 1 == next->m_range.m_startIndex) {
-                m_info.addWarning({ParserWarning::WARNING_TYPE::SUSPICIOUS_IDENTIFIER_NUM_PATTERN,
+                m_info.addWarning({ParserWarning::TYPE::SUSPICIOUS_IDENTIFIER_NUM_PATTERN,
                                    it->m_string + " * " + next->toString(),
                                    {it->m_range.m_startIndex, next->m_range.m_endIndex}});
             }

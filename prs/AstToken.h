@@ -6,13 +6,12 @@
 #define PARSER_ASTTOKEN_H
 
 #include "StructuralToken.h"
+#include "Token.h"
 
 #include <memory>
 #include <set>
 #include <variant>
 #include <vector>
-
-class AstTokenizer;
 
 class AstToken {
 
@@ -26,10 +25,6 @@ class AstToken {
     };
 
     enum class TYPE { PLUS, MINUS, TIMES, DIVIDE, POWER, UNARY_MINUS, EQUALS };
-
-    //    void printBT(const BSTNode* node) {
-    //        printTree("", node, false);
-    //    }
 
   public:
     explicit AstToken(const std::list<StructuralToken>& structuralTokens);
@@ -45,13 +40,13 @@ class AstToken {
 
   private:
     static void replaceUnaryMinuses(std::list<std::variant<AstToken, Token>>& tempTokens);
-    void        replacePowers(std::list<std::variant<AstToken, Token>>& tempTokens);
-    void        replaceTimesDivide(std::list<std::variant<AstToken, Token>>& tempTokens);
-    void        replacePlusMinus(std::list<std::variant<AstToken, Token>>& tempTokens);
+    static void        replacePowers(std::list<std::variant<AstToken, Token>>& tempTokens);
+    static void        replaceTimesDivide(std::list<std::variant<AstToken, Token>>& tempTokens);
+    static void        replacePlusMinus(std::list<std::variant<AstToken, Token>>& tempTokens);
     void        printTree(const std::string& prefix, const AstToken& node, bool isLeft) const;
-    [[nodiscard]] static std::list<std::variant<AstToken, Token>>::iterator tokenIt(std::list<std::variant<AstToken, Token>>&          tempTokens,
-                  std::list<std::variant<AstToken, Token>>::iterator it,
-                  const std::set<Token::TOKEN_TYPE>&                 types);
+    [[nodiscard]] static std::list<std::variant<AstToken, Token>>::iterator tokenIt(std::list<std::variant<AstToken, Token>>& tempTokens,
+                                                                                    std::list<std::variant<AstToken, Token>>::iterator it,
+                                                                                    const std::set<Token::TOKEN_TYPE>& types);
 
     std::variant<TYPE, Function, Vector, std::string, double, long long> m_token;
     std::vector<AstToken>                                                m_children;
