@@ -8,6 +8,7 @@
 #include "Range.h"
 
 #include <string>
+#include <variant>
 
 class Token {
 
@@ -15,14 +16,20 @@ class Token {
     friend class StructuralTokenizer;
     friend class StructuralToken;
     friend class AstToken;
+    friend class TokenWriter;
 
   public:
     enum class TYPE { PLUS, MINUS, UNARY_MINUS, POWER, DIVIDE, TIMES, LEFT_BR, RIGHT_BR, COMMA, NUMBER, IDENTIFIER, EQUALS };
 
     Token(TYPE type, std::string value, Range range);
 
-    [[nodiscard]] std::string toString(bool readable = true) const;
-    TYPE                      type() const;
+    [[nodiscard]] std::string toString() const;
+    [[nodiscard]] TYPE        type() const;
+
+    template <class... Ts>
+    [[nodiscard]] static bool isTokenOfType(const std::variant<Ts...>& t, Token::TYPE type) {
+        return std::holds_alternative<Token>(t) && std::get<Token>(t).m_type == type;
+    }
 
   private:
     TYPE        m_type;

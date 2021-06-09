@@ -7,22 +7,18 @@
 Token::Token(Token::TYPE type, std::string value, Range range) : m_type(type), m_string(std::move(value)), m_range(range) {
 }
 
-std::string Token::toString(bool readable) const {
-    if (readable) {
-        return m_string;
-    } else {
-        switch (m_type) {
-            case TYPE::NUMBER:
-                return "_Num[" + m_string + "] ";
-            case TYPE::IDENTIFIER:
-                return "_Id" + m_range.toString() + "(" + m_string + ") ";
-            case TYPE::UNARY_MINUS:
-                return "_Un[-] ";
-            default:
-                break;
-        }
-        return "[" + m_string + "] ";
+std::string Token::toString() const {
+    switch (m_type) {
+        case TYPE::NUMBER:
+            return "_Num[" + m_string + "] ";
+        case TYPE::IDENTIFIER:
+            return "_Id" + m_range.toString() + "(" + m_string + ") ";
+        case TYPE::UNARY_MINUS:
+            return "_Un[-] ";
+        default:
+            break;
     }
+    return "[" + m_string + "] ";
 }
 
 Token::TYPE Token::type() const {

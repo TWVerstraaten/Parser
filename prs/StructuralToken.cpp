@@ -5,11 +5,10 @@
 #include "StructuralToken.h"
 
 #include "../gen/defines.h"
+#include "TokenWriter.h"
 
 #include <algorithm>
 #include <cassert>
-#include <sstream>
-
 
 StructuralToken::StructuralToken(const Token& token) : m_token(token), m_range(token.m_range) {
 }
@@ -30,50 +29,7 @@ StructuralToken::StructuralToken(long long number, Range range) : m_token(number
 }
 
 std::string StructuralToken::toString() const {
-    return std::visit([this](const auto& a) { return toString(a); }, m_token);
-}
-
-std::string StructuralToken::toString(const Token& token) const {
-    return "t" + m_range.toString() + "(" + token.toString(true) + ")";
-}
-
-std::string StructuralToken::toString(const std::string& token) const {
-    return "x" + m_range.toString() + "(" + token + ")";
-}
-
-std::string StructuralToken::toString(double token) const {
-    return "d" + m_range.toString() + "(" + std::to_string(token) + ")";
-}
-
-std::string StructuralToken::toString(long long token) const {
-    return "n" + m_range.toString() + "(" + std::to_string(token) + ")";
-}
-
-std::string StructuralToken::toString(const Bracketed& token) const {
-    std::stringstream ss;
-    ss << "Br" << m_range.toString() << "(";
-    bool writeComma = false;
-    for (const auto& list : token.m_tokenLists) {
-        if (writeComma) {
-            ss << ", ";
-        }
-        writeComma = true;
-        std::for_each(TT_IT(list), [&](const auto& a) { ss << a.toString(); });
-    }
-    ss << ")";
-    return ss.str();
-}
-
-std::string StructuralToken::toString(const Function& token) const {
-    std::stringstream ss;
-    ss << "F" << m_range.toString() << token.m_name << "(";
-    ss << toString(token.m_arguments);
-    ss << ")";
-    return ss.str();
-}
-
-bool StructuralToken::isRawTokenOfType(Token::TYPE type) const {
-    return std::holds_alternative<Token>(m_token) && std::get<Token>(m_token).m_type == type;
+    return std::visit([this](const auto& a) { return TokenWriter::toString(a, m_range); }, m_token);
 }
 
 bool StructuralToken::isString() const {
@@ -82,15 +38,15 @@ bool StructuralToken::isString() const {
 
 StructuralToken StructuralToken::makeFromCommaSeparated(std::list<StructuralToken>&& tokenList) {
     assert(tokenList.size() > 1);
-    assert(tokenList.back().isRawTokenOfType(Token::TYPE::RIGHT_BR));
+    assert(Token::isTokenOfType(tokenList.back().m_token, Token::TYPE::RIGHT_BR));
 
     const size_t startIndex   = tokenList.front().m_range.startIndex();
     const size_t endIndex     = tokenList.back().m_range.endIndex();
     bool         isFunction   = tokenList.front().isString();
     std::string  functionName = isFunction ? std::get<std::string>(tokenList.front().m_token) : "";
     assert(isFunction != (functionName.empty()));
-    assert(isFunction ? std::next(tokenList.begin())->isRawTokenOfType(Token::TYPE::LEFT_BR)
-                      : tokenList.front().isRawTokenOfType(Token::TYPE::LEFT_BR));
+    assert(isFunction ? Token::isTokenOfType(std::next(tokenList.begin())->m_token, Token::TYPE::LEFT_BR)
+                      : Token::isTokenOfType(tokenList.front().m_token, Token::TYPE::LEFT_BR));
 
     if (isFunction) {
         tokenList.pop_front();
@@ -102,11 +58,11 @@ StructuralToken StructuralToken::makeFromCommaSeparated(std::list<StructuralToke
 }
 
 StructuralToken::Bracketed StructuralToken::makeBracketed(std::list<StructuralToken>& tokenList) {
-    const size_t commaCount = std::count_if(TT_IT(tokenList), TT_LAMBDA(a, return a.isRawTokenOfType(Token::TYPE::COMMA);));
+    const size_t commaCount = std::count_if(TT_IT(tokenList), TT_LAMBDA(a, return Token::isTokenOfType(a.m_token, Token::TYPE::COMMA);));
     std::vector<std::list<StructuralToken>> commaSeparatedGroups(commaCount + 1);
 
     for (size_t i = 0; i != commaCount + 1; ++i) {
-        const auto commaIt = std::find_if(TT_IT(tokenList), TT_LAMBDA(a, return a.isRawTokenOfType(Token::TYPE::COMMA);));
+        const auto commaIt = std::find_if(TT_IT(tokenList), TT_LAMBDA(a, return Token::isTokenOfType(a.m_token, Token::TYPE::COMMA);));
         commaSeparatedGroups[i].splice(commaSeparatedGroups[i].begin(), tokenList, tokenList.begin(), commaIt);
         if (not tokenList.empty()) {
             tokenList.pop_front();

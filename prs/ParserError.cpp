@@ -5,8 +5,9 @@
 #include "ParserError.h"
 
 #include <cassert>
+#include <utility>
 
-ParserError::ParserError(TYPE type, const std::string& message, Range range) : m_type(type), m_message(message), m_range(range) {
+ParserError::ParserError(TYPE type, std::string message, Range range) : m_type(type), m_message(std::move(message)), m_range(range) {
 }
 
 std::string ParserError::toString() const {

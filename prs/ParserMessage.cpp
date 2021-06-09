@@ -6,8 +6,7 @@
 
 #include <cassert>
 
-ParserMessage::ParserMessage(TYPE type, const std::string& message, Range range)
-    : m_type(type), m_message(message), m_range(range) {
+ParserMessage::ParserMessage(TYPE type, std::string message, Range range) : m_type(type), m_message(std::move(message)), m_range(range) {
 }
 
 std::string ParserMessage::toString() const {

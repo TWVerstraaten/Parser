@@ -5,9 +5,10 @@
 #include "ParserWarning.h"
 
 #include <cassert>
+#include <utility>
 
-ParserWarning::ParserWarning(TYPE type, const std::string& message, Range range)
-    : m_type(type), m_message(message), m_range(range) {
+ParserWarning::ParserWarning(TYPE type, std::string  message, Range range)
+    : m_type(type), m_message(std::move(message)), m_range(range) {
 }
 
 std::string ParserWarning::toString() const {

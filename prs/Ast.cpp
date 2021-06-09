@@ -11,10 +11,10 @@
 Ast::Ast(const std::string& string) : m_rootNode(Parser::parse(string, m_info)) {
     std::cout << "Parsed\t" << string << '\n';
     if (success()) {
-        m_rootNode->printTree();
+        std::cout << AstToken::printTree(*m_rootNode) << '\n';
         m_dependsOn = m_rootNode->dependsOn();
         for (const auto& el : m_dependsOn) {
-            std::cout << el.m_name << '\n';
+            std::cout << el.name() << '\n';
         }
     }
     m_info.printAll();

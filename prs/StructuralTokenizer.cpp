@@ -46,11 +46,12 @@ void StructuralTokenizer::addStringTokenToStructuralTokens(const Token& token) {
 }
 
 void StructuralTokenizer::extractFunctionsAndBracketsFromStructuralTokens() {
-    const size_t bracketCount = std::count_if(TT_IT(m_tokenList), TT_LAMBDA(a, return a.isRawTokenOfType(Token::TYPE::RIGHT_BR);));
+    const size_t bracketCount =
+        std::count_if(TT_IT(m_tokenList), TT_LAMBDA(a, return Token::isTokenOfType(a.m_token, Token::TYPE::RIGHT_BR);));
     for (size_t dummy = 0; dummy != bracketCount; ++dummy) {
-        auto rightIt = std::find_if(TT_IT(m_tokenList), TT_LAMBDA(a, return a.isRawTokenOfType(Token::TYPE::RIGHT_BR);));
+        auto rightIt = std::find_if(TT_IT(m_tokenList), TT_LAMBDA(a, return Token::isTokenOfType(a.m_token, Token::TYPE::RIGHT_BR);));
         auto leftIt  = rightIt;
-        while (not((--leftIt)->isRawTokenOfType(Token::TYPE::LEFT_BR))) {}
+        while (not(Token::isTokenOfType((--leftIt)->m_token, Token::TYPE::LEFT_BR))) {}
 
         if (leftIt != m_tokenList.begin() && std::prev(leftIt)->isString()) {
             --leftIt;

@@ -10,8 +10,7 @@ Range::Range(size_t startIndex, size_t endIndex) : m_startIndex(startIndex), m_e
 }
 
 std::string Range::toString() const {
-    if (m_startIndex == std::numeric_limits<size_t>::max()) {
-        assert(m_endIndex == std::numeric_limits<size_t>::max());
+    if (m_startIndex == std::numeric_limits<size_t>::max() && m_endIndex == std::numeric_limits<size_t>::max()) {
         return "[Empty range]";
     } else {
         return "[" + std::to_string(m_startIndex) + "," + std::to_string(m_endIndex) + "]";

@@ -19,6 +19,8 @@ class ParserInfo;
 
 class AstToken {
 
+    friend class TokenWriter;
+
     struct Vector {
         size_t m_argumentCount;
     };
@@ -40,7 +42,7 @@ class AstToken {
     [[nodiscard]] std::set<CustomFunction> dependsOn() const;
     [[nodiscard]] std::set<std::string>    variablesUsed() const;
 
-    void printTree() const;
+    [[nodiscard]] static std::string printTree(const AstToken& root);
 
   private:
     typedef std::variant<AstToken, Token> TempToken;
@@ -50,7 +52,6 @@ class AstToken {
     static void replacePowers(TempTokenList& tempTokens, ParserInfo& info);
     static void replaceTimesDivide(TempTokenList& tempTokens, ParserInfo& info);
     static void replacePlusMinus(TempTokenList& tempTokens, ParserInfo& info);
-    static void printTree(const std::string& prefix, const AstToken& node, bool isLeft);
 
     std::variant<OPERATOR_TYPE, Empty, CustomFunction, ReservedFunction, Vector, std::string, double, long long> m_token;
     std::vector<AstToken>                                                                                        m_children;

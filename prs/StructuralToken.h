@@ -14,7 +14,7 @@
 class StructuralToken {
     friend class StructuralTokenizer;
     friend class AstToken;
-    friend class AstToken;
+    friend class TokenWriter;
 
     struct Bracketed {
         std::vector<std::list<StructuralToken>> m_tokenLists;
@@ -28,26 +28,17 @@ class StructuralToken {
   public:
     explicit StructuralToken(const Token& token);
 
-    StructuralToken(const std::string& variable, Range range);
-    StructuralToken(double number, Range range);
-    StructuralToken(long long number, Range range);
-
-    [[nodiscard]] static StructuralToken makeFromCommaSeparated(std::list<StructuralToken>&& tokenList);
-
-    [[nodiscard]] bool        isRawTokenOfType(Token::TYPE type) const;
     [[nodiscard]] bool        isString() const;
     [[nodiscard]] std::string toString() const;
 
-  private:
-    explicit StructuralToken(Bracketed&& multiBracketed, Range range);
-    explicit StructuralToken(Function&& function, Range range);
+    [[nodiscard]] static StructuralToken makeFromCommaSeparated(std::list<StructuralToken>&& tokenList);
 
-    [[nodiscard]] std::string toString(const Token& token) const;
-    [[nodiscard]] std::string toString(const Bracketed& token) const;
-    [[nodiscard]] std::string toString(const Function& token) const;
-    [[nodiscard]] std::string toString(const std::string& token) const;
-    [[nodiscard]] std::string toString(double token) const;
-    [[nodiscard]] std::string toString(long long token) const;
+  private:
+    StructuralToken(const std::string& variable, Range range);
+    StructuralToken(double number, Range range);
+    StructuralToken(long long number, Range range);
+    StructuralToken(Bracketed&& multiBracketed, Range range);
+    StructuralToken(Function&& function, Range range);
 
     [[nodiscard]] static Bracketed makeBracketed(std::list<StructuralToken>& tokenList);
 

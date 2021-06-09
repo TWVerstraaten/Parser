@@ -18,7 +18,7 @@ class Tokenizer {
   public:
     Tokenizer(std::string string, ParserInfo& info);
 
-    [[nodiscard]] std::string             toString(bool readable = true) const;
+    [[nodiscard]] std::string             toString() const;
     [[nodiscard]] const std::list<Token>& tokenList() const;
 
   private:

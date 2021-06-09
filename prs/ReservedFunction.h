@@ -12,6 +12,7 @@
 class ReservedFunction {
 
     friend class AstToken;
+    friend class TokenWriter;
 
   private:
     struct Sin {

@@ -28,7 +28,7 @@ class ParserError {
     };
 
   public:
-    ParserError(TYPE type, const std::string& message, Range range = {});
+    ParserError(TYPE type, std::string  message, Range range = {});
 
     [[nodiscard]] std::string toString() const;
 

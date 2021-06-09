@@ -7,6 +7,7 @@
 #include "../gen/Overloaded.h"
 #include "../gen/defines.h"
 #include "ParserInfo.h"
+#include "TokenWriter.h"
 
 #include <algorithm>
 #include <cassert>
@@ -17,7 +18,7 @@ AstToken::AstToken(const std::list<StructuralToken>& structuralTokens, ParserInf
         m_token = Empty{};
         return;
     }
-    if (auto it = std::find_if(TT_IT(structuralTokens), TT_LAMBDA(a, return a.isRawTokenOfType(Token::TYPE::EQUALS);));
+    if (auto it = std::find_if(TT_IT(structuralTokens), TT_LAMBDA(a, return Token::isTokenOfType(a.m_token, Token::TYPE::EQUALS);));
         it != structuralTokens.end()) {
         m_token    = OPERATOR_TYPE::EQUALS;
         m_range    = {structuralTokens.front().m_range.startIndex(), structuralTokens.back().m_range.endIndex()};
@@ -28,14 +29,7 @@ AstToken::AstToken(const std::list<StructuralToken>& structuralTokens, ParserInf
 
     TempTokenList tempTokens;
     for (const auto& el : structuralTokens) {
-        std::visit(Overloaded{[&](const StructuralToken::Bracketed& bracketed) {
-                                  if (bracketed.m_tokenLists.size() == 1) {
-                                      tempTokens.emplace_back(AstToken{bracketed.m_tokenLists.front(), info});
-                                  } else {
-                                      tempTokens.emplace_back(AstToken{bracketed, el.m_range, info});
-                                  }
-                              },
-                              [&](const Token& a) { tempTokens.emplace_back(a); },
+        std::visit(Overloaded{[&](const Token& a) { tempTokens.emplace_back(a); },
                               [&](const auto& a) {
                                   tempTokens.emplace_back(AstToken{a, el.m_range, info});
                               }},
@@ -48,11 +42,7 @@ AstToken::AstToken(const std::list<StructuralToken>& structuralTokens, ParserInf
     replacePlusMinus(tempTokens, info);
 
     if (tempTokens.size() != 1) {
-        for (const auto& el : tempTokens) {
-            std::visit(
-                Overloaded{[](const AstToken& token) { token.printTree(); }, [](const auto& a) { std::cout << a.toString() << '\n'; }}, el);
-        }
-        info.addError(ParserError{ParserError::TYPE::GENERIC, "More than one token left at AstToken???"});
+        info.addError(ParserError{ParserError::TYPE::GENERIC, std::string("More than one token left at AstToken? ") + TT_WHERE_STRING});
     }
 
     assert(std::holds_alternative<AstToken>(tempTokens.front()));
@@ -73,11 +63,12 @@ AstToken::AstToken(const StructuralToken::Function& function, Range range, Parse
     }
     auto reserved = ReservedFunction::getReserved(function.m_name);
     if (reserved.has_value()) {
-        m_token = ReservedFunction{reserved.value()};
-        if (ReservedFunction::getArgumentCount(reserved.value()) != function.m_arguments.m_tokenLists.size()) {
+        const auto val = reserved.value();
+        m_token        = ReservedFunction{val};
+        if (ReservedFunction::getArgumentCount(val) != function.m_arguments.m_tokenLists.size()) {
             info.addError(ParserError{ParserError::TYPE::WRONG_ARGUMENT_COUNT_RESERVED,
-                                      ReservedFunction::getName(reserved.value()) + " should have " +
-                                          std::to_string(ReservedFunction::getArgumentCount(reserved.value())) + " arguments",
+                                      ReservedFunction::getName(val) + " should have " +
+                                          std::to_string(ReservedFunction::getArgumentCount(val)) + " arguments",
                                       m_range});
         }
     }
@@ -100,65 +91,16 @@ AstToken::AstToken(AstToken::OPERATOR_TYPE type, AstToken left, AstToken right, 
     : m_token(type), m_children({std::move(left), std::move(right)}), m_range(range) {
 }
 
-void AstToken::printTree(const std::string& prefix, const AstToken& node, bool isLeft) {
-    std::cout << prefix;
-    std::cout << (isLeft ? "├── " : "└── ");
-
-    std::visit(
-        Overloaded{[](OPERATOR_TYPE type) {
-                       switch (type) {
-                           case OPERATOR_TYPE::PLUS:
-                               std::cout << "+";
-                               break;
-                           case OPERATOR_TYPE::MINUS:
-                               std::cout << "-";
-                               break;
-                           case OPERATOR_TYPE::TIMES:
-                               std::cout << "*";
-                               break;
-                           case OPERATOR_TYPE::DIVIDE:
-                               std::cout << "/";
-                               break;
-                           case OPERATOR_TYPE::POWER:
-                               std::cout << "^";
-                               break;
-                           case OPERATOR_TYPE::UNARY_MINUS:
-                               std::cout << "-";
-                               break;
-                           case OPERATOR_TYPE::EQUALS:
-                               std::cout << "=";
-                               break;
-                       }
-                   },
-                   [](const CustomFunction& function) { std::cout << "Fun(" << function.m_argumentCount << ")@_" << function.m_name; },
-                   [](const Vector& vector) { std::cout << "Vec(" << vector.m_argumentCount << ")"; },
-                   [](const ReservedFunction& reservedFunction) { std::cout << ReservedFunction::getName(reservedFunction.m_reserved); },
-                   [](const Empty&) { std::cout << "_empty_"; },
-                   [](const auto& val) { std::cout << val; }},
-        node.m_token);
-    std::cout << "  " << node.m_range.toString() << std::endl;
-
-    const size_t childCount = node.m_children.size();
-    if (childCount == 0) {
-        return;
-    }
-    for (size_t i = 0; i != childCount - 1; ++i) {
-        printTree(prefix + (isLeft ? "│    " : "     "), node.m_children.at(i), true);
-    }
-    printTree(prefix + (isLeft ? "│    " : "     "), node.m_children.back(), false);
+std::string AstToken::printTree(const AstToken& root) {
+    return TokenWriter::printTree("", root, false);
 }
 
-void AstToken::printTree() const {
-    printTree("", *this, false);
-}
-
-std::list<std::variant<AstToken, Token>>::iterator tokenIt(std::list<std::variant<AstToken, Token>>&          tempTokens,
-                                                           std::list<std::variant<AstToken, Token>>::iterator it,
-                                                           const std::set<Token::TYPE>&                       types) {
-    return std::find_if(
-        it,
-        tempTokens.end(),
-        TT_LAMBDA_REF(a, return std::holds_alternative<Token>(a) && (types.find(std::get<Token>(a).type()) != types.end());));
+[[nodiscard]] static std::list<std::variant<AstToken, Token>>::iterator tokenIt(std::list<std::variant<AstToken, Token>>& tempTokens,
+                                                                                std::list<std::variant<AstToken, Token>>::iterator it,
+                                                                                const std::set<Token::TYPE>&                       types) {
+    return std::find_if(it, tempTokens.end(), [&](const auto& a) {
+        return std::holds_alternative<Token>(a) && (types.find(std::get<Token>(a).type()) != types.end());
+    });
 }
 
 void AstToken::replaceUnaryMinuses(TempTokenList& tempTokens, ParserInfo& info) {

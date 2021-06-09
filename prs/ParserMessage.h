@@ -17,7 +17,7 @@ class ParserMessage {
     enum TYPE { INSERT_MULTIPLICATION };
 
   public:
-    ParserMessage(TYPE type, const std::string& message, Range range = {});
+    ParserMessage(TYPE type, std::string  message, Range range = {});
 
     [[nodiscard]] std::string toString() const;
 

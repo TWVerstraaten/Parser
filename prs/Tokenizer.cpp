@@ -121,10 +121,10 @@ void Tokenizer::replaceUnaryMinuses() {
     }
 }
 
-std::string Tokenizer::toString(bool readable) const {
+std::string Tokenizer::toString() const {
     std::stringstream ss;
     for (const auto& token : m_tokenList) {
-        ss << token.toString(readable);
+        ss << token.toString();
     }
     ss << '\n';
     return ss.str();
@@ -165,9 +165,9 @@ void Tokenizer::checkRepeatedOperators() {
     if (m_tokenList.size() < 2) {
         return;
     }
-    static const std::set<Token::TYPE> operatorTypes{
-        Token::TYPE::POWER, Token::TYPE::PLUS, Token::TYPE::MINUS, Token::TYPE::TIMES, Token::TYPE::DIVIDE, Token::TYPE::UNARY_MINUS};
-    const std::set<Token::TYPE> allowedAfterOperator = {Token::TYPE::IDENTIFIER, Token::TYPE::NUMBER, Token::TYPE::LEFT_BR};
+    using T = Token::TYPE;
+    static const std::set<T> operatorTypes{T::POWER, T::PLUS, T::MINUS, T::TIMES, T::DIVIDE, T::UNARY_MINUS};
+    static const std::set<T> allowedAfterOperator{T::IDENTIFIER, T::NUMBER, Token::TYPE::LEFT_BR};
 
     for (auto it = m_tokenList.begin(); std::next(it) != m_tokenList.end(); ++it) {
         const auto currentType = it->m_type;

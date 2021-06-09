@@ -7,9 +7,16 @@
 
 #include <string>
 
-struct CustomFunction {
+class CustomFunction {
     friend bool operator<(const CustomFunction& left, const CustomFunction& right);
 
+  public:
+    CustomFunction(std::string name, size_t argumentCount);
+
+    [[nodiscard]] const std::string& name() const;
+    [[nodiscard]] size_t             argumentCount() const;
+
+  private:
     std::string m_name;
     size_t      m_argumentCount;
 };
