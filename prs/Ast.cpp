@@ -7,6 +7,7 @@
 #include "Parser.h"
 #include "TokenTemplates.h"
 
+#include <cassert>
 #include <iostream>
 
 Ast::Ast(const std::string& string) : m_rootNode(Parser::parse(string, m_info)) {
@@ -18,7 +19,8 @@ Ast::Ast(const std::string& string) : m_rootNode(Parser::parse(string, m_info)) 
         for (const auto& el : m_dependsOn) {
             std::cout << el.name() << '\n';
         }
-        determineHeaderType();
+        checkHeaderAndSetType();
+        std::cout << m_header.toString() << '\n';
     }
     m_info.printAll();
 }
@@ -43,10 +45,26 @@ std::set<std::string> Ast::declaredVariables() const {
     return m_rootNode->declaredVariables();
 }
 
-void Ast::determineHeaderType() {
+void Ast::checkHeaderAndSetType() {
     if (TokenTemplates::tokenEquals<AstToken::OPERATOR_TYPE>(m_rootNode->m_token, AstToken::OPERATOR_TYPE::EQUALS)) {
-
+        assert(m_rootNode->m_children.size() == 2);
+        const auto& headerAst = m_rootNode->m_children.front();
+        if (std::holds_alternative<std::string>(headerAst.m_token)) {
+            assert(headerAst.m_children.empty());
+            const auto& name = std::get<std::string>(headerAst.m_token);
+            m_header         = Header::OnlyNamedHeader{name};
+        } else {
+            assert(std::holds_alternative<CustomFunction>(headerAst.m_token));
+            const auto&              function = std::get<CustomFunction>(headerAst.m_token);
+            std::vector<std::string> variableNames;
+            variableNames.reserve(function.argumentCount());
+            for (const auto& child : headerAst.m_children) {
+                assert(std::holds_alternative<std::string>(child.m_token));
+                variableNames.emplace_back(std::get<std::string>(child.m_token));
+            }
+            m_header = Header::NamedAndVariablesHeader{function.name(), std::move(variableNames)};
+        }
     } else {
-        m_headerType = HEADER_TYPE::EMPTY;
+        m_header = Header::EmptyHeader{};
     };
 }

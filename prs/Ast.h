@@ -6,6 +6,7 @@
 #define PRS_AST_H
 
 #include "AstToken.h"
+#include "Header.h"
 #include "ParserInfo.h"
 
 #include <memory>
@@ -13,8 +14,6 @@
 class Ast {
 
   public:
-    enum class HEADER_TYPE { EMPTY, ONLY_NAMED, NAMED_AND_VARIABLES_DECLARED };
-
     explicit Ast(const std::string& string);
 
     [[nodiscard]] bool              success() const;
@@ -25,10 +24,10 @@ class Ast {
     [[nodiscard]] std::set<std::string>    declaredVariables() const;
 
   private:
-    void determineHeaderType();
+    void checkHeaderAndSetType();
 
-    HEADER_TYPE               m_headerType;
     ParserInfo                m_info;
+    Header                    m_header;
     std::unique_ptr<AstToken> m_rootNode;
     std::unique_ptr<AstToken> m_simplifiedNode;
     std::set<CustomFunction>  m_dependsOn;
