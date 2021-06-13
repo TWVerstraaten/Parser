@@ -24,3 +24,7 @@ size_t Range::startIndex() const {
 size_t Range::endIndex() const {
     return m_endIndex;
 }
+
+bool Range::isEmpty() const {
+    return m_endIndex == std::numeric_limits<size_t>::max() && m_startIndex == std::numeric_limits<size_t>::max();
+}

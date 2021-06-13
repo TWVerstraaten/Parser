@@ -38,15 +38,15 @@ bool StructuralToken::isString() const {
 
 StructuralToken StructuralToken::makeFromCommaSeparated(std::list<StructuralToken>&& tokenList) {
     assert(tokenList.size() > 1);
-    assert(Token::isTokenOfType(tokenList.back().m_token, Token::TYPE::RIGHT_BR));
+    assert(TokenTemplates::isTokenOfType<Token>(tokenList.back().m_token, Token::TYPE::RIGHT_BR));
 
     const size_t startIndex   = tokenList.front().m_range.startIndex();
     const size_t endIndex     = tokenList.back().m_range.endIndex();
     bool         isFunction   = tokenList.front().isString();
     std::string  functionName = isFunction ? std::get<std::string>(tokenList.front().m_token) : "";
     assert(isFunction != (functionName.empty()));
-    assert(isFunction ? Token::isTokenOfType(std::next(tokenList.begin())->m_token, Token::TYPE::LEFT_BR)
-                      : Token::isTokenOfType(tokenList.front().m_token, Token::TYPE::LEFT_BR));
+    assert(isFunction ? TokenTemplates::isTokenOfType<Token>(std::next(tokenList.begin())->m_token, Token::TYPE::LEFT_BR)
+                      : TokenTemplates::isTokenOfType<Token>(tokenList.front().m_token, Token::TYPE::LEFT_BR));
 
     if (isFunction) {
         tokenList.pop_front();
@@ -58,15 +58,17 @@ StructuralToken StructuralToken::makeFromCommaSeparated(std::list<StructuralToke
 }
 
 StructuralToken::Bracketed StructuralToken::makeBracketed(std::list<StructuralToken>& tokenList) {
-    const size_t commaCount = std::count_if(TT_IT(tokenList), TT_LAMBDA(a, return Token::isTokenOfType(a.m_token, Token::TYPE::COMMA);));
+    const size_t commaCount =
+        std::count_if(TT_IT(tokenList), TT_LAMBDA(a, return TokenTemplates::isTokenOfType<Token>(a.m_token, Token::TYPE::COMMA);));
     std::vector<std::list<StructuralToken>> commaSeparatedGroups(commaCount + 1);
 
     for (size_t i = 0; i != commaCount + 1; ++i) {
-        const auto commaIt = std::find_if(TT_IT(tokenList), TT_LAMBDA(a, return Token::isTokenOfType(a.m_token, Token::TYPE::COMMA);));
+        const auto commaIt =
+            std::find_if(TT_IT(tokenList), TT_LAMBDA(a, return TokenTemplates::isTokenOfType<Token>(a.m_token, Token::TYPE::COMMA);));
         commaSeparatedGroups[i].splice(commaSeparatedGroups[i].begin(), tokenList, tokenList.begin(), commaIt);
         if (not tokenList.empty()) {
             tokenList.pop_front();
         }
     }
-    return StructuralToken::Bracketed{std::move(commaSeparatedGroups)};
+    return commaSeparatedGroups.empty() ? StructuralToken::Bracketed{{}} : StructuralToken::Bracketed{std::move(commaSeparatedGroups)};
 }

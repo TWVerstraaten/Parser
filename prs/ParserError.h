@@ -24,11 +24,12 @@ class ParserError {
         IDENTIFIER_ERROR,
         WRONG_ARGUMENT_COUNT_RESERVED,
         NUMBER_ERROR,
+        UNFINISHED,
         GENERIC
     };
 
   public:
-    ParserError(TYPE type, std::string  message, Range range = {});
+    ParserError(TYPE type, std::string message, Range range = {});
 
     [[nodiscard]] std::string toString() const;
 

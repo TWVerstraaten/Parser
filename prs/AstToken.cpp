@@ -11,17 +11,25 @@
 
 #include <algorithm>
 #include <cassert>
-#include <iostream>
 
 AstToken::AstToken(const std::list<StructuralToken>& structuralTokens, ParserInfo& info) {
-    if (structuralTokens.empty()) {
-        m_token = Empty{};
-        return;
+    switch (structuralTokens.size()) {
+        case 0:
+            m_range = Range{};
+            m_token = Empty{};
+            return;
+        case 1:
+            m_range = structuralTokens.front().m_range;
+            break;
+        default:
+            m_range = {structuralTokens.front().m_range.startIndex(), structuralTokens.back().m_range.endIndex()};
+            break;
     }
-    if (auto it = std::find_if(TT_IT(structuralTokens), TT_LAMBDA(a, return Token::isTokenOfType(a.m_token, Token::TYPE::EQUALS);));
+
+    if (auto it = std::find_if(TT_IT(structuralTokens),
+                               TT_LAMBDA(a, return TokenTemplates::isTokenOfType<Token>(a.m_token, Token::TYPE::EQUALS);));
         it != structuralTokens.end()) {
         m_token    = OPERATOR_TYPE::EQUALS;
-        m_range    = {structuralTokens.front().m_range.startIndex(), structuralTokens.back().m_range.endIndex()};
         m_children = {AstToken{std::list<StructuralToken>(structuralTokens.begin(), it), info},
                       AstToken{std::list<StructuralToken>(std::next(it), structuralTokens.end()), info}};
         return;
@@ -41,18 +49,24 @@ AstToken::AstToken(const std::list<StructuralToken>& structuralTokens, ParserInf
     replaceUnaryMinuses(tempTokens, info);
     replacePlusMinus(tempTokens, info);
 
-    if (tempTokens.size() != 1) {
+    if (tempTokens.size() > 1) {
         info.addError(ParserError{ParserError::TYPE::GENERIC, std::string("More than one token left at AstToken? ") + TT_WHERE_STRING});
     }
-
-    assert(std::holds_alternative<AstToken>(tempTokens.front()));
-    *this = std::get<AstToken>(tempTokens.front());
+    if (not tempTokens.empty()) {
+        assert(std::holds_alternative<AstToken>(tempTokens.front()));
+        m_children = std::move(std::get<AstToken>(tempTokens.front()).m_children);
+        m_token    = std::get<AstToken>(tempTokens.front()).m_token;
+    }
 }
 
 AstToken::AstToken(const StructuralToken::Bracketed& bracketed, Range range, ParserInfo& info)
     : m_token(Vector{bracketed.m_tokenLists.size()}), m_range(range) {
     for (const auto& el : bracketed.m_tokenLists) {
         m_children.emplace_back(el, info);
+    }
+    if (m_children.size() == 1 && std::holds_alternative<Empty>(m_children.front().m_token)) {
+        m_children.clear();
+        std::get<Vector>(m_token).m_argumentCount = 0;
     }
 }
 
@@ -61,15 +75,20 @@ AstToken::AstToken(const StructuralToken::Function& function, Range range, Parse
     for (const auto& el : function.m_arguments.m_tokenLists) {
         m_children.emplace_back(el, info);
     }
+    if (m_children.size() == 1 && std::holds_alternative<Empty>(m_children.front().m_token)) {
+        m_children.clear();
+        std::get<CustomFunction>(m_token).m_argumentCount = 0;
+    }
     auto reserved = ReservedFunction::getReserved(function.m_name);
     if (reserved.has_value()) {
-        const auto val = reserved.value();
-        m_token        = ReservedFunction{val};
-        if (ReservedFunction::getArgumentCount(val) != function.m_arguments.m_tokenLists.size()) {
-            info.addError(ParserError{ParserError::TYPE::WRONG_ARGUMENT_COUNT_RESERVED,
-                                      ReservedFunction::getName(val) + " should have " +
-                                          std::to_string(ReservedFunction::getArgumentCount(val)) + " arguments",
-                                      m_range});
+        const auto val           = reserved.value();
+        const auto argumentCount = std::get<CustomFunction>(m_token).m_argumentCount;
+        m_token                  = ReservedFunction{val};
+        if (ReservedFunction::getArgumentCount(val) != argumentCount) {
+            info.addError({ParserError::TYPE::WRONG_ARGUMENT_COUNT_RESERVED,
+                           ReservedFunction::getName(val) + " takes " + std::to_string(ReservedFunction::getArgumentCount(val)) +
+                               " arguments, not " + std::to_string(argumentCount),
+                           m_range});
         }
     }
 }
@@ -195,4 +214,8 @@ std::set<std::string> AstToken::variablesUsed() const {
         variables.merge(child.variablesUsed());
     }
     return variables;
+}
+
+std::set<std::string> AstToken::declaredVariables() const {
+    return {};
 }

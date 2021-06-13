@@ -8,6 +8,8 @@
 #include <string>
 
 class CustomFunction {
+
+    friend class AstToken;
     friend bool operator<(const CustomFunction& left, const CustomFunction& right);
 
   public:

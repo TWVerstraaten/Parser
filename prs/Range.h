@@ -11,9 +11,10 @@
 class Range {
 
   public:
-    Range() = default;
     Range(size_t startIndex, size_t endIndex);
+    Range() = default;
 
+    [[nodiscard]] bool isEmpty() const;
     [[nodiscard]] std::string toString() const;
     [[nodiscard]] size_t      startIndex() const;
     [[nodiscard]] size_t      endIndex() const;

@@ -21,11 +21,11 @@ Tokenizer::Tokenizer(std::string string, ParserInfo& info) : m_string(std::move(
     if (not m_info.success()) {
         return;
     }
-    replaceUnaryMinuses();
     checkBrackets();
     checkDoubleEquals();
     checkRepeatedCommas();
     checkRepeatedOperators();
+    replaceUnaryMinuses();
     checkIdentifierNumberPatternWithNoSpace();
 }
 
@@ -143,20 +143,25 @@ void Tokenizer::checkBrackets() {
             --bracketDepth;
         }
     }
-    if (bracketDepth != 0) {
-        auto it = std::find_if(m_tokenList.rbegin(), m_tokenList.rend(), TT_LAMBDA(a, return a.m_type == Token::TYPE::LEFT_BR;));
-        assert(it != m_tokenList.rend());
-        m_info.addError({ParserError::TYPE::UNMATCHED_OPEN_BR, "", it->m_range});
+    bracketDepth = 0;
+    for (auto it = m_tokenList.rbegin(); it != m_tokenList.rend(); ++it) {
+        if (it->m_type == Token::TYPE::RIGHT_BR) {
+            ++bracketDepth;
+        } else if (it->m_type == Token::TYPE::LEFT_BR) {
+            if (bracketDepth == 0) {
+                m_info.addError({ParserError::TYPE::UNMATCHED_OPEN_BR, "", it->m_range});
+                return;
+            }
+            --bracketDepth;
+        }
     }
 }
 
 void Tokenizer::checkDoubleEquals() {
-    auto it = std::find_if(TT_IT(m_tokenList), TT_LAMBDA(a, return a.m_type == Token::TYPE::EQUALS;));
-    if (it == m_tokenList.end()) {
+    if (auto it = std::find_if(TT_IT(m_tokenList), TT_LAMBDA(a, return a.m_type == Token::TYPE::EQUALS;)); it == m_tokenList.end()) {
         return;
-    }
-    it = std::find_if(std::next(it), m_tokenList.end(), TT_LAMBDA(a, return a.m_type == Token::TYPE::EQUALS;));
-    if (it != m_tokenList.end()) {
+    } else if (it = std::find_if(std::next(it), m_tokenList.end(), TT_LAMBDA(a, return a.m_type == Token::TYPE::EQUALS;));
+               it != m_tokenList.end()) {
         m_info.addError({ParserError::TYPE::TOO_MANY_EQUALS, "", it->m_range});
     }
 }
@@ -167,34 +172,30 @@ void Tokenizer::checkRepeatedOperators() {
     }
     using T = Token::TYPE;
     static const std::set<T> operatorTypes{T::POWER, T::PLUS, T::MINUS, T::TIMES, T::DIVIDE, T::UNARY_MINUS};
-    static const std::set<T> allowedAfterOperator{T::IDENTIFIER, T::NUMBER, Token::TYPE::LEFT_BR};
+    static const std::set<T> requiredAfterOperators{T::IDENTIFIER, T::NUMBER, Token::TYPE::LEFT_BR};
 
-    for (auto it = m_tokenList.begin(); std::next(it) != m_tokenList.end(); ++it) {
-        const auto currentType = it->m_type;
-        if (operatorTypes.find(currentType) != operatorTypes.end()) {
-            const auto nextType = std::next(it)->m_type;
-            if (allowedAfterOperator.find(nextType) == allowedAfterOperator.end()) {
+    for (auto it = m_tokenList.begin(); it != m_tokenList.end(); ++it) {
+        if (operatorTypes.find(it->m_type) != operatorTypes.end()) {
+            if (std::next(it) == m_tokenList.end()) {
+                m_info.addError({ParserError::TYPE::UNFINISHED, it->m_string, it->m_range});
+            }
+            auto next = std::next(it);
+            if (requiredAfterOperators.find(next->m_type) == requiredAfterOperators.end()) {
                 m_info.addError({ParserError::TYPE::ILLEGAL_SEQUENCE,
-                                 it->m_string + " " + std::next(it)->m_string,
-                                 {it->m_range.startIndex(), std::next(it)->m_range.endIndex()}});
+                                 it->m_string + " " + next->m_string,
+                                 {it->m_range.startIndex(), next->m_range.endIndex()}});
             }
         }
     }
 }
 
 void Tokenizer::checkRepeatedCommas() {
-    bool lastWasComma = false;
-    for (auto it = m_tokenList.begin(); it != m_tokenList.end(); ++it) {
-        if (it->m_type == Token::TYPE::COMMA) {
-            if (lastWasComma) {
-                assert(it != m_tokenList.begin());
-                m_info.addError(
-                    {ParserError::TYPE::ILLEGAL_SEQUENCE, ", ,", {std::prev(it)->m_range.startIndex(), it->m_range.endIndex()}});
-            } else {
-                lastWasComma = true;
-            }
-        } else {
-            lastWasComma = false;
+    if (m_tokenList.size() < 2) {
+        return;
+    }
+    for (auto it = m_tokenList.begin(); std::next(it) != m_tokenList.end(); ++it) {
+        if (it->m_type == Token::TYPE::COMMA && std::next(it)->m_type == Token::TYPE::COMMA) {
+            m_info.addError({ParserError::TYPE::ILLEGAL_SEQUENCE, ", ,", {it->m_range.startIndex(), std::next(it)->m_range.endIndex()}});
         }
     }
 }

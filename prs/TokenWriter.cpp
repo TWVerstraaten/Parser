@@ -85,13 +85,11 @@ std::string TokenWriter::printTree(const std::string& prefix, const AstToken& no
                node.m_token);
     ss << "  " << node.m_range.toString() << std::endl;
 
-    const auto childCount = node.m_children.size();
-    if (childCount == 0) {
+    if (node.m_children.empty()) {
         return ss.str();
     }
-    for (size_t i = 0; i != childCount - 1; ++i) {
-        ss << printTree(prefix + (isLeft ? "│    " : "     "), node.m_children.at(i), true);
+    for (auto it = node.m_children.begin(); it != node.m_children.end(); ++it) {
+        ss << printTree(prefix + (isLeft ? "│    " : "     "), *it, std::next(it) != node.m_children.end());
     }
-    ss << printTree(prefix + (isLeft ? "│    " : "     "), node.m_children.back(), false);
     return ss.str();
 }

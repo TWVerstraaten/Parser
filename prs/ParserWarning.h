@@ -16,7 +16,7 @@ class ParserWarning {
     enum TYPE { SUSPICIOUS_IDENTIFIER_NUM_PATTERN };
 
   public:
-    ParserWarning(TYPE type, std::string  message, Range range = {});
+    ParserWarning(TYPE type, std::string message, Range range = {});
 
     [[nodiscard]] std::string toString() const;
 

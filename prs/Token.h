@@ -6,6 +6,7 @@
 #define PRS_TOKEN_H
 
 #include "Range.h"
+#include "TokenTemplates.h"
 
 #include <string>
 #include <variant>
@@ -26,10 +27,10 @@ class Token {
     [[nodiscard]] std::string toString() const;
     [[nodiscard]] TYPE        type() const;
 
-    template <class... Ts>
-    [[nodiscard]] static bool isTokenOfType(const std::variant<Ts...>& t, Token::TYPE type) {
-        return std::holds_alternative<Token>(t) && std::get<Token>(t).m_type == type;
-    }
+    //    template <class... Ts>
+    //    [[nodiscard]] static bool isTokenOfType(const std::variant<Ts...>& t, TYPE type) {
+    //        return TokenTemplates::isTokenOfType<Token>(t, type);
+    //    }
 
   private:
     TYPE        m_type;

@@ -20,6 +20,7 @@ class ParserInfo;
 class AstToken {
 
     friend class TokenWriter;
+    friend class Ast;
 
     struct Vector {
         size_t m_argumentCount;
@@ -39,8 +40,11 @@ class AstToken {
     AstToken(OPERATOR_TYPE type, AstToken astToken, Range range, ParserInfo& info);
     AstToken(OPERATOR_TYPE type, AstToken left, AstToken right, Range range, ParserInfo& info);
 
+    //    void replaceVariables(const std::vector<std::pair<std::string, )
+
     [[nodiscard]] std::set<CustomFunction> dependsOn() const;
     [[nodiscard]] std::set<std::string>    variablesUsed() const;
+    [[nodiscard]] std::set<std::string>    declaredVariables() const;
 
     [[nodiscard]] static std::string printTree(const AstToken& root);
 
