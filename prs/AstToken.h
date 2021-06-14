@@ -9,6 +9,7 @@
 #include "ReservedFunction.h"
 #include "StructuralToken.h"
 #include "Token.h"
+#include "VectorToken.h"
 
 #include <memory>
 #include <set>
@@ -21,10 +22,7 @@ class AstToken {
 
     friend class TokenWriter;
     friend class Ast;
-
-    struct Vector {
-        size_t m_argumentCount;
-    };
+    friend class UnrolledAstToken;
 
     struct Empty {};
 
@@ -44,7 +42,6 @@ class AstToken {
 
     [[nodiscard]] std::set<CustomFunction> dependsOn() const;
     [[nodiscard]] std::set<std::string>    variablesUsed() const;
-    [[nodiscard]] std::set<std::string>    declaredVariables() const;
 
     [[nodiscard]] static std::string printTree(const AstToken& root);
 
@@ -57,9 +54,9 @@ class AstToken {
     static void replaceTimesDivide(TempTokenList& tempTokens, ParserInfo& info);
     static void replacePlusMinus(TempTokenList& tempTokens, ParserInfo& info);
 
-    std::variant<OPERATOR_TYPE, Empty, CustomFunction, ReservedFunction, Vector, std::string, double, long long> m_token;
-    std::vector<AstToken>                                                                                        m_children;
-    Range                                                                                                        m_range;
+    std::variant<OPERATOR_TYPE, Empty, CustomFunction, ReservedFunction, VectorToken, std::string, double, long long> m_token;
+    std::vector<AstToken>                                                                                             m_children;
+    Range                                                                                                             m_range;
 };
 
 #endif // PRS_ASTTOKEN_H

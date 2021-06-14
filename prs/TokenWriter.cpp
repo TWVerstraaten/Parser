@@ -78,7 +78,7 @@ std::string TokenWriter::printTree(const std::string& prefix, const AstToken& no
 
     std::visit(Overloaded{[&](AstToken::OPERATOR_TYPE type) { ss << TokenWriter::toString(type); },
                           [&](const CustomFunction& function) { ss << "Fun(" << function.argumentCount() << ")@_" << function.name(); },
-                          [&](const AstToken::Vector& vector) { ss << "Vec(" << vector.m_argumentCount << ")"; },
+                          [&](const VectorToken& vector) { ss << "Vec(" << vector.m_dimension << ")"; },
                           [&](const ReservedFunction& reservedFunction) { ss << ReservedFunction::getName(reservedFunction.m_reserved); },
                           [&](const AstToken::Empty&) { ss << "_empty_"; },
                           [&](const auto& val) { ss << val; }},

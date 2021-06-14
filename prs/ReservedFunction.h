@@ -13,6 +13,7 @@ class ReservedFunction {
 
     friend class AstToken;
     friend class TokenWriter;
+    friend class UnrolledAstToken;
 
   private:
     struct Sin {
@@ -47,11 +48,15 @@ class ReservedFunction {
     typedef std::variant<Sin, Cos, Tan, ASin, ACos, ATan, ATan2> Reserved;
 
     inline static Reserved s_allReserved[] = {Sin(), Cos(), Tan(), ASin(), ACos(), ATan(), ATan2()};
+
     explicit ReservedFunction(Reserved reserved);
 
     [[nodiscard]] static size_t                  getArgumentCount(const Reserved& reserved);
     [[nodiscard]] static std::string             getName(const Reserved& reserved);
     [[nodiscard]] static std::optional<Reserved> getReserved(const std::string& string);
+
+    [[nodiscard]] static double eval(const Reserved& reserved, double argument);
+    [[nodiscard]] static double eval(const Reserved& reserved, double first, double second);
 
     Reserved m_reserved;
 };

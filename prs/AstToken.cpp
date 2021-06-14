@@ -60,13 +60,13 @@ AstToken::AstToken(const std::list<StructuralToken>& structuralTokens, ParserInf
 }
 
 AstToken::AstToken(const StructuralToken::Bracketed& bracketed, Range range, ParserInfo& info)
-    : m_token(Vector{bracketed.m_tokenLists.size()}), m_range(range) {
+    : m_token(VectorToken{bracketed.m_tokenLists.size()}), m_range(range) {
     for (const auto& el : bracketed.m_tokenLists) {
         m_children.emplace_back(el, info);
     }
     if (m_children.size() == 1 && std::holds_alternative<Empty>(m_children.front().m_token)) {
         m_children.clear();
-        std::get<Vector>(m_token).m_argumentCount = 0;
+        std::get<VectorToken>(m_token).m_dimension = 0;
     }
 }
 
@@ -214,8 +214,4 @@ std::set<std::string> AstToken::variablesUsed() const {
         variables.merge(child.variablesUsed());
     }
     return variables;
-}
-
-std::set<std::string> AstToken::declaredVariables() const {
-    return {};
 }

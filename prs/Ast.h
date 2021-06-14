@@ -13,6 +13,8 @@
 
 class Ast {
 
+    friend class UnrolledAst;
+
   public:
     explicit Ast(const std::string& string);
 
@@ -21,12 +23,14 @@ class Ast {
 
     [[nodiscard]] std::set<CustomFunction> dependsOn() const;
     [[nodiscard]] std::set<std::string>    variablesUsed() const;
-    [[nodiscard]] std::set<std::string>    declaredVariables() const;
+    [[nodiscard]] std::vector<std::string> declaredVariables() const;
 
   private:
-    void checkHeaderAndSetType();
+    void                          checkAndSetHeader();
+    [[nodiscard]] const AstToken& body() const;
 
     ParserInfo                m_info;
+    bool                      m_headerWasSet = false;
     Header                    m_header;
     std::unique_ptr<AstToken> m_rootNode;
     std::unique_ptr<AstToken> m_simplifiedNode;
