@@ -24,3 +24,15 @@ std::string Token::toString() const {
 Token::TYPE Token::type() const {
     return m_type;
 }
+
+const Range& Token::range() const {
+    return m_range;
+}
+
+const std::string& Token::string() const {
+    return m_string;
+}
+
+void Token::setType(Token::TYPE type) {
+    m_type = type;
+}

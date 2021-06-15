@@ -5,7 +5,6 @@
 #include "Ast.h"
 
 #include "Parser.h"
-#include "TokenTemplates.h"
 
 #include <cassert>
 #include <iostream>
@@ -15,7 +14,7 @@ Ast::Ast(const std::string& string) : m_rootNode(Parser::parse(string, m_info)) 
     if (success()) {
         checkAndSetHeader();
         m_simplifiedNode = std::make_unique<AstToken>(*m_rootNode);
-        std::cout << AstToken::printTree(*m_simplifiedNode) << '\n';
+        std::cout << AstToken::toStringAsTree(*m_simplifiedNode) << '\n';
         m_dependsOn = m_rootNode->dependsOn();
         for (const auto& el : m_dependsOn) {
             std::cout << el.name() << '\n';
@@ -33,7 +32,7 @@ const ParserInfo& Ast::info() const {
     return m_info;
 }
 
-std::set<CustomFunction> Ast::dependsOn() const {
+std::set<CustomFunctionToken> Ast::dependsOn() const {
     return m_rootNode->dependsOn();
 }
 
@@ -45,35 +44,34 @@ std::vector<std::string> Ast::declaredVariables() const {
     assert(m_headerWasSet);
     switch (m_header.type()) {
         case Header::HEADER_TYPE::NAMED_AND_VARIABLES_DECLARED:
-            return std::get<Header::NamedAndVariablesHeader>(m_header.m_header).m_variables;
+            return std::get<Header::FullHeader>(m_header.m_header).m_variables;
         default:
             return {};
     }
 }
 
 void Ast::checkAndSetHeader() {
-    if (TokenTemplates::tokenEquals<AstToken::OPERATOR_TYPE>(m_rootNode->m_token, AstToken::OPERATOR_TYPE::EQUALS)) {
-        assert(m_rootNode->m_children.size() == 2);
-        const auto& headerAst = m_rootNode->m_children.front();
-        if (std::holds_alternative<std::string>(headerAst.m_token)) {
-            assert(headerAst.m_children.empty());
-            const auto& name = std::get<std::string>(headerAst.m_token);
-            m_header         = Header::OnlyNamedHeader{name};
-        } else {
-            assert(std::holds_alternative<CustomFunction>(headerAst.m_token));
-            const auto&              function = std::get<CustomFunction>(headerAst.m_token);
-            std::vector<std::string> variableNames;
-            variableNames.reserve(function.argumentCount());
-            for (const auto& child : headerAst.m_children) {
-                assert(std::holds_alternative<std::string>(child.m_token));
-                variableNames.emplace_back(std::get<std::string>(child.m_token));
-            }
-            m_header = Header::NamedAndVariablesHeader{function.name(), std::move(variableNames)};
-        }
+    if (not TokenTemplates::tokenEquals<AstToken::OPERATOR_TYPE>(m_rootNode->token(), AstToken::OPERATOR_TYPE::EQUALS)) {
+        m_header = Header{};
     } else {
-        m_header = Header::EmptyHeader{};
+        buildNonEmptyHeader();
     }
     m_headerWasSet = true;
+}
+
+void Ast::buildNonEmptyHeader() {
+    static const std::set<std::string> reservedCoordinates{"x", "y", "z"};
+    assert(m_rootNode->children().size() == 2);
+    const auto& headerAst = m_rootNode->children().front();
+    if (std::holds_alternative<std::string>(headerAst.token())) {
+        assert(headerAst.children().empty());
+        m_header = Header{std::get<std::string>(headerAst.token())};
+    } else if (std::holds_alternative<CustomFunctionToken>(headerAst.token())) {
+        m_header = Header(std::get<CustomFunctionToken>(headerAst.token()), headerAst);
+    } else {
+        assert(std::holds_alternative<VectorToken>(headerAst.token()));
+        m_header = Header(std::get<VectorToken>(headerAst.token()), headerAst);
+    }
 }
 
 const AstToken& Ast::body() const {
@@ -81,8 +79,8 @@ const AstToken& Ast::body() const {
         case Header::HEADER_TYPE::EMPTY:
             return *m_rootNode;
         default:
-            assert(m_rootNode->m_children.size() == 2);
-            return m_rootNode->m_children.back();
+            assert(m_rootNode->children().size() == 2);
+            return m_rootNode->children().back();
     }
     assert(false);
 }

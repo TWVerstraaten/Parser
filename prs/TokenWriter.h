@@ -9,6 +9,8 @@
 #include "StructuralToken.h"
 #include "Token.h"
 
+class UnrolledAstToken;
+
 class TokenWriter {
 
   public:
@@ -19,7 +21,8 @@ class TokenWriter {
     [[nodiscard]] static std::string toString(double val, const Range& range);
     [[nodiscard]] static std::string toString(long long val, const Range& range);
     [[nodiscard]] static std::string toString(AstToken::OPERATOR_TYPE type);
-    [[nodiscard]] static std::string printTree(const std::string& prefix, const AstToken& node, bool isLeft);
+    [[nodiscard]] static std::string toString(const UnrolledAstToken& unrolledAstToken);
+    [[nodiscard]] static std::string toStringAsTree(const std::string& prefix, const AstToken& node, bool isLeft);
 };
 
 #endif // PRS_TOKENWRITER_H

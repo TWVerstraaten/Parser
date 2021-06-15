@@ -11,11 +11,7 @@
 
 class ReservedFunction {
 
-    friend class AstToken;
-    friend class TokenWriter;
-    friend class UnrolledAstToken;
-
-  private:
+  public:
     struct Sin {
         static const size_t       s_argumentCount = 1;
         inline static const char* s_name          = "sin";

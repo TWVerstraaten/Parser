@@ -10,10 +10,10 @@
 #include <algorithm>
 #include <cassert>
 
-StructuralToken::StructuralToken(const Token& token) : m_token(token), m_range(token.m_range) {
+StructuralToken::StructuralToken(const Token& token) : m_token(token), m_range(token.range()) {
 }
 
-StructuralToken::StructuralToken(Bracketed&& multiBracketed, Range range) : m_token(multiBracketed), m_range(range) {
+StructuralToken::StructuralToken(Bracketed&& bracketed, Range range) : m_token(bracketed), m_range(range) {
 }
 
 StructuralToken::StructuralToken(Function&& function, Range range) : m_token(function), m_range(range) {
@@ -58,17 +58,23 @@ StructuralToken StructuralToken::makeFromCommaSeparated(std::list<StructuralToke
 }
 
 StructuralToken::Bracketed StructuralToken::makeBracketed(std::list<StructuralToken>& tokenList) {
-    const size_t commaCount =
-        std::count_if(TT_IT(tokenList), TT_LAMBDA(a, return TokenTemplates::isTokenOfType<Token>(a.m_token, Token::TYPE::COMMA);));
+    const size_t                            commaCount = std::count_if(TT_IT(tokenList), TT_LAMBDA(a, return TokenTemplates::isTokenOfType<Token>(a.m_token, Token::TYPE::COMMA);));
     std::vector<std::list<StructuralToken>> commaSeparatedGroups(commaCount + 1);
 
     for (size_t i = 0; i != commaCount + 1; ++i) {
-        const auto commaIt =
-            std::find_if(TT_IT(tokenList), TT_LAMBDA(a, return TokenTemplates::isTokenOfType<Token>(a.m_token, Token::TYPE::COMMA);));
+        const auto commaIt = std::find_if(TT_IT(tokenList), TT_LAMBDA(a, return TokenTemplates::isTokenOfType<Token>(a.m_token, Token::TYPE::COMMA);));
         commaSeparatedGroups[i].splice(commaSeparatedGroups[i].begin(), tokenList, tokenList.begin(), commaIt);
         if (not tokenList.empty()) {
             tokenList.pop_front();
         }
     }
     return commaSeparatedGroups.empty() ? StructuralToken::Bracketed{{}} : StructuralToken::Bracketed{std::move(commaSeparatedGroups)};
+}
+
+const StructuralToken::StructuralTokenVariant& StructuralToken::token() const {
+    return m_token;
+}
+
+const Range& StructuralToken::range() const {
+    return m_range;
 }

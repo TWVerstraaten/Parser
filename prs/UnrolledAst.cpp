@@ -12,3 +12,7 @@ UnrolledAst::UnrolledAst(const Ast& ast) : m_header(ast.m_header), m_token(ast.b
 std::string UnrolledAst::toString() const {
     return "Header:\t" + m_header.toString() + "\nBody:\t" + m_token.toString() + "\n";
 }
+
+UnrolledAstToken UnrolledAst::setVariable(const std::string& variable, const gen::Number& number) const {
+    return m_token.setVariable(variable, number);
+}

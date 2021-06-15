@@ -4,8 +4,6 @@
 
 #include "Range.h"
 
-#include <cassert>
-
 Range::Range(size_t startIndex, size_t endIndex) : m_startIndex(startIndex), m_endIndex(endIndex) {
 }
 

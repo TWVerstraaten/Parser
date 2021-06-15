@@ -6,11 +6,8 @@
 
 #include "../gen/defines.h"
 #include "ParserInfo.h"
-#include "StructuralToken.h"
 
 #include <algorithm>
-#include <cassert>
-#include <iostream>
 #include <map>
 #include <set>
 #include <sstream>
@@ -105,10 +102,10 @@ void Tokenizer::tokenize() {
 void Tokenizer::replaceUnaryMinuses() {
     bool nextMinusIsUnary = true;
     for (auto& token : m_tokenList) {
-        if (token.m_type == Token::TYPE::MINUS && nextMinusIsUnary) {
-            token.m_type = Token::TYPE::UNARY_MINUS;
+        if (token.type() == Token::TYPE::MINUS && nextMinusIsUnary) {
+            token.setType(Token::TYPE::UNARY_MINUS);
         } else
-            switch (token.m_type) {
+            switch (token.type()) {
                 case Token::TYPE::LEFT_BR:
                 case Token::TYPE::COMMA:
                 case Token::TYPE::EQUALS:
@@ -133,11 +130,11 @@ std::string Tokenizer::toString() const {
 void Tokenizer::checkBrackets() {
     size_t bracketDepth = 0;
     for (auto& token : m_tokenList) {
-        if (token.m_type == Token::TYPE::LEFT_BR) {
+        if (token.type() == Token::TYPE::LEFT_BR) {
             ++bracketDepth;
-        } else if (token.m_type == Token::TYPE::RIGHT_BR) {
+        } else if (token.type() == Token::TYPE::RIGHT_BR) {
             if (bracketDepth == 0) {
-                m_info.addError({ParserError::TYPE::UNMATCHED_CLOSING_BR, "", token.m_range});
+                m_info.addError({ParserError::TYPE::UNMATCHED_CLOSING_BR, "", token.range()});
                 return;
             }
             --bracketDepth;
@@ -145,11 +142,11 @@ void Tokenizer::checkBrackets() {
     }
     bracketDepth = 0;
     for (auto it = m_tokenList.rbegin(); it != m_tokenList.rend(); ++it) {
-        if (it->m_type == Token::TYPE::RIGHT_BR) {
+        if (it->type() == Token::TYPE::RIGHT_BR) {
             ++bracketDepth;
-        } else if (it->m_type == Token::TYPE::LEFT_BR) {
+        } else if (it->type() == Token::TYPE::LEFT_BR) {
             if (bracketDepth == 0) {
-                m_info.addError({ParserError::TYPE::UNMATCHED_OPEN_BR, "", it->m_range});
+                m_info.addError({ParserError::TYPE::UNMATCHED_OPEN_BR, "", it->range()});
                 return;
             }
             --bracketDepth;
@@ -158,11 +155,10 @@ void Tokenizer::checkBrackets() {
 }
 
 void Tokenizer::checkDoubleEquals() {
-    if (auto it = std::find_if(TT_IT(m_tokenList), TT_LAMBDA(a, return a.m_type == Token::TYPE::EQUALS;)); it == m_tokenList.end()) {
+    if (auto it = std::find_if(TT_IT(m_tokenList), TT_LAMBDA(a, return a.type() == Token::TYPE::EQUALS;)); it == m_tokenList.end()) {
         return;
-    } else if (it = std::find_if(std::next(it), m_tokenList.end(), TT_LAMBDA(a, return a.m_type == Token::TYPE::EQUALS;));
-               it != m_tokenList.end()) {
-        m_info.addError({ParserError::TYPE::TOO_MANY_EQUALS, "", it->m_range});
+    } else if (it = std::find_if(std::next(it), m_tokenList.end(), TT_LAMBDA(a, return a.type() == Token::TYPE::EQUALS;)); it != m_tokenList.end()) {
+        m_info.addError({ParserError::TYPE::TOO_MANY_EQUALS, "", it->range()});
     }
 }
 
@@ -175,15 +171,13 @@ void Tokenizer::checkRepeatedOperators() {
     static const std::set<T> requiredAfterOperators{T::IDENTIFIER, T::NUMBER, Token::TYPE::LEFT_BR};
 
     for (auto it = m_tokenList.begin(); it != m_tokenList.end(); ++it) {
-        if (operatorTypes.find(it->m_type) != operatorTypes.end()) {
+        if (operatorTypes.find(it->type()) != operatorTypes.end()) {
             if (std::next(it) == m_tokenList.end()) {
-                m_info.addError({ParserError::TYPE::UNFINISHED, it->m_string, it->m_range});
+                m_info.addError({ParserError::TYPE::UNFINISHED, it->string(), it->range()});
             }
             auto next = std::next(it);
-            if (requiredAfterOperators.find(next->m_type) == requiredAfterOperators.end()) {
-                m_info.addError({ParserError::TYPE::ILLEGAL_SEQUENCE,
-                                 it->m_string + " " + next->m_string,
-                                 {it->m_range.startIndex(), next->m_range.endIndex()}});
+            if (requiredAfterOperators.find(next->type()) == requiredAfterOperators.end()) {
+                m_info.addError({ParserError::TYPE::ILLEGAL_SEQUENCE, it->string() + " " + next->string(), {it->range().startIndex(), next->range().endIndex()}});
             }
         }
     }
@@ -194,8 +188,8 @@ void Tokenizer::checkRepeatedCommas() {
         return;
     }
     for (auto it = m_tokenList.begin(); std::next(it) != m_tokenList.end(); ++it) {
-        if (it->m_type == Token::TYPE::COMMA && std::next(it)->m_type == Token::TYPE::COMMA) {
-            m_info.addError({ParserError::TYPE::ILLEGAL_SEQUENCE, ", ,", {it->m_range.startIndex(), std::next(it)->m_range.endIndex()}});
+        if (it->type() == Token::TYPE::COMMA && std::next(it)->type() == Token::TYPE::COMMA) {
+            m_info.addError({ParserError::TYPE::ILLEGAL_SEQUENCE, ", ,", {it->range().startIndex(), std::next(it)->range().endIndex()}});
         }
     }
 }
@@ -206,11 +200,10 @@ void Tokenizer::checkIdentifierNumberPatternWithNoSpace() {
     }
     for (auto it = m_tokenList.begin(); std::next(it) != m_tokenList.end(); ++it) {
         auto next = std::next(it);
-        if (it->m_type == Token::TYPE::IDENTIFIER && next->m_type == Token::TYPE::NUMBER) {
-            if (it->m_range.endIndex() + 1 == next->m_range.startIndex()) {
-                m_info.addWarning({ParserWarning::TYPE::SUSPICIOUS_IDENTIFIER_NUM_PATTERN,
-                                   it->m_string + "*" + next->toString(),
-                                   {it->m_range.startIndex(), next->m_range.endIndex()}});
+        if (it->type() == Token::TYPE::IDENTIFIER && next->type() == Token::TYPE::NUMBER) {
+            if (it->range().endIndex() + 1 == next->range().startIndex()) {
+                m_info.addWarning(
+                    {ParserWarning::TYPE::SUSPICIOUS_IDENTIFIER_NUM_PATTERN, it->string() + "*" + next->toString(), {it->range().startIndex(), next->range().endIndex()}});
             }
         }
     }

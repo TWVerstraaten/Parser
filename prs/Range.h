@@ -5,7 +5,6 @@
 #ifndef PRS_RANGE_H
 #define PRS_RANGE_H
 
-#include <cstddef>
 #include <string>
 
 class Range {
@@ -14,7 +13,7 @@ class Range {
     Range(size_t startIndex, size_t endIndex);
     Range() = default;
 
-    [[nodiscard]] bool isEmpty() const;
+    [[nodiscard]] bool        isEmpty() const;
     [[nodiscard]] std::string toString() const;
     [[nodiscard]] size_t      startIndex() const;
     [[nodiscard]] size_t      endIndex() const;

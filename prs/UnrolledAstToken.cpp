@@ -7,22 +7,30 @@
 #include "../gen/Overloaded.h"
 #include "../gen/defines.h"
 #include "AstToken.h"
+#include "TokenWriter.h"
 
 #include <algorithm>
 #include <cassert>
-#include <map>
-#include <sstream>
+
+static const auto S_BINARY_SIMPLIFY = [](auto& children, const auto& func, auto& token) {
+    assert(children.size() == 2);
+    if (children.at(0).isNumeric() && children.at(1).isNumeric()) {
+        gen::Number result = func(children.at(0).toNumber(), children.at(1).toNumber());
+        token              = UnrolledAstToken::fromNumber(result);
+        children.clear();
+    }
+};
 
 UnrolledAstToken::UnrolledAstToken(const AstToken& astToken) {
-    assert(not TokenTemplates::tokenEquals<AstToken::OPERATOR_TYPE>(astToken.m_token, AstToken::OPERATOR_TYPE::EQUALS));
+    assert(not TokenTemplates::tokenEquals<AstToken::OPERATOR_TYPE>(astToken.token(), AstToken::OPERATOR_TYPE::EQUALS));
     static const std::map<AstToken::OPERATOR_TYPE, UnrolledToken> operatorToUnrolled = {{AstToken::OPERATOR_TYPE::PLUS, Plus{}},
                                                                                         {AstToken::OPERATOR_TYPE::MINUS, Minus{}},
                                                                                         {AstToken::OPERATOR_TYPE::TIMES, Times{}},
                                                                                         {AstToken::OPERATOR_TYPE::DIVIDE, Divide{}},
                                                                                         {AstToken::OPERATOR_TYPE::POWER, Power{}},
                                                                                         {AstToken::OPERATOR_TYPE::UNARY_MINUS, UnaryMinus{}}};
-    std::visit(Overloaded{[](const AstToken::Empty&) { assert(false); },
-                          [](const CustomFunction&) { assert(false); },
+    std::visit(Overloaded{[](const AstToken::Empty&) {},
+                          [](const CustomFunctionToken&) { assert(false); },
                           [this](const AstToken::OPERATOR_TYPE& type) {
                               assert(type != AstToken::OPERATOR_TYPE::EQUALS);
                               assert(operatorToUnrolled.find(type) != operatorToUnrolled.end());
@@ -30,9 +38,9 @@ UnrolledAstToken::UnrolledAstToken(const AstToken& astToken) {
                           },
                           [this](const VectorToken& token) { m_token = token; },
                           [this](const auto& token) { m_token = token; }},
-               astToken.m_token);
-    m_children.reserve(astToken.m_children.size());
-    for (const auto& child : astToken.m_children) {
+               astToken.token());
+    m_children.reserve(astToken.children().size());
+    for (const auto& child : astToken.children()) {
         m_children.emplace_back(child);
     }
     unWrap1DVectors();
@@ -40,33 +48,7 @@ UnrolledAstToken::UnrolledAstToken(const AstToken& astToken) {
 }
 
 std::string UnrolledAstToken::toString() const {
-    return std::visit(Overloaded{[this](const Plus& p) { return "(" + m_children.front().toString() + "+" + m_children.back().toString() + ")"; },
-                                 [this](const Minus& p) { return "(" + m_children.front().toString() + "-" + m_children.back().toString() + ")"; },
-                                 [this](const Times& p) { return "(" + m_children.front().toString() + "*" + m_children.back().toString() + ")"; },
-                                 [this](const Divide& p) { return "(" + m_children.front().toString() + "/" + m_children.back().toString() + ")"; },
-                                 [this](const Power& p) { return "(" + m_children.front().toString() + "^" + m_children.back().toString() + ")"; },
-                                 [this](const UnaryMinus& p) { return "(-" + m_children.front().toString() + ")"; },
-                                 [this](const ReservedFunction& p) { return ReservedFunction::getName(p.m_reserved) + "(" + commaSeparatedChildren() + ")"; },
-                                 [this](const VectorToken& p) { return "(" + commaSeparatedChildren() + ")"; },
-                                 [](const auto& a) {
-                                     std::stringstream ss;
-                                     ss << a;
-                                     return ss.str();
-                                 }},
-                      m_token);
-}
-
-std::string UnrolledAstToken::commaSeparatedChildren() const {
-    std::stringstream ss;
-    bool              firstPass = true;
-    for (const auto& child : m_children) {
-        if (not firstPass) {
-            ss << ",";
-        }
-        ss << child.toString();
-        firstPass = false;
-    }
-    return ss.str();
+    return TokenWriter::toString(*this);
 }
 
 bool UnrolledAstToken::isNumeric() const {
@@ -77,32 +59,24 @@ void UnrolledAstToken::simplify() {
     for (auto& el : m_children) {
         el.simplify();
     }
-    static const auto binarySimplify = [](auto& children, auto f, auto& token) {
-        assert(children.size() == 2);
-        if (children.at(0).isNumeric() && children.at(1).isNumeric()) {
-            gen::Number result = f(children.at(0).toNumber(), children.at(1).toNumber());
-            token              = fromNumber(result);
-            children.clear();
-        }
-    };
     std::visit(Overloaded{[&](const Plus& p) {
-                              binarySimplify(
+                              S_BINARY_SIMPLIFY(
                                   m_children, [](const auto& l, const auto& r) { return l + r; }, m_token);
                           },
                           [&](const Minus& p) {
-                              binarySimplify(
+                              S_BINARY_SIMPLIFY(
                                   m_children, [](const auto& l, const auto& r) { return l - r; }, m_token);
                           },
                           [&](const Times& p) {
-                              binarySimplify(
+                              S_BINARY_SIMPLIFY(
                                   m_children, [](const auto& l, const auto& r) { return l * r; }, m_token);
                           },
                           [&](const Divide& p) {
-                              binarySimplify(
+                              S_BINARY_SIMPLIFY(
                                   m_children, [](const auto& l, const auto& r) { return l / r; }, m_token);
                           },
                           [&](const Power& p) {
-                              binarySimplify(
+                              S_BINARY_SIMPLIFY(
                                   m_children, [](const auto& l, const auto& r) { return l ^ r; }, m_token);
                           },
                           [&](const UnaryMinus& p) {
@@ -133,7 +107,7 @@ gen::Number UnrolledAstToken::toNumber() const {
                                  [](long long d) { return gen::Number(d); },
                                  [](const auto& a) {
                                      assert(false);
-                                     return gen::Number(0ll);
+                                     return gen::Number(std::numeric_limits<double>::quiet_NaN());
                                  }},
                       m_token);
 }
@@ -150,6 +124,7 @@ void UnrolledAstToken::simplifyFunction() {
     if (std::any_of(TT_IT(m_children), TT_LAMBDA(a, return not a.isNumeric();))) {
         return;
     }
+    assert(std::holds_alternative<ReservedFunction>(m_token));
     const auto& p = std::get<ReservedFunction>(m_token);
     switch (ReservedFunction::getArgumentCount(p.m_reserved)) {
         case 1:
@@ -172,4 +147,29 @@ void UnrolledAstToken::unWrap1DVectors() {
         m_token    = m_children.front().m_token;
         m_children = std::move(m_children.front().m_children);
     }
+}
+
+void UnrolledAstToken::setVariableInternal(const std::string& variable, const gen::Number& number) {
+    if (std::holds_alternative<std::string>(m_token) && std::get<std::string>(m_token) == variable) {
+        m_token = fromNumber(number);
+    } else {
+        for (auto& el : m_children) {
+            el.setVariableInternal(variable, number);
+        }
+    }
+}
+
+UnrolledAstToken UnrolledAstToken::setVariable(const std::string& variable, const gen::Number& number) const {
+    UnrolledAstToken result = *this;
+    result.setVariableInternal(variable, number);
+    result.simplify();
+    return result;
+}
+
+const UnrolledAstToken::UnrolledToken& UnrolledAstToken::token() const {
+    return m_token;
+}
+
+const std::vector<UnrolledAstToken>& UnrolledAstToken::children() const {
+    return m_children;
 }

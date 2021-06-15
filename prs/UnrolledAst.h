@@ -15,6 +15,8 @@ class UnrolledAst {
   public:
     UnrolledAst(const Ast& ast);
 
+    [[nodiscard]] UnrolledAstToken setVariable(const std::string& variable, const gen::Number& number) const;
+
     [[nodiscard]] std::string toString() const;
 
   private:

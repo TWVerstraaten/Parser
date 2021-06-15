@@ -5,13 +5,11 @@
 #ifndef PRS_ASTTOKEN_H
 #define PRS_ASTTOKEN_H
 
-#include "CustomFunction.h"
+#include "CustomFunctionToken.h"
 #include "ReservedFunction.h"
 #include "StructuralToken.h"
-#include "Token.h"
 #include "VectorToken.h"
 
-#include <memory>
 #include <set>
 #include <variant>
 #include <vector>
@@ -20,15 +18,12 @@ class ParserInfo;
 
 class AstToken {
 
-    friend class TokenWriter;
-    friend class Ast;
-    friend class UnrolledAstToken;
-
+  public:
     struct Empty {};
-
     enum class OPERATOR_TYPE { PLUS, MINUS, TIMES, DIVIDE, POWER, UNARY_MINUS, EQUALS };
 
-  public:
+    typedef std::variant<OPERATOR_TYPE, Empty, CustomFunctionToken, ReservedFunction, VectorToken, std::string, double, long long int> AstTokenVariant;
+
     explicit AstToken(const std::list<StructuralToken>& structuralTokens, ParserInfo& info);
     AstToken(const StructuralToken::Bracketed& bracketed, Range range, ParserInfo& info);
     AstToken(const StructuralToken::Function& function, Range range, ParserInfo& info);
@@ -38,14 +33,17 @@ class AstToken {
     AstToken(OPERATOR_TYPE type, AstToken astToken, Range range, ParserInfo& info);
     AstToken(OPERATOR_TYPE type, AstToken left, AstToken right, Range range, ParserInfo& info);
 
-    //    void replaceVariables(const std::vector<std::pair<std::string, )
+    [[nodiscard]] std::set<CustomFunctionToken> dependsOn() const;
+    [[nodiscard]] std::set<std::string>         variablesUsed() const;
+    [[nodiscard]] const AstTokenVariant&        token() const;
+    [[nodiscard]] const std::vector<AstToken>&  children() const;
+    [[nodiscard]] const Range&                  range() const;
 
-    [[nodiscard]] std::set<CustomFunction> dependsOn() const;
-    [[nodiscard]] std::set<std::string>    variablesUsed() const;
-
-    [[nodiscard]] static std::string printTree(const AstToken& root);
+    [[nodiscard]] static std::string toStringAsTree(const AstToken& root);
 
   private:
+    void maybeCastToReservedFunction(ParserInfo& info);
+
     typedef std::variant<AstToken, Token> TempToken;
     typedef std::list<TempToken>          TempTokenList;
 
@@ -54,9 +52,9 @@ class AstToken {
     static void replaceTimesDivide(TempTokenList& tempTokens, ParserInfo& info);
     static void replacePlusMinus(TempTokenList& tempTokens, ParserInfo& info);
 
-    std::variant<OPERATOR_TYPE, Empty, CustomFunction, ReservedFunction, VectorToken, std::string, double, long long> m_token;
-    std::vector<AstToken>                                                                                             m_children;
-    Range                                                                                                             m_range;
+    AstTokenVariant       m_token;
+    std::vector<AstToken> m_children;
+    Range                 m_range;
 };
 
 #endif // PRS_ASTTOKEN_H

@@ -9,6 +9,7 @@
 #include "ReservedFunction.h"
 #include "VectorToken.h"
 
+#include <map>
 #include <variant>
 #include <vector>
 
@@ -16,6 +17,7 @@ class AstToken;
 
 class UnrolledAstToken {
 
+  public:
     struct Plus {};
     struct Minus {};
     struct Times {};
@@ -25,23 +27,25 @@ class UnrolledAstToken {
 
     typedef std::variant<Plus, Minus, Times, Divide, Power, UnaryMinus, ReservedFunction, VectorToken, std::string, double, long long> UnrolledToken;
 
-  public:
     explicit UnrolledAstToken(const AstToken& astToken);
 
     void simplify();
 
-    [[nodiscard]] std::string          toString() const;
-    [[nodiscard]] bool                 isNumeric() const;
-    [[nodiscard]] bool                 is1DNumericVector() const;
-    [[nodiscard]] double               toDouble() const;
-    [[nodiscard]] gen::Number          toNumber() const;
+    [[nodiscard]] UnrolledAstToken setVariable(const std::string& variable, const gen::Number& number) const;
+
+    [[nodiscard]] bool                                 isNumeric() const;
+    [[nodiscard]] double                               toDouble() const;
+    [[nodiscard]] const UnrolledToken&                 token() const;
+    [[nodiscard]] const std::vector<UnrolledAstToken>& children() const;
+    [[nodiscard]] gen::Number                          toNumber() const;
+    [[nodiscard]] std::string                          toString() const;
+
     [[nodiscard]] static UnrolledToken fromNumber(const gen::Number& number);
 
   private:
-    [[nodiscard]] std::string commaSeparatedChildren() const;
-
     void simplifyFunction();
     void unWrap1DVectors();
+    void setVariableInternal(const std::string& variable, const gen::Number& number);
 
     UnrolledToken                 m_token;
     std::vector<UnrolledAstToken> m_children;
