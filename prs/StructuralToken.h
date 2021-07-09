@@ -32,7 +32,7 @@ class StructuralToken {
     StructuralToken(Bracketed&& bracketed, Range range);
     StructuralToken(Function&& function, Range range);
 
-    [[nodiscard]] bool                          isString() const;
+    [[nodiscard]] bool                          holdsString() const;
     [[nodiscard]] std::string                   toString() const;
     [[nodiscard]] const StructuralTokenVariant& token() const;
     [[nodiscard]] const Range&                  range() const;
@@ -42,8 +42,8 @@ class StructuralToken {
   private:
     [[nodiscard]] static Bracketed makeBracketed(std::list<StructuralToken>& tokenList);
 
-    std::variant<Token, Bracketed, Function, std::string, double, long long> m_token;
-    Range                                                                    m_range;
+    StructuralTokenVariant m_token;
+    Range                  m_range;
 };
 
 #endif // PRS_STRUCTURALTOKEN_H

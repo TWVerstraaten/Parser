@@ -9,33 +9,38 @@
 #include "Header.h"
 #include "ParserInfo.h"
 
-#include <memory>
-
 class Ast {
 
-    friend class UnrolledAst;
+    Ast() = default;
 
   public:
     explicit Ast(const std::string& string);
 
-    [[nodiscard]] bool              success() const;
-    [[nodiscard]] const ParserInfo& info() const;
+    void replaceVariableInPlace(const std::string& variable, const AstToken& token);
+    void replaceFunctionInPlace(const Ast& functionToken);
 
+    [[nodiscard]] bool                          success() const;
+    [[nodiscard]] bool                          hasCustomDependencies() const;
+    [[nodiscard]] const ParserInfo&             info() const;
+    [[nodiscard]] const Header&                 header() const;
     [[nodiscard]] std::set<CustomFunctionToken> dependsOn() const;
-    [[nodiscard]] std::set<std::string>    variablesUsed() const;
-    [[nodiscard]] std::vector<std::string> declaredVariables() const;
+    [[nodiscard]] std::set<std::string>         variablesUsed() const;
+    [[nodiscard]] std::vector<std::string>      declaredVariables() const;
+    [[nodiscard]] const AstToken&               body() const;
+    [[nodiscard]] Ast                           replaceVariable(const std::string& variable, const AstToken& token) const;
+    [[nodiscard]] Ast                           replaceFunction(const Ast& functionToken) const;
+    [[nodiscard]] std::string                   toStringAsTree() const;
+    [[nodiscard]] std::string                   toStringFlat() const;
 
   private:
-    void                          checkAndSetHeader();
-    void                          buildNonEmptyHeader();
-    [[nodiscard]] const AstToken& body() const;
+    void checkAndSetHeader();
+    void buildNonEmptyHeader();
 
-    ParserInfo                m_info;
-    bool                      m_headerWasSet = false;
-    Header                    m_header;
-    std::unique_ptr<AstToken> m_rootNode;
-    std::unique_ptr<AstToken> m_simplifiedNode;
-    std::set<CustomFunctionToken>  m_dependsOn;
+    ParserInfo                    m_info;
+    bool                          m_headerWasSet = false;
+    Header                        m_header;
+    AstToken                      m_rootNode;
+    std::set<CustomFunctionToken> m_dependsOn;
 };
 
 #endif // PRS_AST_H

@@ -11,10 +11,7 @@
 
 class ParserError {
 
-    friend class Tokenizer;
-    friend class StructuralTokenizer;
-    friend class AstToken;
-
+  public:
     enum class TYPE {
         ILLEGAL_CHARACTER,
         UNMATCHED_CLOSING_BR,
@@ -28,15 +25,14 @@ class ParserError {
         GENERIC
     };
 
-  public:
     ParserError(TYPE type, std::string message, Range range = {});
 
     [[nodiscard]] std::string toString() const;
 
   private:
-    const TYPE        m_type;
-    const std::string m_message;
-    const Range       m_range;
+    TYPE        m_type;
+    std::string m_message;
+    Range       m_range;
 };
 
 #endif // PRS_PARSERERROR_H

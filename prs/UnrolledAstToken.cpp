@@ -12,29 +12,38 @@
 #include <algorithm>
 #include <cassert>
 
+static UnrolledAstToken::UnrolledToken S_FROM_NUMBER(const gen::Number& number) {
+    if (number.holdsLongLong()) {
+        return number.toLongLong();
+    } else {
+        return number.toDouble();
+    }
+}
+
 static const auto S_BINARY_SIMPLIFY = [](auto& children, const auto& func, auto& token) {
     assert(children.size() == 2);
     if (children.at(0).isNumeric() && children.at(1).isNumeric()) {
         gen::Number result = func(children.at(0).toNumber(), children.at(1).toNumber());
-        token              = UnrolledAstToken::fromNumber(result);
+        token              = S_FROM_NUMBER(result);
         children.clear();
     }
 };
 
 UnrolledAstToken::UnrolledAstToken(const AstToken& astToken) {
     assert(not TokenTemplates::tokenEquals<AstToken::OPERATOR_TYPE>(astToken.token(), AstToken::OPERATOR_TYPE::EQUALS));
-    static const std::map<AstToken::OPERATOR_TYPE, UnrolledToken> operatorToUnrolled = {{AstToken::OPERATOR_TYPE::PLUS, Plus{}},
-                                                                                        {AstToken::OPERATOR_TYPE::MINUS, Minus{}},
-                                                                                        {AstToken::OPERATOR_TYPE::TIMES, Times{}},
-                                                                                        {AstToken::OPERATOR_TYPE::DIVIDE, Divide{}},
-                                                                                        {AstToken::OPERATOR_TYPE::POWER, Power{}},
-                                                                                        {AstToken::OPERATOR_TYPE::UNARY_MINUS, UnaryMinus{}}};
+    static const std::map<AstToken::OPERATOR_TYPE, UnrolledToken> S_OPERATOR_TO_UNROLLED = {{AstToken::OPERATOR_TYPE::PLUS, Plus{}},
+                                                                                            {AstToken::OPERATOR_TYPE::MINUS, Minus{}},
+                                                                                            {AstToken::OPERATOR_TYPE::TIMES, Times{}},
+                                                                                            {AstToken::OPERATOR_TYPE::DIVIDE, Divide{}},
+                                                                                            {AstToken::OPERATOR_TYPE::POWER, Power{}},
+                                                                                            {AstToken::OPERATOR_TYPE::UNARY_MINUS, UnaryMinus{}}};
     std::visit(Overloaded{[](const AstToken::Empty&) {},
+                          [](const AstToken::Error&) { assert(false); },
                           [](const CustomFunctionToken&) { assert(false); },
                           [this](const AstToken::OPERATOR_TYPE& type) {
                               assert(type != AstToken::OPERATOR_TYPE::EQUALS);
-                              assert(operatorToUnrolled.find(type) != operatorToUnrolled.end());
-                              m_token = operatorToUnrolled.at(type);
+                              assert(S_OPERATOR_TO_UNROLLED.find(type) != S_OPERATOR_TO_UNROLLED.end());
+                              m_token = S_OPERATOR_TO_UNROLLED.at(type);
                           },
                           [this](const VectorToken& token) { m_token = token; },
                           [this](const auto& token) { m_token = token; }},
@@ -82,11 +91,11 @@ void UnrolledAstToken::simplify() {
                           [&](const UnaryMinus& p) {
                               assert(m_children.size() == 1);
                               if (m_children.front().isNumeric()) {
-                                  m_token = fromNumber(-m_children.front().toNumber());
+                                  m_token = S_FROM_NUMBER(-m_children.front().toNumber());
                                   m_children.clear();
                               }
                           },
-                          [&](const ReservedFunction& p) { simplifyFunction(); },
+                          [&](const rsrvd::Reserved& p) { simplifyFunction(); },
                           [](const auto& a) {}},
                m_token);
 }
@@ -112,26 +121,18 @@ gen::Number UnrolledAstToken::toNumber() const {
                       m_token);
 }
 
-UnrolledAstToken::UnrolledToken UnrolledAstToken::fromNumber(const gen::Number& number) {
-    if (number.holdsLongLong()) {
-        return number.toLongLong();
-    } else {
-        return number.toDouble();
-    }
-}
-
 void UnrolledAstToken::simplifyFunction() {
     if (std::any_of(TT_IT(m_children), TT_LAMBDA(a, return not a.isNumeric();))) {
         return;
     }
-    assert(std::holds_alternative<ReservedFunction>(m_token));
-    const auto& p = std::get<ReservedFunction>(m_token);
-    switch (ReservedFunction::getArgumentCount(p.m_reserved)) {
+    assert(std::holds_alternative<rsrvd::Reserved>(m_token));
+    const auto& p = std::get<rsrvd::Reserved>(m_token);
+    switch (S_GET_ARGUMENT_COUNT(p)) {
         case 1:
-            m_token = ReservedFunction::eval(p.m_reserved, m_children.at(0).toDouble());
+            m_token = S_EVAL(p, m_children.at(0).toDouble());
             break;
         case 2:
-            m_token = ReservedFunction::eval(p.m_reserved, m_children.at(0).toDouble(), m_children.at(1).toDouble());
+            m_token = S_EVAL(p, m_children.at(0).toDouble(), m_children.at(1).toDouble());
             break;
         default:
             assert(false);
@@ -144,14 +145,14 @@ void UnrolledAstToken::unWrap1DVectors() {
         el.unWrap1DVectors();
     }
     if (std::holds_alternative<VectorToken>(m_token) && m_children.size() == 1) {
-        m_token    = m_children.front().m_token;
+        m_token    = std::move(m_children.front().m_token);
         m_children = std::move(m_children.front().m_children);
     }
 }
 
 void UnrolledAstToken::setVariableInternal(const std::string& variable, const gen::Number& number) {
     if (std::holds_alternative<std::string>(m_token) && std::get<std::string>(m_token) == variable) {
-        m_token = fromNumber(number);
+        m_token = S_FROM_NUMBER(number);
     } else {
         for (auto& el : m_children) {
             el.setVariableInternal(variable, number);

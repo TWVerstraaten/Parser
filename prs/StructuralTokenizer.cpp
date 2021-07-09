@@ -52,7 +52,7 @@ void StructuralTokenizer::extractFunctionsAndBracketsFromStructuralTokens() {
         auto leftIt  = rightIt;
         while (not(TokenTemplates::isTokenOfType<Token>((--leftIt)->token(), Token::TYPE::LEFT_BR))) {}
 
-        if (leftIt != m_tokenList.begin() && std::prev(leftIt)->isString()) {
+        if (leftIt != m_tokenList.begin() && std::prev(leftIt)->holdsString()) {
             --leftIt;
         }
         auto                       insertPosition = std::next(rightIt);

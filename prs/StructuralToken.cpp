@@ -32,7 +32,7 @@ std::string StructuralToken::toString() const {
     return std::visit([this](const auto& a) { return TokenWriter::toString(a, m_range); }, m_token);
 }
 
-bool StructuralToken::isString() const {
+bool StructuralToken::holdsString() const {
     return std::holds_alternative<std::string>(m_token);
 }
 
@@ -40,10 +40,10 @@ StructuralToken StructuralToken::makeFromCommaSeparated(std::list<StructuralToke
     assert(tokenList.size() > 1);
     assert(TokenTemplates::isTokenOfType<Token>(tokenList.back().m_token, Token::TYPE::RIGHT_BR));
 
-    const size_t startIndex   = tokenList.front().m_range.startIndex();
-    const size_t endIndex     = tokenList.back().m_range.endIndex();
-    bool         isFunction   = tokenList.front().isString();
-    std::string  functionName = isFunction ? std::get<std::string>(tokenList.front().m_token) : "";
+    const size_t      startIndex   = tokenList.front().m_range.startIndex();
+    const size_t      endIndex     = tokenList.back().m_range.endIndex();
+    const bool        isFunction   = tokenList.front().holdsString();
+    const std::string functionName = isFunction ? std::get<std::string>(tokenList.front().m_token) : "";
     assert(isFunction != (functionName.empty()));
     assert(isFunction ? TokenTemplates::isTokenOfType<Token>(std::next(tokenList.begin())->m_token, Token::TYPE::LEFT_BR)
                       : TokenTemplates::isTokenOfType<Token>(tokenList.front().m_token, Token::TYPE::LEFT_BR));

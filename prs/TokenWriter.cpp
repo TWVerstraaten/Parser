@@ -80,8 +80,9 @@ std::string TokenWriter::toStringAsTree(const std::string& prefix, const AstToke
     std::visit(Overloaded{[&](AstToken::OPERATOR_TYPE type) { ss << TokenWriter::toString(type); },
                           [&](const CustomFunctionToken& function) { ss << "Fun(" << function.argumentCount() << ")@_" << function.name(); },
                           [&](const VectorToken& vector) { ss << "Vec(" << vector.m_dimension << ")"; },
-                          [&](const ReservedFunction& reservedFunction) { ss << ReservedFunction::getName(reservedFunction.m_reserved); },
+                          [&](const rsrvd::Reserved& reservedFunction) { ss << S_GET_NAME(reservedFunction); },
                           [&](const AstToken::Empty&) { ss << "_empty_"; },
+                          [&](const AstToken::Error&) { ss << "_error_"; },
                           [&](const auto& val) { ss << val; }},
                node.token());
     ss << "  " << node.range().toString() << std::endl;
@@ -104,12 +105,11 @@ std::string TokenWriter::toString(const UnrolledAstToken& unrolledAstToken) {
             [&](const UnrolledAstToken::Divide& p) { return "(" + unrolledAstToken.children().front().toString() + "/" + unrolledAstToken.children().back().toString() + ")"; },
             [&](const UnrolledAstToken::Power& p) { return "(" + unrolledAstToken.children().front().toString() + "^" + unrolledAstToken.children().back().toString() + ")"; },
             [&](const UnrolledAstToken::UnaryMinus& p) { return "(-" + unrolledAstToken.children().front().toString() + ")"; },
-            [&](const ReservedFunction& p) {
-                return ReservedFunction::getName(p.m_reserved) + "(" +
-                       alg::StringAlg::concatenateStrings<UnrolledAstToken>(unrolledAstToken.children(), [](const auto& a) { return a.toString(); }) + ")";
+            [&](const rsrvd::Reserved& p) {
+                return S_GET_NAME(p) + "(" + alg::StringAlg::S_CONCATENATE_STRINGS<UnrolledAstToken>(unrolledAstToken.children(), [](const auto& a) { return a.toString(); }) + ")";
             },
             [&](const VectorToken& p) {
-                return "(" + alg::StringAlg::concatenateStrings<UnrolledAstToken>(unrolledAstToken.children(), [](const auto& a) { return a.toString(); }) + ")";
+                return "(" + alg::StringAlg::S_CONCATENATE_STRINGS<UnrolledAstToken>(unrolledAstToken.children(), [](const auto& a) { return a.toString(); }) + ")";
             },
             [](const auto& a) {
                 std::stringstream ss;

@@ -25,7 +25,7 @@ class UnrolledAstToken {
     struct Power {};
     struct UnaryMinus {};
 
-    typedef std::variant<Plus, Minus, Times, Divide, Power, UnaryMinus, ReservedFunction, VectorToken, std::string, double, long long> UnrolledToken;
+    typedef std::variant<Plus, Minus, Times, Divide, Power, UnaryMinus, rsrvd::Reserved, VectorToken, std::string, double, long long> UnrolledToken;
 
     explicit UnrolledAstToken(const AstToken& astToken);
 
@@ -35,12 +35,10 @@ class UnrolledAstToken {
 
     [[nodiscard]] bool                                 isNumeric() const;
     [[nodiscard]] double                               toDouble() const;
-    [[nodiscard]] const UnrolledToken&                 token() const;
-    [[nodiscard]] const std::vector<UnrolledAstToken>& children() const;
     [[nodiscard]] gen::Number                          toNumber() const;
     [[nodiscard]] std::string                          toString() const;
-
-    [[nodiscard]] static UnrolledToken fromNumber(const gen::Number& number);
+    [[nodiscard]] const UnrolledToken&                 token() const;
+    [[nodiscard]] const std::vector<UnrolledAstToken>& children() const;
 
   private:
     void simplifyFunction();

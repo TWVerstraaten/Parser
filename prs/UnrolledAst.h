@@ -13,9 +13,10 @@ class Ast;
 class UnrolledAst {
 
   public:
-    UnrolledAst(const Ast& ast);
+    explicit UnrolledAst(const Ast& ast);
 
     [[nodiscard]] UnrolledAstToken setVariable(const std::string& variable, const gen::Number& number) const;
+    [[nodiscard]] UnrolledAstToken setVariables(const std::map<std::string, gen::Number>& variableMap) const;
 
     [[nodiscard]] std::string toString() const;
 

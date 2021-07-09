@@ -34,5 +34,4 @@ std::string ParserError::toString() const {
             return "Unfinished Formula: naked ending " + m_message + " at " + m_range.toString();
     }
     assert(false);
-    return "";
 }

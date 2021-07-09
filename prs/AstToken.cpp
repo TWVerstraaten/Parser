@@ -4,6 +4,7 @@
 
 #include "AstToken.h"
 
+#include "../alg/StringAlg.h"
 #include "../gen/Overloaded.h"
 #include "../gen/defines.h"
 #include "ParserInfo.h"
@@ -11,20 +12,97 @@
 
 #include <algorithm>
 #include <cassert>
+#include <sstream>
+
+[[nodiscard]] static AstToken::TempTokenList::iterator S_TOKEN_IT(AstToken::TempTokenList& tempTokens, AstToken::TempTokenList::iterator it, const std::set<Token::TYPE>& types) {
+    return std::find_if(it, tempTokens.end(), [&](const auto& a) { return std::holds_alternative<Token>(a) && (types.find(std::get<Token>(a).type()) != types.end()); });
+}
+
+static void S_REPLACE_UNARY_MINUSES(AstToken::TempTokenList& tempTokens, ParserInfo& info) {
+    static const std::set<Token::TYPE> s{Token::TYPE::UNARY_MINUS};
+    for (auto it = S_TOKEN_IT(tempTokens, tempTokens.begin(), s); it != tempTokens.end(); it = S_TOKEN_IT(tempTokens, std::next(it), s)) {
+        assert(std::holds_alternative<Token>(*it));
+        const auto& token = std::get<Token>(*it);
+        assert(token.type() == Token::TYPE::UNARY_MINUS);
+        assert(std::holds_alternative<AstToken>(*std::next(it)));
+        const size_t start = token.range().startIndex();
+        it                 = tempTokens.erase(it);
+        const size_t end   = std::get<AstToken>(*it).range().endIndex();
+        *it                = AstToken{AstToken::OPERATOR_TYPE::UNARY_MINUS, std::get<AstToken>(*it), Range{start, end}, info};
+    }
+}
+
+static void S_REPLACE_POWERS(AstToken::TempTokenList& tempTokens, ParserInfo& info) {
+    static const std::set<Token::TYPE> s{Token::TYPE::POWER};
+    for (auto it = S_TOKEN_IT(tempTokens, tempTokens.begin(), s); it != tempTokens.end(); it = S_TOKEN_IT(tempTokens, it, s)) {
+        assert(std::holds_alternative<Token>(*it));
+        assert(std::get<Token>(*it).type() == Token::TYPE::POWER);
+        assert(std::holds_alternative<AstToken>(*std::next(it)));
+        assert(std::holds_alternative<AstToken>(*std::prev(it)));
+        const size_t start = std::get<AstToken>(*std::prev(it)).range().startIndex();
+        const size_t end   = std::get<AstToken>(*std::next(it)).range().endIndex();
+        *std::prev(it) = AstToken{AstToken::OPERATOR_TYPE::POWER, std::move(std::get<AstToken>(*std::prev(it))), std::move(std::get<AstToken>(*std::next(it))), {start, end}, info};
+        it             = tempTokens.erase(it, std::next(it, 2));
+    }
+}
+
+static void S_REPLACE_TIMES_DIVIDE(AstToken::TempTokenList& tempTokens, ParserInfo& info) {
+    static const std::set<Token::TYPE> s{Token::TYPE::TIMES, Token::TYPE::DIVIDE};
+    for (auto it = S_TOKEN_IT(tempTokens, tempTokens.begin(), s); it != tempTokens.end(); it = S_TOKEN_IT(tempTokens, it, s)) {
+        assert(std::holds_alternative<Token>(*it));
+        const auto type = std::get<Token>(*it).type();
+        assert(std::holds_alternative<AstToken>(*std::next(it)));
+        assert(std::holds_alternative<AstToken>(*std::prev(it)));
+        const size_t start        = std::get<AstToken>(*std::prev(it)).range().startIndex();
+        const size_t end          = std::get<AstToken>(*std::next(it)).range().endIndex();
+        const auto   astTokenType = type == Token::TYPE::TIMES ? AstToken::OPERATOR_TYPE::TIMES : AstToken::OPERATOR_TYPE::DIVIDE;
+        *std::prev(it)            = AstToken{astTokenType, std::move(std::get<AstToken>(*std::prev(it))), std::move(std::get<AstToken>(*std::next(it))), {start, end}, info};
+        it                        = tempTokens.erase(it, std::next(it, 2));
+    }
+}
+
+static void S_REPLACE_PLUS_MINUS(AstToken::TempTokenList& tempTokens, ParserInfo& info) {
+    static const std::set<Token::TYPE> s{Token::TYPE::PLUS, Token::TYPE::MINUS};
+    for (auto it = S_TOKEN_IT(tempTokens, tempTokens.begin(), s); it != tempTokens.end(); it = S_TOKEN_IT(tempTokens, it, s)) {
+        assert(std::holds_alternative<Token>(*it));
+        const auto type = std::get<Token>(*it).type();
+        assert(std::holds_alternative<AstToken>(*std::next(it)));
+        assert(std::holds_alternative<AstToken>(*std::prev(it)));
+        const size_t start        = std::get<AstToken>(*std::prev(it)).range().startIndex();
+        const size_t end          = std::get<AstToken>(*std::next(it)).range().endIndex();
+        const auto   astTokenType = type == Token::TYPE::PLUS ? AstToken::OPERATOR_TYPE::PLUS : AstToken::OPERATOR_TYPE::MINUS;
+        *std::prev(it)            = AstToken{astTokenType, std::move(std::get<AstToken>(*std::prev(it))), std::move(std::get<AstToken>(*std::next(it))), {start, end}, info};
+        it                        = tempTokens.erase(it, std::next(it, 2));
+    }
+}
+
+static std::string S_OPERATOR_TYPE_TO_STRING(AstToken::OPERATOR_TYPE type) {
+    switch (type) {
+        case AstToken::OPERATOR_TYPE::PLUS:
+            return "+";
+        case AstToken::OPERATOR_TYPE::MINUS:
+            return "-";
+        case AstToken::OPERATOR_TYPE::TIMES:
+            return "*";
+        case AstToken::OPERATOR_TYPE::DIVIDE:
+            return "/";
+        case AstToken::OPERATOR_TYPE::POWER:
+            return "^";
+        case AstToken::OPERATOR_TYPE::UNARY_MINUS:
+            return "-";
+        case AstToken::OPERATOR_TYPE::EQUALS:
+            return "=";
+    }
+    assert(false);
+}
 
 AstToken::AstToken(const std::list<StructuralToken>& structuralTokens, ParserInfo& info) {
-    switch (structuralTokens.size()) {
-        case 0:
-            m_range = Range{};
-            m_token = Empty{};
-            return;
-        case 1:
-            m_range = structuralTokens.front().range();
-            break;
-        default:
-            m_range = {structuralTokens.front().range().startIndex(), structuralTokens.back().range().endIndex()};
-            break;
+    if (structuralTokens.empty()) {
+        m_range = Range{};
+        m_token = Empty{};
+        return;
     }
+    m_range = {structuralTokens.front().range().startIndex(), structuralTokens.back().range().endIndex()};
 
     if (auto it = std::find_if(TT_IT(structuralTokens), TT_LAMBDA(a, return TokenTemplates::isTokenOfType<Token>(a.token(), Token::TYPE::EQUALS);)); it != structuralTokens.end()) {
         m_token    = OPERATOR_TYPE::EQUALS;
@@ -37,10 +115,10 @@ AstToken::AstToken(const std::list<StructuralToken>& structuralTokens, ParserInf
         std::visit(Overloaded{[&](const Token& a) { tempTokens.emplace_back(a); }, [&](const auto& a) { tempTokens.emplace_back(AstToken{a, el.range(), info}); }}, el.token());
     }
 
-    replacePowers(tempTokens, info);
-    replaceTimesDivide(tempTokens, info);
-    replaceUnaryMinuses(tempTokens, info);
-    replacePlusMinus(tempTokens, info);
+    S_REPLACE_POWERS(tempTokens, info);
+    S_REPLACE_TIMES_DIVIDE(tempTokens, info);
+    S_REPLACE_UNARY_MINUSES(tempTokens, info);
+    S_REPLACE_PLUS_MINUS(tempTokens, info);
 
     if (tempTokens.size() > 1) {
         info.addError(ParserError{ParserError::TYPE::GENERIC, std::string("More than one token left at AstToken? ") + TT_WHERE_STRING});
@@ -68,7 +146,7 @@ AstToken::AstToken(const StructuralToken::Function& function, Range range, Parse
     }
     if (m_children.size() == 1 && std::holds_alternative<Empty>(m_children.front().m_token)) {
         m_children.clear();
-        std::get<CustomFunctionToken>(m_token).m_argumentCount = 0;
+        std::get<CustomFunctionToken>(m_token).setArgumentCount(0);
     }
     maybeCastToReservedFunction(info);
 }
@@ -91,97 +169,30 @@ AstToken::AstToken(AstToken::OPERATOR_TYPE type, AstToken left, AstToken right, 
 
 void AstToken::maybeCastToReservedFunction(ParserInfo& info) {
     assert(std::holds_alternative<CustomFunctionToken>(m_token));
-    if (auto reserved = ReservedFunction::getReserved(std::get<CustomFunctionToken>(m_token).m_name); reserved.has_value()) {
+    if (auto reserved = rsrvd::S_GET_RESERVED(std::get<CustomFunctionToken>(m_token).name()); reserved.has_value()) {
         const auto val                   = reserved.value();
-        const auto argumentCount         = std::get<CustomFunctionToken>(m_token).m_argumentCount;
-        const auto requiredArgumentCount = ReservedFunction::getArgumentCount(val);
+        const auto argumentCount         = std::get<CustomFunctionToken>(m_token).argumentCount();
+        const auto requiredArgumentCount = S_GET_ARGUMENT_COUNT(val);
         if (requiredArgumentCount != argumentCount) {
             info.addError({ParserError::TYPE::WRONG_ARGUMENT_COUNT_RESERVED,
-                           ReservedFunction::getName(val) + " takes " + std::to_string(requiredArgumentCount) + " arguments, not " + std::to_string(argumentCount),
+                           S_GET_NAME(val) + " takes " + std::to_string(requiredArgumentCount) + " arguments, not " + std::to_string(argumentCount),
                            m_range});
         }
-        m_token = ReservedFunction{val};
+        m_token = val;
     }
 }
 
-std::string AstToken::toStringAsTree(const AstToken& root) {
-    return TokenWriter::toStringAsTree("", root, false);
-}
-
-[[nodiscard]] static std::list<std::variant<AstToken, Token>>::iterator
-tokenIt(std::list<std::variant<AstToken, Token>>& tempTokens, std::list<std::variant<AstToken, Token>>::iterator it, const std::set<Token::TYPE>& types) {
-    return std::find_if(it, tempTokens.end(), [&](const auto& a) { return std::holds_alternative<Token>(a) && (types.find(std::get<Token>(a).type()) != types.end()); });
-}
-
-void AstToken::replaceUnaryMinuses(TempTokenList& tempTokens, ParserInfo& info) {
-    static const std::set<Token::TYPE> s{Token::TYPE::UNARY_MINUS};
-    for (auto it = tokenIt(tempTokens, tempTokens.begin(), s); it != tempTokens.end(); it = tokenIt(tempTokens, std::next(it), s)) {
-        assert(std::holds_alternative<Token>(*it));
-        const auto& token = std::get<Token>(*it);
-        assert(token.type() == Token::TYPE::UNARY_MINUS);
-        assert(std::holds_alternative<AstToken>(*std::next(it)));
-        const size_t start = token.range().startIndex();
-        it                 = tempTokens.erase(it);
-        const size_t end   = std::get<AstToken>(*it).m_range.endIndex();
-        *it                = AstToken{OPERATOR_TYPE::UNARY_MINUS, std::get<AstToken>(*it), Range{start, end}, info};
-    }
-}
-
-void AstToken::replacePowers(TempTokenList& tempTokens, ParserInfo& info) {
-    static const std::set<Token::TYPE> s{Token::TYPE::POWER};
-    for (auto it = tokenIt(tempTokens, tempTokens.begin(), s); it != tempTokens.end(); it = tokenIt(tempTokens, it, s)) {
-        assert(std::holds_alternative<Token>(*it));
-        assert(std::get<Token>(*it).type() == Token::TYPE::POWER);
-        assert(std::holds_alternative<AstToken>(*std::next(it)));
-        assert(std::holds_alternative<AstToken>(*std::prev(it)));
-        const size_t start = std::get<AstToken>(*std::prev(it)).m_range.startIndex();
-        const size_t end   = std::get<AstToken>(*std::next(it)).m_range.endIndex();
-        *std::prev(it)     = AstToken{OPERATOR_TYPE::POWER, std::move(std::get<AstToken>(*std::prev(it))), std::move(std::get<AstToken>(*std::next(it))), {start, end}, info};
-        it                 = tempTokens.erase(it, std::next(it, 2));
-    }
-}
-
-void AstToken::replaceTimesDivide(TempTokenList& tempTokens, ParserInfo& info) {
-    static const std::set<Token::TYPE> s{Token::TYPE::TIMES, Token::TYPE::DIVIDE};
-    for (auto it = tokenIt(tempTokens, tempTokens.begin(), s); it != tempTokens.end(); it = tokenIt(tempTokens, it, s)) {
-        assert(std::holds_alternative<Token>(*it));
-        const auto type = std::get<Token>(*it).type();
-        assert(std::holds_alternative<AstToken>(*std::next(it)));
-        assert(std::holds_alternative<AstToken>(*std::prev(it)));
-        const size_t start        = std::get<AstToken>(*std::prev(it)).m_range.startIndex();
-        const size_t end          = std::get<AstToken>(*std::next(it)).m_range.endIndex();
-        const auto   astTokenType = type == Token::TYPE::TIMES ? OPERATOR_TYPE::TIMES : OPERATOR_TYPE::DIVIDE;
-        *std::prev(it)            = AstToken{astTokenType, std::move(std::get<AstToken>(*std::prev(it))), std::move(std::get<AstToken>(*std::next(it))), {start, end}, info};
-        it                        = tempTokens.erase(it, std::next(it, 2));
-    }
-}
-
-void AstToken::replacePlusMinus(TempTokenList& tempTokens, ParserInfo& info) {
-    static const std::set<Token::TYPE> s{Token::TYPE::PLUS, Token::TYPE::MINUS};
-    for (auto it = tokenIt(tempTokens, tempTokens.begin(), s); it != tempTokens.end(); it = tokenIt(tempTokens, it, s)) {
-        assert(std::holds_alternative<Token>(*it));
-        const auto type = std::get<Token>(*it).type();
-        assert(std::holds_alternative<AstToken>(*std::next(it)));
-        assert(std::holds_alternative<AstToken>(*std::prev(it)));
-        const size_t start        = std::get<AstToken>(*std::prev(it)).m_range.startIndex();
-        const size_t end          = std::get<AstToken>(*std::next(it)).m_range.endIndex();
-        const auto   astTokenType = type == Token::TYPE::PLUS ? OPERATOR_TYPE::PLUS : OPERATOR_TYPE::MINUS;
-        *std::prev(it)            = AstToken{astTokenType, std::move(std::get<AstToken>(*std::prev(it))), std::move(std::get<AstToken>(*std::next(it))), {start, end}, info};
-        it                        = tempTokens.erase(it, std::next(it, 2));
-    }
-}
-
-std::set<CustomFunctionToken> AstToken::dependsOn() const {
+std::set<CustomFunctionToken> AstToken::getCustomFunctionDependencies() const {
     if (std::holds_alternative<OPERATOR_TYPE>(m_token) && std::get<OPERATOR_TYPE>(m_token) == OPERATOR_TYPE::EQUALS) {
         assert(m_children.size() == 2);
-        return m_children.at(1).dependsOn();
+        return m_children.at(1).getCustomFunctionDependencies();
     }
     std::set<CustomFunctionToken> functionDependencies;
     if (std::holds_alternative<CustomFunctionToken>(m_token)) {
         functionDependencies.insert(std::get<CustomFunctionToken>(m_token));
     }
     for (const auto& child : m_children) {
-        functionDependencies.merge(child.dependsOn());
+        functionDependencies.merge(child.getCustomFunctionDependencies());
     }
     return functionDependencies;
 }
@@ -211,4 +222,87 @@ const std::vector<AstToken>& AstToken::children() const {
 
 const Range& AstToken::range() const {
     return m_range;
+}
+
+void AstToken::replaceVariable(const std::string& variable, const AstToken& token) {
+    std::visit(Overloaded{[&](const std::string& variableToken) {
+                              assert(m_children.empty());
+                              if (variableToken == variable) {
+                                  *this = token;
+                              }
+                          },
+                          [&](const auto& a) {
+                              for (auto& child : m_children) {
+                                  child.replaceVariable(variable, token);
+                              }
+                          }},
+               m_token);
+}
+
+void AstToken::replaceVariables(const std::map<std::string, AstToken>& variableMap) {
+    std::visit(Overloaded{[&](const std::string& variableToken) {
+                              assert(m_children.empty());
+                              if (variableMap.find(variableToken) != variableMap.end()) {
+                                  *this = variableMap.at(variableToken);
+                              }
+                          },
+                          [&](const auto& a) {
+                              for (auto& child : m_children) {
+                                  child.replaceVariables(variableMap);
+                              }
+                          }},
+               m_token);
+}
+
+void AstToken::replaceVariables(const std::vector<std::string>& variables, const std::vector<AstToken>& tokens) {
+    assert(variables.size() == tokens.size());
+    std::map<std::string, AstToken> variableMap;
+    for (size_t i = 0; i != variables.size(); ++i) {
+        assert(variableMap.find(variables.at(i)) == variableMap.end());
+        variableMap.insert({variables.at(i), tokens.at(i)});
+    }
+    replaceVariables(variableMap);
+}
+
+std::string AstToken::toStringAsTree() const {
+    return TokenWriter::toStringAsTree("", *this, false);
+}
+
+void AstToken::replaceFunction(const Header::FullHeader& header, const AstToken& functionToken) {
+    for (auto& child : m_children) {
+        child.replaceFunction(header, functionToken);
+    }
+    std::visit(Overloaded{[&](const CustomFunctionToken& function) {
+                              if (function.name() == header.m_name) {
+                                  assert(function.argumentCount() == header.m_variables.size());
+                                  auto replaced = functionToken;
+                                  replaced.replaceVariables(header.m_variables, m_children);
+                                  *this = replaced;
+                              }
+                          },
+                          [&](const auto& a) {}},
+               m_token);
+}
+
+std::string AstToken::toStringFlat() const {
+    const auto writeChildren = [this]() { return alg::StringAlg::S_CONCATENATE_STRINGS<AstToken>(m_children, [&](const auto& a) { return a.toStringFlat(); }); };
+    return std::visit(Overloaded{[](AstToken::Error) { return std::string("_error_"); },
+                                 [](AstToken::Empty) { return std::string("_empty_"); },
+                                 [&](OPERATOR_TYPE type) {
+                                     if (type == OPERATOR_TYPE::UNARY_MINUS) {
+                                         return "-(" + m_children.front().toStringFlat() + ")";
+                                     } else {
+                                         return "(" + m_children.front().toStringFlat() + " " + S_OPERATOR_TYPE_TO_STRING(type) + " " + m_children.back().toStringFlat() + ")";
+                                     }
+                                 },
+                                 [&](const CustomFunctionToken& function) { return function.name() + "(" + writeChildren() + ")"; },
+                                 [&](const rsrvd::Reserved& function) { return rsrvd::S_GET_NAME(function) + "(" + writeChildren() + ")"; },
+                                 [&](const VectorToken& vectorToken) { return "(" + writeChildren() + ")"; },
+                                 [](const std::string& str) { return str; },
+                                 [](const auto& a) {
+                                     std::stringstream ss;
+                                     ss << a;
+                                     return ss.str();
+                                 }},
+                      m_token);
 }

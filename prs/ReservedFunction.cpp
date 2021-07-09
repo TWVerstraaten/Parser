@@ -6,54 +6,55 @@
 
 #include "../alg/StringAlg.h"
 #include "../gen/Overloaded.h"
+#include "../gen/defines.h"
 
 #include <cassert>
 #include <cmath>
 
-ReservedFunction::ReservedFunction(ReservedFunction::Reserved reserved) : m_reserved(reserved) {
-}
+namespace rsrvd {
 
-std::optional<ReservedFunction::Reserved> ReservedFunction::getReserved(const std::string& string) {
-    const auto trimmed = alg::StringAlg::trim(string);
-    for (const auto& type : s_allReserved) {
-        if (trimmed == getName(type)) {
-            return type;
+    std::optional<rsrvd::Reserved> S_GET_RESERVED(const std::string& string) {
+        static const std::vector<rsrvd::Reserved> S_ALL_RESERVED = {rsrvd::Sin(), rsrvd::Cos(), rsrvd::Tan(), rsrvd::ASin(), rsrvd::ACos(), rsrvd::ATan(), rsrvd::ATan2()};
+        const auto                                trimmed        = alg::StringAlg::S_TRIM(string);
+        if (auto it = std::find_if(TT_IT(S_ALL_RESERVED), TT_LAMBDA_REF(a, return S_GET_NAME(a) == trimmed;)); it != S_ALL_RESERVED.end()) {
+            return *it;
+        } else {
+            return {};
         }
     }
-    return {};
-}
 
-size_t ReservedFunction::getArgumentCount(const ReservedFunction::Reserved& reserved) {
-    return std::visit([](const auto& a) { return std::remove_reference_t<decltype(a)>::s_argumentCount; }, reserved);
-}
+    size_t S_GET_ARGUMENT_COUNT(const rsrvd::Reserved& reserved) {
+        return std::visit([](const auto& a) { return std::remove_reference_t<decltype(a)>::s_argumentCount; }, reserved);
+    }
 
-std::string ReservedFunction::getName(const ReservedFunction::Reserved& reserved) {
-    return std::visit([](const auto& a) { return std::string(std::remove_reference_t<decltype(a)>::s_name); }, reserved);
-}
+    std::string S_GET_NAME(const rsrvd::Reserved& reserved) {
+        return std::visit([](const auto& a) { return std::string(std::remove_reference_t<decltype(a)>::s_name); }, reserved);
+    }
 
-double ReservedFunction::eval(const ReservedFunction::Reserved& reserved, double argument) {
-    return std::visit(Overloaded{
-                          [argument](const Sin&) { return std::sin(argument); },
-                          [argument](const Cos&) { return std::cos(argument); },
-                          [argument](const Tan&) { return std::tan(argument); },
-                          [argument](const ASin&) { return std::asin(argument); },
-                          [argument](const ACos&) { return std::acos(argument); },
-                          [argument](const ATan&) { return std::atan(argument); },
-                          [](const auto&) {
-                              assert(false);
-                              return std::numeric_limits<double>::quiet_NaN();
+    double S_EVAL(const rsrvd::Reserved& reserved, double argument) {
+        return std::visit(Overloaded{
+                              [argument](const rsrvd::Sin&) { return std::sin(argument); },
+                              [argument](const rsrvd::Cos&) { return std::cos(argument); },
+                              [argument](const rsrvd::Tan&) { return std::tan(argument); },
+                              [argument](const rsrvd::ASin&) { return std::asin(argument); },
+                              [argument](const rsrvd::ACos&) { return std::acos(argument); },
+                              [argument](const rsrvd::ATan&) { return std::atan(argument); },
+                              [](const auto&) {
+                                  assert(false);
+                                  return std::numeric_limits<double>::quiet_NaN();
+                              },
                           },
-                      },
-                      reserved);
-}
+                          reserved);
+    }
 
-double ReservedFunction::eval(const ReservedFunction::Reserved& reserved, double first, double second) {
-    return std::visit(Overloaded{
-                          [first, second](const ATan2&) { return std::atan2(first, second); },
-                          [](const auto&) {
-                              assert(false);
-                              return std::numeric_limits<double>::quiet_NaN();
+    double S_EVAL(const rsrvd::Reserved& reserved, double first, double second) {
+        return std::visit(Overloaded{
+                              [first, second](const rsrvd::ATan2&) { return std::atan2(first, second); },
+                              [](const auto&) {
+                                  assert(false);
+                                  return std::numeric_limits<double>::quiet_NaN();
+                              },
                           },
-                      },
-                      reserved);
-}
+                          reserved);
+    }
+} // namespace rsrvd

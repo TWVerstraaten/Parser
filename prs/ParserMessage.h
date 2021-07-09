@@ -11,20 +11,17 @@
 
 class ParserMessage {
 
-    friend class Tokenizer;
-    friend class StructuralTokenizer;
-
+  public:
     enum TYPE { INSERT_MULTIPLICATION };
 
-  public:
     ParserMessage(TYPE type, std::string message, Range range = {});
 
     [[nodiscard]] std::string toString() const;
 
   private:
-    const TYPE        m_type;
-    const std::string m_message;
-    const Range       m_range;
+    TYPE        m_type;
+    std::string m_message;
+    Range       m_range;
 };
 
 #endif // PRS_PARSERMESSAGE_H

@@ -10,10 +10,10 @@
 
 #include <cassert>
 
-static const std::set<std::string> s_reservedCoordinates{"x", "y", "z"};
+static const std::set<std::string> S_RESERVED_COORDINATES{"x", "y", "z"};
 
 Header::Header(const std::string& name) {
-    if (s_reservedCoordinates.find(name) != s_reservedCoordinates.end()) {
+    if (S_RESERVED_COORDINATES.find(name) != S_RESERVED_COORDINATES.end()) {
         m_header = SingleCoordinateHeader{name};
     } else {
         m_header = OnlyNamedHeader{name};
@@ -35,7 +35,7 @@ Header::Header(const VectorToken& vectorToken, const AstToken& headerToken) {
     variableNames.reserve(vectorToken.m_dimension);
     for (const auto& child : headerToken.children()) {
         assert(std::holds_alternative<std::string>(child.token()));
-        assert(s_reservedCoordinates.find(std::get<std::string>(child.token())) != s_reservedCoordinates.end());
+        assert(S_RESERVED_COORDINATES.find(std::get<std::string>(child.token())) != S_RESERVED_COORDINATES.end());
         variableNames.emplace_back(std::get<std::string>(child.token()));
     }
     m_header = CoordinateVectorHeader{std::move(variableNames)};
@@ -51,10 +51,14 @@ Header::HEADER_TYPE Header::type() const {
 }
 
 std::string Header::toString() const {
-    return std::visit(Overloaded{[](EmptyHeader) { return std::string("Empty header"); },
+    return std::visit(Overloaded{[](EmptyHeader) { return std::string("Empty headerVariant"); },
                                  [](const OnlyNamedHeader& namedHeader) { return "Named:\t" + namedHeader.m_name; },
                                  [](const SingleCoordinateHeader& single) { return "Single coord:\t" + single.m_coordinate; },
-                                 [](const CoordinateVectorHeader& vector) { return "Coord. vector:\t(" + alg::StringAlg::concatenateStrings(vector.m_coordinates) + ")"; },
-                                 [](const FullHeader& h) { return std::string("Full:\t") + h.m_name + "(" + alg::StringAlg::concatenateStrings(h.m_variables) + ")"; }},
+                                 [](const CoordinateVectorHeader& vector) { return "Coord. vector:\t(" + alg::StringAlg::S_CONCATENATE_STRINGS(vector.m_coordinates) + ")"; },
+                                 [](const FullHeader& h) { return std::string("Full:\t") + h.m_name + "(" + alg::StringAlg::S_CONCATENATE_STRINGS(h.m_variables) + ")"; }},
                       m_header);
+}
+
+const Header::HeaderVariant& Header::headerVariant() const {
+    return m_header;
 }

@@ -7,7 +7,6 @@
 
 #include "AstToken.h"
 
-#include <memory>
 #include <string>
 
 class ParserInfo;
@@ -15,7 +14,7 @@ class ParserInfo;
 class Parser {
 
   public:
-    static std::unique_ptr<AstToken> parse(const std::string& string, ParserInfo& info);
+    static std::optional<AstToken> parse(const std::string& string, ParserInfo& info);
 };
 
 #endif // PRS_PARSER_H
