@@ -14,13 +14,16 @@ namespace gen {
         Number(const Number& other);
         explicit Number(std::variant<long long, double> value);
         explicit Number(const std::string& value);
-        explicit Number(long long value);
-        explicit Number(double value);
+        Number(long long value);
+        Number(int value);
+        Number(double value);
 
-        [[nodiscard]] float                                      toFloat() const;
+        [[nodiscard]] double                                     toDouble() const;
         [[nodiscard]] Number                                     negate() const;
         [[nodiscard]] const std::variant<long long int, double>& number() const;
         [[nodiscard]] std::string                                toString() const;
+        [[nodiscard]] bool                                       holdsLongLong() const;
+        [[nodiscard]] long long                                  toLongLong() const;
 
         friend bool   operator==(const Number& a, const Number& b);
         friend bool   operator<(const Number& a, const Number& b);

@@ -23,7 +23,7 @@ namespace fml {
     }
 
     static bool checkIdentifier(const std::string& string) {
-        auto trimmedString = alg::StringAlg::trim(string);
+        auto trimmedString = alg::StringAlg::S_TRIM(string);
         assert(trimmedString == string);
         if (trimmedString.empty()) {
             return false;
@@ -40,12 +40,12 @@ namespace fml {
         if ((containsIllegalCharacters())) {
             return;
         }
-        const auto parts = alg::StringAlg::trimAndSplit(m_headerString, "(");
-        if (setErrorIf(parts.empty(), "Empty function header") || setErrorIf(parts.size() > 2, "Too many opening brackets")) {
+        const auto parts = alg::StringAlg::S_TRIM_AND_SPLIT(m_headerString, "(");
+        if (setErrorIf(parts.empty(), "Empty function headerVariant") || setErrorIf(parts.size() > 2, "Too many opening brackets")) {
             return;
         }
-        m_name = alg::StringAlg::trim(parts.at(0));
-        assert(m_name == alg::StringAlg::trim(m_name));
+        m_name = alg::StringAlg::S_TRIM(parts.at(0));
+        assert(m_name == alg::StringAlg::S_TRIM(m_name));
 
         if (setErrorIf(not checkIdentifier(m_name), "Invalid function name: " + m_name)) {
             return;
@@ -59,7 +59,7 @@ namespace fml {
         if (setErrorIf(argumentString.empty(), "Empty argument list")) {
             return;
         }
-        if (setErrorIf(argumentString.at(argumentString.length() - 1) != ')', "Closing bracket should be last character of header")) {
+        if (setErrorIf(argumentString.at(argumentString.length() - 1) != ')', "Closing bracket should be last character of headerVariant")) {
             return;
         }
 
@@ -67,7 +67,7 @@ namespace fml {
         std::set<std::string> declaredVariableSet;
         std::set<std::string> duplicateVariableSet;
         for (boost::tokenizer<>::iterator token = tokenizer.begin(); token != tokenizer.end(); ++token) {
-            std::string next = alg::StringAlg::trim(*token);
+            std::string next = alg::StringAlg::S_TRIM(*token);
             if (setErrorIf(not checkIdentifier(next), "Invalid variable name: " + next)) {
                 return;
             }
@@ -80,7 +80,7 @@ namespace fml {
         }
         if (not duplicateVariableSet.empty()) {
             m_success     = false;
-            m_errorString = "Duplicate variables: " + alg::StringAlg::concatenateStrings(duplicateVariableSet);
+            m_errorString = "Duplicate variables: " + alg::StringAlg::S_CONCATENATE_STRINGS(duplicateVariableSet);
         }
     }
 
@@ -104,7 +104,7 @@ namespace fml {
         std::string chars;
         std::for_each(illegalCharacters.begin(), illegalCharacters.end(), [&](char c) { chars += c; });
         m_success     = false;
-        m_errorString = "Illegal characters in header: " + chars;
+        m_errorString = "Illegal characters in headerVariant: " + chars;
         return true;
     }
 } // namespace fml

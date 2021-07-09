@@ -20,6 +20,6 @@ namespace ast {
       private:
     };
 
-} // namespace ast
+} // namespace originalAst
 
 #endif // PRS_RESERVEDFUNCTION_H

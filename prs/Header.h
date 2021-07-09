@@ -17,7 +17,7 @@ class Header {
 
   public:
     struct EmptyHeader {};
-    struct OnlyNamedHeader {
+    struct ConstantHeader {
         std::string m_name;
     };
     struct SingleCoordinateHeader {
@@ -30,9 +30,9 @@ class Header {
         std::string              m_name;
         std::vector<std::string> m_variables;
     };
-    enum class HEADER_TYPE { EMPTY, ONLY_NAMED, NAMED_AND_VARIABLES_DECLARED, SINGLE_COORDINATE, COORDINATE_VECTOR };
+    enum class HEADER_TYPE { EMPTY, CONSTANT, FULL_HEADER, SINGLE_COORDINATE, COORDINATE_VECTOR };
 
-    typedef std::variant<EmptyHeader, OnlyNamedHeader, FullHeader, SingleCoordinateHeader, CoordinateVectorHeader> HeaderVariant;
+    typedef std::variant<EmptyHeader, ConstantHeader, FullHeader, SingleCoordinateHeader, CoordinateVectorHeader> HeaderVariant;
 
     Header() = default;
     explicit Header(const std::string& name);

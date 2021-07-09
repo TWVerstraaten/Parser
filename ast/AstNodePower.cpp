@@ -90,4 +90,4 @@ namespace ast {
         result.merge(m_exponent->functionDependencies());
         return result;
     }
-} // namespace ast
+} // namespace originalAst

@@ -37,6 +37,6 @@ namespace ast {
       private:
         gen::Number m_value;
     };
-} // namespace ast
+} // namespace originalAst
 
 #endif // PARSER_ASTNODENUMBER_H

@@ -56,5 +56,5 @@ namespace ast {
         const std::function<bool(u_ptr_AstNode&)>                                m_removePredicate;
         std::vector<u_ptr_AstNode>                                               m_nodes;
     };
-} // namespace ast
+} // namespace originalAst
 #endif // PARSER_ASTNODECOMMUTATIVE_H

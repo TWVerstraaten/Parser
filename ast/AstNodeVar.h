@@ -32,6 +32,6 @@ namespace ast {
       private:
         std::string m_variableName;
     };
-} // namespace ast
+} // namespace originalAst
 
 #endif // PARSER_ASTNODEVAR_H

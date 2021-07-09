@@ -160,11 +160,9 @@ void UnrolledAstToken::setVariableInternal(const std::string& variable, const ge
     }
 }
 
-UnrolledAstToken UnrolledAstToken::setVariable(const std::string& variable, const gen::Number& number) const {
-    UnrolledAstToken result = *this;
-    result.setVariableInternal(variable, number);
-    result.simplify();
-    return result;
+void UnrolledAstToken::setVariableInPlace(const std::string& variable, const gen::Number& number) {
+    setVariableInternal(variable, number);
+    simplify();
 }
 
 const UnrolledAstToken::UnrolledToken& UnrolledAstToken::token() const {

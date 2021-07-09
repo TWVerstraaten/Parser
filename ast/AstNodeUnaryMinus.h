@@ -32,6 +32,6 @@ namespace ast {
       private:
         u_ptr_AstNode m_value;
     };
-} // namespace ast
+} // namespace originalAst
 
 #endif // PARSER_ASTNODEUNARYMINUS_H

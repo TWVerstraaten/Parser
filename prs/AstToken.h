@@ -46,6 +46,7 @@ class AstToken {
     void replaceFunction(const Header::FullHeader& header, const AstToken& functionToken);
 
     [[nodiscard]] std::set<CustomFunctionToken> getCustomFunctionDependencies() const;
+    [[nodiscard]] std::set<std::string>         getUndeclaredVariables(const std::set<std::string>& declared) const;
     [[nodiscard]] std::set<std::string>         variablesUsed() const;
     [[nodiscard]] const AstTokenVariant&        token() const;
     [[nodiscard]] const std::vector<AstToken>&  children() const;

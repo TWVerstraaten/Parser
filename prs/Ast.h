@@ -19,11 +19,13 @@ class Ast {
     void replaceVariableInPlace(const std::string& variable, const AstToken& token);
     void replaceFunctionInPlace(const Ast& functionToken);
 
+    [[nodiscard]] CustomFunctionToken           getCustomFunctionToken() const;
     [[nodiscard]] bool                          success() const;
     [[nodiscard]] bool                          hasCustomDependencies() const;
     [[nodiscard]] const ParserInfo&             info() const;
     [[nodiscard]] const Header&                 header() const;
-    [[nodiscard]] std::set<CustomFunctionToken> dependsOn() const;
+    [[nodiscard]] std::set<CustomFunctionToken> functionDependencies() const;
+    [[nodiscard]] std::set<std::string>         constantDependencies() const;
     [[nodiscard]] std::set<std::string>         variablesUsed() const;
     [[nodiscard]] std::vector<std::string>      declaredVariables() const;
     [[nodiscard]] const AstToken&               body() const;
@@ -40,7 +42,7 @@ class Ast {
     bool                          m_headerWasSet = false;
     Header                        m_header;
     AstToken                      m_rootNode;
-    std::set<CustomFunctionToken> m_dependsOn;
+    std::set<CustomFunctionToken> m_functionDependencies;
 };
 
 #endif // PRS_AST_H

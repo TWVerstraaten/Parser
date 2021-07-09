@@ -5,25 +5,27 @@
 #ifndef PARSER_STRINGALG_H
 #define PARSER_STRINGALG_H
 
-#include <iterator>
-#include <set>
+#include <functional>
 #include <sstream>
 #include <string>
-#include <vector>
 
 namespace alg {
     class StringAlg {
       public:
-        template <class Container>
-        static std::string concatenateStrings(const Container& set) {
-            std::ostringstream stream;
-            std::copy(set.begin(), set.end(), std::ostream_iterator<std::string>(stream, ","));
-            std::string result = stream.str();
-            return result.empty() ? "" : result.substr(0, result.length() - 1);
+        template <class Type = std::string, class Container>
+        static std::string S_CONCATENATE_STRINGS(
+            const Container& container, const std::function<std::string(const Type&)> f = [](const Type& a) { return a; }) {
+            std::ostringstream ss;
+            bool               firstPass = true;
+            for (const auto& el : container) {
+                ss << (firstPass ? "" : ", ") + f(el);
+                firstPass = false;
+            }
+            return ss.str();
         }
 
-        static std::vector<std::string> trimAndSplit(std::string string, const std::string& splitCharacters);
-        static std::string              trim(std::string string);
+        static std::vector<std::string> S_TRIM_AND_SPLIT(std::string string, const std::string& splitCharacters);
+        static std::string              S_TRIM(std::string string);
     };
 } // namespace alg
 

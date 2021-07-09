@@ -31,7 +31,7 @@ class UnrolledAstToken {
 
     void simplify();
 
-    [[nodiscard]] UnrolledAstToken setVariable(const std::string& variable, const gen::Number& number) const;
+    void setVariableInPlace(const std::string& variable, const gen::Number& number);
 
     [[nodiscard]] bool                                 isNumeric() const;
     [[nodiscard]] double                               toDouble() const;

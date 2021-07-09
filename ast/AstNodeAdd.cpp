@@ -84,4 +84,4 @@ namespace ast {
         }
         return res;
     }
-} // namespace ast
+} // namespace originalAst

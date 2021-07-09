@@ -42,6 +42,6 @@ namespace ast {
         std::string                m_functionName;
         std::vector<u_ptr_AstNode> m_arguments;
     };
-} // namespace ast
+} // namespace originalAst
 
 #endif // PARSER_ASTNODEFUNCTION_H

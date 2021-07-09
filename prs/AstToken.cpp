@@ -306,3 +306,17 @@ std::string AstToken::toStringFlat() const {
                                  }},
                       m_token);
 }
+
+std::set<std::string> AstToken::getUndeclaredVariables(const std::set<std::string>& declared) const {
+    std::set<std::string> result;
+    for (const auto& el : m_children) {
+        result.merge(el.getUndeclaredVariables(declared));
+    }
+    if (std::holds_alternative<std::string>(m_token)) {
+        const auto& variableName = std::get<std::string>(m_token);
+        if (declared.find(variableName) == declared.end()) {
+            result.insert(variableName);
+        }
+    }
+    return result;
+}

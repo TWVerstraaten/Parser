@@ -16,14 +16,28 @@ std::string UnrolledAst::toString() const {
 }
 
 UnrolledAstToken UnrolledAst::setVariable(const std::string& variable, const gen::Number& number) const {
-    return m_token.setVariable(variable, number);
+    auto result = m_token;
+    result.setVariableInPlace(variable, number);
+    return result;
 }
 
 UnrolledAstToken UnrolledAst::setVariables(const std::map<std::string, gen::Number>& variableMap) const {
     assert(not variableMap.empty());
     auto result = m_token;
     for (const auto& [v, n] : variableMap) {
-        result = result.setVariable(v, n);
+        result.setVariableInPlace(v, n);
     }
     return result;
+}
+
+void UnrolledAst::setVariableInPlace(const std::string& variable, const gen::Number& number) {
+    m_token.setVariableInPlace(variable, number);
+}
+
+void UnrolledAst::setVariablesInPlace(const std::map<std::string, gen::Number>& variableMap) {
+    assert(not variableMap.empty());
+    auto result = m_token;
+    for (const auto& [v, n] : variableMap) {
+        result.setVariableInPlace(v, n);
+    }
 }

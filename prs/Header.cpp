@@ -16,7 +16,7 @@ Header::Header(const std::string& name) {
     if (S_RESERVED_COORDINATES.find(name) != S_RESERVED_COORDINATES.end()) {
         m_header = SingleCoordinateHeader{name};
     } else {
-        m_header = OnlyNamedHeader{name};
+        m_header = ConstantHeader{name};
     }
 }
 
@@ -43,16 +43,16 @@ Header::Header(const VectorToken& vectorToken, const AstToken& headerToken) {
 
 Header::HEADER_TYPE Header::type() const {
     return std::visit(Overloaded{[](const EmptyHeader) { return HEADER_TYPE::EMPTY; },
-                                 [](const OnlyNamedHeader&) { return HEADER_TYPE::ONLY_NAMED; },
+                                 [](const ConstantHeader&) { return HEADER_TYPE::CONSTANT; },
                                  [](const SingleCoordinateHeader&) { return HEADER_TYPE::SINGLE_COORDINATE; },
                                  [](const CoordinateVectorHeader&) { return HEADER_TYPE::COORDINATE_VECTOR; },
-                                 [](const FullHeader&) { return HEADER_TYPE::NAMED_AND_VARIABLES_DECLARED; }},
+                                 [](const FullHeader&) { return HEADER_TYPE::FULL_HEADER; }},
                       m_header);
 }
 
 std::string Header::toString() const {
     return std::visit(Overloaded{[](EmptyHeader) { return std::string("Empty headerVariant"); },
-                                 [](const OnlyNamedHeader& namedHeader) { return "Named:\t" + namedHeader.m_name; },
+                                 [](const ConstantHeader& namedHeader) { return "Named:\t" + namedHeader.m_name; },
                                  [](const SingleCoordinateHeader& single) { return "Single coord:\t" + single.m_coordinate; },
                                  [](const CoordinateVectorHeader& vector) { return "Coord. vector:\t(" + alg::StringAlg::S_CONCATENATE_STRINGS(vector.m_coordinates) + ")"; },
                                  [](const FullHeader& h) { return std::string("Full:\t") + h.m_name + "(" + alg::StringAlg::S_CONCATENATE_STRINGS(h.m_variables) + ")"; }},

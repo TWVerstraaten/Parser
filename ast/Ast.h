@@ -30,5 +30,5 @@ namespace ast {
         std::string                    m_string;
         std::unique_ptr<const AstNode> m_rootNode;
     };
-} // namespace ast
+} // namespace originalAst
 #endif // PRS_AST_H

@@ -20,9 +20,9 @@ namespace gen {
         }
     }
 
-    void DependencyGraph::addDependsOn(const std::string& dependent, const std::string& function) {
-        if (not edgeExists(dependent, function)) {
-            add_edge(getOrAddVertexByName(function), getOrAddVertexByName(dependent), m_graph);
+    void DependencyGraph::addDependsOn(const std::string& function, const std::string& dependsOn) {
+        if (not edgeExists(function, dependsOn)) {
+            add_edge(getOrAddVertexByName(dependsOn), getOrAddVertexByName(function), m_graph);
         }
     }
 
@@ -36,8 +36,8 @@ namespace gen {
         return boost::graph_traits<Graph>::null_vertex();
     }
 
-    struct dependents_visitor : public boost::bfs_visitor<> {
-        explicit dependents_visitor(std::set<std::string>& dependents) : m_dependents(dependents) {
+    struct DependentsVisitor : public boost::bfs_visitor<> {
+        explicit DependentsVisitor(std::set<std::string>& dependents) : m_dependents(dependents) {
         }
 
         template <class Vertex, class Graph>
@@ -49,14 +49,14 @@ namespace gen {
 
     std::set<std::string> DependencyGraph::getDependents(const std::string& function) {
         std::set<std::string> result;
-        dependents_visitor    vis(result);
+        DependentsVisitor     vis(result);
         ColorMap              colorMap(num_vertices(m_graph), boost::white_color);
         breadth_first_visit(m_graph, getVertexByName(function), boost::visitor(vis).color_map(&colorMap[0]));
         return result;
     }
 
-    struct cycle_detector : public boost::dfs_visitor<> {
-        explicit cycle_detector(bool& has_cycle) : m_hasCycle(has_cycle) {
+    struct CycleDetector : public boost::dfs_visitor<> {
+        explicit CycleDetector(bool& hasCycle) : m_hasCycle(hasCycle) {
         }
 
         template <class Edge, class Graph>
@@ -68,10 +68,10 @@ namespace gen {
     };
 
     bool DependencyGraph::hasCircularDependency(const std::string& function) {
-        const auto     reversed = boost::reverse_graph<Graph, Graph&>(m_graph);
-        bool           hasCycle = false;
-        cycle_detector vis(hasCycle);
-        ColorMap       colorMap(num_vertices(m_graph), boost::white_color);
+        const auto    reversed = boost::reverse_graph<Graph, Graph&>(m_graph);
+        bool          hasCycle = false;
+        CycleDetector vis(hasCycle);
+        ColorMap      colorMap(num_vertices(m_graph), boost::white_color);
         depth_first_visit(reversed, getVertexByName(function), vis, &colorMap[0]);
         return hasCycle;
     }

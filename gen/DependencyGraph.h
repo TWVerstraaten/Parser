@@ -7,20 +7,18 @@
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/properties.hpp>
-#include <set>
 #include <string>
 
 namespace gen {
 
     class DependencyGraph {
-        typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS, boost::property<boost::vertex_name_t, std::string>>
-            Graph;
+        typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS, boost::property<boost::vertex_name_t, std::string>> Graph;
 
         typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
 
       public:
         void addVertex(const std::string& vertexName);
-        void addDependsOn(const std::string& dependent, const std::string& function);
+        void addDependsOn(const std::string& function, const std::string& dependsOn);
         void write() const;
 
         [[nodiscard]] size_t edgeCount() const;

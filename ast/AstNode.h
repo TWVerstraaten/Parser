@@ -76,5 +76,5 @@ namespace ast {
 
         static bool compare_u_ptr(const u_ptr_AstNode& lhs, const u_ptr_AstNode& rhs);
     };
-} // namespace ast
+} // namespace originalAst
 #endif // PARSER_ASTNODE_H

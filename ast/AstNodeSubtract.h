@@ -34,6 +34,6 @@ namespace ast {
         u_ptr_AstNode m_leftNode;
         u_ptr_AstNode m_rightNode;
     };
-} // namespace ast
+} // namespace originalAst
 
 #endif // PARSER_ASTNODESUBTRACT_H

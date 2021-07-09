@@ -27,6 +27,6 @@ namespace ast {
         [[nodiscard]] std::unique_ptr<AstNodeMul> simplifiedCopy() const;
         [[nodiscard]] u_ptr_AstNode               distributeMultiplication() const;
     };
-} // namespace ast
+} // namespace originalAst
 
 #endif // PARSER_ASTNODEMUL_H

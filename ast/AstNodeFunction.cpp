@@ -20,7 +20,7 @@ namespace ast {
     AstNodeFunction::AstNodeFunction(std::string functionName, std::vector<u_ptr_AstNode>&& arguments)
         : m_functionName(std::move(functionName)), m_arguments(std::move(arguments)) {
 
-        assert(m_functionName == alg::StringAlg::trim(m_functionName));
+        assert(m_functionName == alg::StringAlg::S_TRIM(m_functionName));
 
         if (fml::ReservedIdentifiers::isReservedFunctionName(m_functionName)) {
             const size_t expectedArgumentCount = fml::ReservedIdentifiers::argumentCountOfReservedFunction(m_functionName);
@@ -172,4 +172,4 @@ namespace ast {
         }
         return result;
     }
-} // namespace ast
+} // namespace originalAst

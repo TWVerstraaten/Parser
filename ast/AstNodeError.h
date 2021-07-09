@@ -34,6 +34,6 @@ namespace ast {
       private:
         ERROR_TYPE m_errorType = ERROR_TYPE::DEFAULT;
     };
-} // namespace ast
+} // namespace originalAst
 
 #endif // PARSER_ASTNODEERROR_H

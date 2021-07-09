@@ -51,7 +51,7 @@ namespace ast {
     }
 
     bool AstNode::isEven() const {
-        std::cout << "Implement isEven in ast.cpp\n";
+        std::cout << "Implement isEven in originalAst.cpp\n";
         return false;
     }
 
@@ -147,4 +147,4 @@ namespace ast {
     u_ptr_AstNode AstNode::makeError() {
         return u_ptr_AstNode(new AstNodeError());
     }
-} // namespace ast
+} // namespace originalAst

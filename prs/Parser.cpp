@@ -8,7 +8,7 @@
 #include "StructuralTokenizer.h"
 #include "Tokenizer.h"
 
-std::optional<AstToken> Parser::parse(const std::string& string, ParserInfo& info) {
+std::optional<AstToken> Parser::S_PARSE(const std::string& string, ParserInfo& info) {
     try {
         Tokenizer tokenizer(string, info);
         if (info.success()) {

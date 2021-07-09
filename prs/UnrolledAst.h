@@ -15,6 +15,9 @@ class UnrolledAst {
   public:
     explicit UnrolledAst(const Ast& ast);
 
+    void setVariableInPlace(const std::string& variable, const gen::Number& number);
+    void setVariablesInPlace(const std::map<std::string, gen::Number>& variableMap);
+
     [[nodiscard]] UnrolledAstToken setVariable(const std::string& variable, const gen::Number& number) const;
     [[nodiscard]] UnrolledAstToken setVariables(const std::map<std::string, gen::Number>& variableMap) const;
 

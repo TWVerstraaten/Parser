@@ -75,4 +75,4 @@ namespace ast {
         result.merge(m_leftNode->functionDependencies());
         return result;
     }
-} // namespace ast
+} // namespace originalAst

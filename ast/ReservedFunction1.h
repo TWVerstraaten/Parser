@@ -28,6 +28,6 @@ namespace ast {
         const std::function<gen::Number(const gen::Number&)> m_function;
     };
 
-} // namespace ast
+} // namespace originalAst
 
 #endif // PARSER_RESERVEDFUNCTION1_H

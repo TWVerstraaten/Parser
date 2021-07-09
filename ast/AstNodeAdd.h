@@ -29,6 +29,6 @@ namespace ast {
 
         [[nodiscard]] std::unique_ptr<AstNodeAdd> simplifiedCopy() const;
     };
-} // namespace ast
+} // namespace originalAst
 
 #endif // PARSER_ASTNODEADD_H

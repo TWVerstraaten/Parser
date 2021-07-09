@@ -76,4 +76,4 @@ namespace ast {
     std::set<fml::FunctionSignature> AstNodeNumber::functionDependencies() const {
         return std::set<fml::FunctionSignature>{};
     }
-} // namespace ast
+} // namespace originalAst

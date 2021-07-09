@@ -1,48 +1,69 @@
-//#include "app/CentralWidget.h"
-//#include "gen/DependencyGraph.h"
-//
-//#include <QApplication>
+#include "app/CentralWidget.h"
+#include "prs/AstManager.h"
 
-#include "gen/defines.h"
-#include "prs/Ast.h"
-#include "prs/Parser.h"
-#include "prs/ReservedFunction.h"
-
+#include <QApplication>
 #include <iostream>
 
 int main(int argc, char* argv[]) {
-    Ast ast("(sin(-atan2(x,y)))");
+    {
+        Ast a1{"f(y)=a*x^(b*c*x) + b"};
+        std::cout << a1.toStringFlat() << "\t csts:\t";
+        for (const auto& el : a1.constantDependencies()) {
+            std::cout << el << "\t";
+        }
+        std::cout << "\n\n";
+    }
+    {
+        Ast a1{"f=z + b"};
+        std::cout << a1.toStringFlat() << "\t csts:\t";
+        for (const auto& el : a1.constantDependencies()) {
+            std::cout << el << "\t";
+        }
+        std::cout << "\n\n";
+    }
+    {
+        Ast a1{"a +x+ b"};
+        std::cout << a1.toStringFlat() << "\t csts:\t";
+        for (const auto& el : a1.constantDependencies()) {
+            std::cout << el << "\t";
+        }
+        std::cout << "\n\n";
+    }
+    {
+        Ast a1{"(y,z)=a +x+ b"};
+        std::cout << a1.toStringFlat() << "\t csts:\t";
+        for (const auto& el : a1.constantDependencies()) {
+            std::cout << el << "\t";
+        }
+        std::cout << "\n\n";
+    }
+    {
+        Ast a1{"z=a +x+ b"};
+        std::cout << a1.toStringFlat() << "\t csts:\t";
+        for (const auto& el : a1.constantDependencies()) {
+            std::cout << el << "\t";
+        }
+        std::cout << "\n\n";
+    }
+    {
+        Ast a1{"k=a +x+ b"};
+        std::cout << a1.toStringFlat() << "\t csts:\t";
+        for (const auto& el : a1.constantDependencies()) {
+            std::cout << el << "\t";
+        }
+        std::cout << "\n\n";
+    }
 
-    //    gen::DependencyGraph g;
+    //    AstManager m;
     //
-    //    g.addDependsOn("f", "h");
-    //    g.addDependsOn("f", "g");
-    //    g.addDependsOn("h", "t");
-    //    g.addDependsOn("h", "g");
-    //    g.addDependsOn("g", "t");
-    //    g.addDependsOn("h", "k");
-    //    g.addDependsOn("t", "f");
-    //    g.write();
-    //    const auto dep = g.getDependents("k");
-    //    for (const auto& el : dep) {
-    //        std::cout << el << "\t";
-    //    }
-    //    std::cout << "\n";
-    //    std::cout << "Circular?\t" << g.hasCircularDependency("k") << '\n';
-    //    std::cout << "Circular?\t" << g.hasCircularDependency("t") << '\n';
-    //    std::cout << "Circular?\t" << g.hasCircularDependency("f") << '\n';
-    //    std::cout << "Circular?\t" << g.hasCircularDependency("g") << '\n';
-    //    std::cout << "Circular?\t" << g.hasCircularDependency("h") << '\n';
+    //    m.add(0, Ast{"h(x) = tan(x)"});
+    //    m.add(1, Ast{"f(x,y) = sin(2 * h(x))"});
+    //    m.add(2, Ast{"2 * h(x+y)"});
     //
-    //    std::cout << g.edgeCount() << '\n';
-    //    g.addDependsOn("k", "k");
-    //    g.addDependsOn("k", "k");
-    //    g.addDependsOn("k", "k");
-    //    g.addDependsOn("k", "k");
-    //    std::cout << g.edgeCount() << '\n';
+    //    std::cout << m.toString() << '\n';
 
-    //    QApplication       a(argc, argv);
-    //    app::CentralWidget w;
-    //    w.show();
-    //    return a.exec();
+    //            QApplication       a(argc, argv);
+    //            app::CentralWidget w;
+    //            w.show();
+    //            return a.exec();
 }

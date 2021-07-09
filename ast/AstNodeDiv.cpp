@@ -86,4 +86,4 @@ namespace ast {
         result.merge(m_denominator->functionDependencies());
         return result;
     }
-} // namespace ast
+} // namespace originalAst

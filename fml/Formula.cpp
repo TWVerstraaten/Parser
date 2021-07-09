@@ -26,7 +26,7 @@ namespace fml {
         if (not m_success) {
             return;
         }
-        const auto parts = alg::StringAlg::trimAndSplit(m_string, "=");
+        const auto parts = alg::StringAlg::S_TRIM_AND_SPLIT(m_string, "=");
         if (setErrorIf(parts.size() == 1, "Does not contain '=' sign")) {
             return;
         }
@@ -72,7 +72,7 @@ namespace fml {
 
     bool Formula::checkForUndeclaredArguments() {
         const auto undeclared = undeclaredVariables();
-        if (setErrorIf(not undeclared.empty(), "Undeclared arguments: " + alg::StringAlg::concatenateStrings(undeclared))) {
+        if (setErrorIf(not undeclared.empty(), "Undeclared arguments: " + alg::StringAlg::S_CONCATENATE_STRINGS(undeclared))) {
             return true;
         }
         return false;
@@ -124,7 +124,7 @@ namespace fml {
 
     std::string Formula::getHints() const {
         const auto unused = unusedVariables();
-        return unused.empty() ? "" : "Unused variables: " + alg::StringAlg::concatenateStrings(unused);
+        return unused.empty() ? "" : "Unused variables: " + alg::StringAlg::S_CONCATENATE_STRINGS(unused);
     }
 
     gen::Number Formula::eval(const std::map<std::string, gen::Number>& arguments) const {
@@ -137,7 +137,7 @@ namespace fml {
 
     std::string Formula::toProcessedString() const {
         std::string result;
-        result += m_formulaHeader->name() + ": " + alg::StringAlg::concatenateStrings(m_formulaHeader->variables()) + "\n";
+        result += m_formulaHeader->name() + ": " + alg::StringAlg::S_CONCATENATE_STRINGS(m_formulaHeader->variables()) + "\n";
         result += m_ast->toString() + "\n";
 
         return result;

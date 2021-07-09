@@ -33,6 +33,6 @@ namespace ast {
         u_ptr_AstNode m_base;
         u_ptr_AstNode m_exponent;
     };
-} // namespace ast
+} // namespace originalAst
 
 #endif // PARSER_ASTNODEPOWER_H

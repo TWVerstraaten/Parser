@@ -145,4 +145,4 @@ namespace ast {
         }
         return result;
     }
-} // namespace ast
+} // namespace originalAst

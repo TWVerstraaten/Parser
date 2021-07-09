@@ -31,6 +31,6 @@ namespace ast {
         u_ptr_AstNode m_numerator;
         u_ptr_AstNode m_denominator;
     };
-} // namespace ast
+} // namespace originalAst
 
 #endif // PARSER_ASTNODEDIV_H

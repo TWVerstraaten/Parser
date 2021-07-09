@@ -24,6 +24,6 @@ namespace fml {
         size_t      m_argumentCount;
     };
 
-} // namespace ast
+} // namespace originalAst
 
 #endif // PARSER_FUNCTIONSIGNATURE_H

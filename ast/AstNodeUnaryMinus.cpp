@@ -71,4 +71,4 @@ namespace ast {
     std::set<fml::FunctionSignature> AstNodeUnaryMinus::functionDependencies() const {
         return m_value->functionDependencies();
     }
-} // namespace ast
+} // namespace originalAst

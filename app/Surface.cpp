@@ -54,7 +54,7 @@ namespace app {
                 valueMap.insert({*variables.begin(), gen::Number(x)});
                 valueMap.insert({*std::next(variables.begin()), gen::Number(y)});
 
-                vertices.push_back({{x, y, formula.eval(valueMap).toFloat()}, {0.3, 0.4, 0.8}});
+                vertices.push_back({{x, y, static_cast<float>(formula.eval(valueMap).toDouble())}, {0.3, 0.4, 0.8}});
             }
         }
 

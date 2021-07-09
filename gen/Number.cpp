@@ -33,6 +33,10 @@ namespace gen {
         m_number = value;
     }
 
+    Number::Number(int value) {
+        m_number = static_cast<long long>(value);
+    }
+
     Number::Number(double value) {
         m_number = value;
     }
@@ -97,20 +101,28 @@ namespace gen {
         if (std::holds_alternative<long long>(a.number()) && std::holds_alternative<long long>(b.number())) {
             long long base     = std::get<long long>(a.number());
             long long exponent = std::get<long long>(b.number());
-            if ((exponent < std::numeric_limits<long long>::digits) &&
-                (exponent * std::log2(base) - 1 < std::numeric_limits<long long>::digits)) {
+            if ((exponent < std::numeric_limits<long long>::digits) && (exponent * std::log2(base) - 1 < std::numeric_limits<long long>::digits)) {
                 return Number{power(base, exponent)};
             }
         }
-        return std::visit([](const auto& a, const auto& b) { return Number(std::pow(static_cast<double>(a), static_cast<double>(b))); },
-                          a.m_number, b.m_number);
+        return std::visit([](const auto& a, const auto& b) { return Number(std::pow(static_cast<double>(a), static_cast<double>(b))); }, a.m_number, b.m_number);
     }
 
     Number operator-(const Number& a) {
         return a.negate();
     }
 
-    float Number::toFloat() const {
+    double Number::toDouble() const {
         return std::visit([](const auto& a) { return static_cast<float>(a); }, m_number);
     }
+
+    bool Number::holdsLongLong() const {
+        return std::holds_alternative<long long>(m_number);
+    }
+
+    long long Number::toLongLong() const {
+        assert(holdsLongLong());
+        return std::get<long long>(m_number);
+    }
+
 } // namespace gen

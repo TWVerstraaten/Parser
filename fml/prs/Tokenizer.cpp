@@ -24,7 +24,7 @@ namespace fml::prs {
     }
 
     Tokenizer::Tokenizer(const std::string& string) {
-        auto                        trimmedString = alg::StringAlg::trim(string);
+        auto                        trimmedString = alg::StringAlg::S_TRIM(string);
         bool                        minusIsUnary  = true;
         std::string::const_iterator it            = trimmedString.cbegin();
 
