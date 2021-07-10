@@ -10,12 +10,13 @@
 #include <list>
 #include <string>
 
-class ParserInfo;
+namespace err {
+    class ParserInfo;
+}
 
 class Tokenizer {
-
   public:
-    Tokenizer(std::string string, ParserInfo& info);
+    Tokenizer(std::string string, err::ParserInfo& info);
 
     [[nodiscard]] std::string             toString() const;
     [[nodiscard]] const std::list<Token>& tokenList() const;
@@ -32,7 +33,7 @@ class Tokenizer {
 
     const std::string m_string;
     std::list<Token>  m_tokenList;
-    ParserInfo&       m_info;
+    err::ParserInfo&  m_info;
 };
 
 #endif // PRS_TOKENIZER_H

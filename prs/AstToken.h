@@ -17,7 +17,9 @@
 #include <variant>
 #include <vector>
 
-class ParserInfo;
+namespace err {
+    class ParserInfo;
+}
 
 class AstToken {
 
@@ -31,14 +33,14 @@ class AstToken {
     typedef std::list<TempToken>                                                                                                             TempTokenList;
 
     AstToken() = default;
-    explicit AstToken(const std::list<StructuralToken>& structuralTokens, ParserInfo& info);
-    AstToken(const StructuralToken::Bracketed& bracketed, Range range, ParserInfo& info);
-    AstToken(const StructuralToken::Function& function, Range range, ParserInfo& info);
-    AstToken(const std::string& string, Range range, ParserInfo& info);
-    AstToken(long long value, Range range, ParserInfo& info);
-    AstToken(double value, Range range, ParserInfo& info);
-    AstToken(OPERATOR_TYPE type, AstToken astToken, Range range, ParserInfo& info);
-    AstToken(OPERATOR_TYPE type, AstToken left, AstToken right, Range range, ParserInfo& info);
+    explicit AstToken(const std::list<StructuralToken>& structuralTokens, err::ParserInfo& info);
+    AstToken(const StructuralToken::Bracketed& bracketed, Range range, err::ParserInfo& info);
+    AstToken(const StructuralToken::Function& function, Range range, err::ParserInfo& info);
+    AstToken(const std::string& string, Range range, err::ParserInfo& info);
+    AstToken(long long value, Range range, err::ParserInfo& info);
+    AstToken(double value, Range range, err::ParserInfo& info);
+    AstToken(OPERATOR_TYPE type, AstToken astToken, Range range, err::ParserInfo& info);
+    AstToken(OPERATOR_TYPE type, AstToken left, AstToken right, Range range, err::ParserInfo& info);
 
     void replaceVariable(const std::string& variable, const AstToken& token);
     void replaceVariables(const std::map<std::string, AstToken>& variableMap);
@@ -55,7 +57,7 @@ class AstToken {
     [[nodiscard]] std::string                   toStringFlat() const;
 
   private:
-    void maybeCastToReservedFunction(ParserInfo& info);
+    void maybeCastToReservedFunction(err::ParserInfo& info);
 
     AstTokenVariant       m_token = {Error{}};
     std::vector<AstToken> m_children;

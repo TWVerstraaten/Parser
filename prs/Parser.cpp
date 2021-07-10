@@ -4,11 +4,11 @@
 
 #include "Parser.h"
 
-#include "ParserInfo.h"
 #include "StructuralTokenizer.h"
 #include "Tokenizer.h"
+#include "err/ParserInfo.h"
 
-std::optional<AstToken> Parser::S_PARSE(const std::string& string, ParserInfo& info) {
+std::optional<AstToken> Parser::S_PARSE(const std::string& string, err::ParserInfo& info) {
     try {
         Tokenizer tokenizer(string, info);
         if (info.success()) {

@@ -6,13 +6,13 @@
 
 #include "../gen/Overloaded.h"
 #include "../gen/defines.h"
-#include "ParserInfo.h"
+#include "err/ParserInfo.h"
 
 #include <algorithm>
 #include <cassert>
 #include <sstream>
 
-StructuralTokenizer::StructuralTokenizer(const std::list<Token>& rawTokenList, ParserInfo& info) : m_info(info) {
+StructuralTokenizer::StructuralTokenizer(const std::list<Token>& rawTokenList, err::ParserInfo& info) : m_info(info) {
     if (not m_info.success()) {
         return;
     }
@@ -37,11 +37,11 @@ StructuralTokenizer::StructuralTokenizer(const std::list<Token>& rawTokenList, P
 }
 
 void StructuralTokenizer::addStringTokenToStructuralTokens(const Token& token) {
-    const auto parsedIdentifier = parseIdentifierToken(token);
+    const auto parsedIdentifier = S_PARSE_IDENTIFIER_TOKEN(token);
     if (parsedIdentifier.has_value()) {
         m_tokenList.emplace_back(StructuralToken{parsedIdentifier.value(), token.range()});
     } else {
-        m_info.addError(ParserError{ParserError::TYPE::IDENTIFIER_ERROR, token.string(), token.range()});
+        m_info.addError(err::ParserError{err::ParserError::TYPE::IDENTIFIER_ERROR, token.string(), token.range()});
     }
 }
 
@@ -63,15 +63,15 @@ void StructuralTokenizer::extractFunctionsAndBracketsFromStructuralTokens() {
 }
 
 void StructuralTokenizer::addNumberTokenToStructuralTokens(const Token& token) {
-    const auto parsedNumber = parseNumberToken(token);
+    const auto parsedNumber = S_PARSE_NUMBER_TOKEN(token);
     if (parsedNumber.has_value()) {
         std::visit([&](auto a) { m_tokenList.emplace_back(StructuralToken{a, token.range()}); }, parsedNumber.value());
     } else {
-        m_info.addError(ParserError{ParserError::TYPE::NUMBER_ERROR, token.string(), token.range()});
+        m_info.addError(err::ParserError{err::ParserError::TYPE::NUMBER_ERROR, token.string(), token.range()});
     }
 }
 
-std::optional<std::string> StructuralTokenizer::parseIdentifierToken(const Token& token) {
+std::optional<std::string> StructuralTokenizer::S_PARSE_IDENTIFIER_TOKEN(const Token& token) {
     assert(token.type() == Token::TYPE::IDENTIFIER);
     const auto& string = token.string();
     if (string.empty() || not isalpha(string.front()) || std::find_if(TT_IT(string), TT_LAMBDA(a, return not(isalnum(a));)) != string.end()) {
@@ -80,7 +80,7 @@ std::optional<std::string> StructuralTokenizer::parseIdentifierToken(const Token
     return string;
 }
 
-std::optional<std::variant<double, long long>> StructuralTokenizer::parseNumberToken(const Token& token) {
+std::optional<std::variant<double, long long>> StructuralTokenizer::S_PARSE_NUMBER_TOKEN(const Token& token) {
     assert(token.type() == Token::TYPE::NUMBER);
     const auto&  string   = token.string();
     const size_t dotCount = std::count_if(TT_IT(string), TT_LAMBDA(a, return a == '.';));
@@ -93,7 +93,7 @@ std::optional<std::variant<double, long long>> StructuralTokenizer::parseNumberT
     } catch (...) { return {}; }
 }
 
-std::string StructuralTokenizer::toString(const std::list<StructuralToken>& structuralTokenList) {
+std::string StructuralTokenizer::S_TO_STRING(const std::list<StructuralToken>& structuralTokenList) {
     std::stringstream ss;
     for (const auto& token : structuralTokenList) {
         ss << token.toString();
@@ -103,7 +103,7 @@ std::string StructuralTokenizer::toString(const std::list<StructuralToken>& stru
 }
 
 std::string StructuralTokenizer::toString() const {
-    return toString(m_tokenList);
+    return S_TO_STRING(m_tokenList);
 }
 
 const std::list<StructuralToken>& StructuralTokenizer::tokenList() const {
@@ -116,7 +116,7 @@ void StructuralTokenizer::insertMultiplicationWhereNeeded(std::list<StructuralTo
     }
     for (auto it = structuralTokens.begin(); it != structuralTokens.end(); ++it) {
         if (std::next(it) != structuralTokens.end() && not(std::holds_alternative<Token>((*it).token()) || std::holds_alternative<Token>((*std::next(it)).token()))) {
-            m_info.addMessage({ParserMessage::TYPE::INSERT_MULTIPLICATION, "", {it->range().endIndex() + 1, it->range().endIndex() + 1}});
+            m_info.addMessage({err::ParserMessage::TYPE::INSERT_MULTIPLICATION, "", {it->range().endIndex() + 1, it->range().endIndex() + 1}});
             it = structuralTokens.insert(std::next(it), StructuralToken{Token{Token::TYPE::TIMES, "* (inferred)", {}}});
         }
         std::visit(

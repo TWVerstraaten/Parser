@@ -26,7 +26,7 @@ bool Ast::success() const {
     return (not std::holds_alternative<AstToken::Error>(m_rootNode.token())) && m_info.success();
 }
 
-const ParserInfo& Ast::info() const {
+const err::ParserInfo& Ast::info() const {
     return m_info;
 }
 

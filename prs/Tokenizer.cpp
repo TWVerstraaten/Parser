@@ -5,14 +5,14 @@
 #include "Tokenizer.h"
 
 #include "../gen/defines.h"
-#include "ParserInfo.h"
+#include "err/ParserInfo.h"
 
 #include <algorithm>
 #include <map>
 #include <set>
 #include <sstream>
 
-Tokenizer::Tokenizer(std::string string, ParserInfo& info) : m_string(std::move(string)), m_info(info) {
+Tokenizer::Tokenizer(std::string string, err::ParserInfo& info) : m_string(std::move(string)), m_info(info) {
     findIllegalCharacters();
     tokenize();
     if (not m_info.success()) {
@@ -31,11 +31,11 @@ const std::list<Token>& Tokenizer::tokenList() const {
 }
 
 void Tokenizer::findIllegalCharacters() {
-    static const std::string allowedSpecialCharacters = ".,()+-*/^=\t ";
+    static const std::string ALLOWED_SPECIAL_CHARACTERS = ".,()+-*/^=\t ";
     for (size_t i = 0; i != m_string.size(); ++i) {
         const char c = m_string.at(i);
-        if (not isalnum(c) && allowedSpecialCharacters.find_first_of(c) == std::string::npos) {
-            m_info.addError({ParserError::TYPE::ILLEGAL_CHARACTER, std::string(1, c), {i, i}});
+        if (not isalnum(c) && ALLOWED_SPECIAL_CHARACTERS.find_first_of(c) == std::string::npos) {
+            m_info.addError({err::ParserError::TYPE::ILLEGAL_CHARACTER, std::string(1, c), {i, i}});
         }
     }
 }
@@ -91,7 +91,7 @@ void Tokenizer::tokenize() {
                     i = j - 1;
                 } else {
                     if (not isspace(c)) {
-                        m_info.addError({ParserError::TYPE::GENERIC, std::string(1, c), {i, i}});
+                        m_info.addError({err::ParserError::TYPE::GENERIC, std::string(1, c), {i, i}});
                     }
                 }
                 break;
@@ -134,7 +134,7 @@ void Tokenizer::checkBrackets() {
             ++bracketDepth;
         } else if (token.type() == Token::TYPE::RIGHT_BR) {
             if (bracketDepth == 0) {
-                m_info.addError({ParserError::TYPE::UNMATCHED_CLOSING_BR, "", token.range()});
+                m_info.addError({err::ParserError::TYPE::UNMATCHED_CLOSING_BR, "", token.range()});
                 return;
             }
             --bracketDepth;
@@ -146,7 +146,7 @@ void Tokenizer::checkBrackets() {
             ++bracketDepth;
         } else if (it->type() == Token::TYPE::LEFT_BR) {
             if (bracketDepth == 0) {
-                m_info.addError({ParserError::TYPE::UNMATCHED_OPEN_BR, "", it->range()});
+                m_info.addError({err::ParserError::TYPE::UNMATCHED_OPEN_BR, "", it->range()});
                 return;
             }
             --bracketDepth;
@@ -158,7 +158,7 @@ void Tokenizer::checkDoubleEquals() {
     if (auto it = std::find_if(TT_IT(m_tokenList), TT_LAMBDA(a, return a.type() == Token::TYPE::EQUALS;)); it == m_tokenList.end()) {
         return;
     } else if (it = std::find_if(std::next(it), m_tokenList.end(), TT_LAMBDA(a, return a.type() == Token::TYPE::EQUALS;)); it != m_tokenList.end()) {
-        m_info.addError({ParserError::TYPE::TOO_MANY_EQUALS, "", it->range()});
+        m_info.addError({err::ParserError::TYPE::TOO_MANY_EQUALS, "", it->range()});
     }
 }
 
@@ -167,17 +167,17 @@ void Tokenizer::checkRepeatedOperators() {
         return;
     }
     using T = Token::TYPE;
-    static const std::set<T> operatorTypes{T::POWER, T::PLUS, T::MINUS, T::TIMES, T::DIVIDE, T::UNARY_MINUS};
-    static const std::set<T> requiredAfterOperators{T::IDENTIFIER, T::NUMBER, Token::TYPE::LEFT_BR};
+    static const std::set<T> OPERATOR_TYPES{T::POWER, T::PLUS, T::MINUS, T::TIMES, T::DIVIDE, T::UNARY_MINUS};
+    static const std::set<T> REQUIRED_AFTER_OPERATORS{T::IDENTIFIER, T::NUMBER, Token::TYPE::LEFT_BR};
 
     for (auto it = m_tokenList.begin(); it != m_tokenList.end(); ++it) {
-        if (operatorTypes.find(it->type()) != operatorTypes.end()) {
+        if (OPERATOR_TYPES.find(it->type()) != OPERATOR_TYPES.end()) {
             if (std::next(it) == m_tokenList.end()) {
-                m_info.addError({ParserError::TYPE::UNFINISHED, it->string(), it->range()});
+                m_info.addError({err::ParserError::TYPE::UNFINISHED, it->string(), it->range()});
             }
             auto next = std::next(it);
-            if (requiredAfterOperators.find(next->type()) == requiredAfterOperators.end()) {
-                m_info.addError({ParserError::TYPE::ILLEGAL_SEQUENCE, it->string() + " " + next->string(), {it->range().startIndex(), next->range().endIndex()}});
+            if (REQUIRED_AFTER_OPERATORS.find(next->type()) == REQUIRED_AFTER_OPERATORS.end()) {
+                m_info.addError({err::ParserError::TYPE::ILLEGAL_SEQUENCE, it->string() + " " + next->string(), {it->range().startIndex(), next->range().endIndex()}});
             }
         }
     }
@@ -189,7 +189,7 @@ void Tokenizer::checkRepeatedCommas() {
     }
     for (auto it = m_tokenList.begin(); std::next(it) != m_tokenList.end(); ++it) {
         if (it->type() == Token::TYPE::COMMA && std::next(it)->type() == Token::TYPE::COMMA) {
-            m_info.addError({ParserError::TYPE::ILLEGAL_SEQUENCE, ", ,", {it->range().startIndex(), std::next(it)->range().endIndex()}});
+            m_info.addError({err::ParserError::TYPE::ILLEGAL_SEQUENCE, ", ,", {it->range().startIndex(), std::next(it)->range().endIndex()}});
         }
     }
 }
@@ -203,7 +203,7 @@ void Tokenizer::checkIdentifierNumberPatternWithNoSpace() {
         if (it->type() == Token::TYPE::IDENTIFIER && next->type() == Token::TYPE::NUMBER) {
             if (it->range().endIndex() + 1 == next->range().startIndex()) {
                 m_info.addWarning(
-                    {ParserWarning::TYPE::SUSPICIOUS_IDENTIFIER_NUM_PATTERN, it->string() + "*" + next->toString(), {it->range().startIndex(), next->range().endIndex()}});
+                    {err::ParserWarning::TYPE::SUSPICIOUS_IDENTIFIER_NUM_PATTERN, it->string() + "*" + next->toString(), {it->range().startIndex(), next->range().endIndex()}});
             }
         }
     }

@@ -7,8 +7,8 @@
 #include "../alg/StringAlg.h"
 #include "../gen/Overloaded.h"
 #include "../gen/defines.h"
-#include "ParserInfo.h"
 #include "TokenWriter.h"
+#include "err/ParserInfo.h"
 
 #include <algorithm>
 #include <cassert>
@@ -18,7 +18,7 @@
     return std::find_if(it, tempTokens.end(), [&](const auto& a) { return std::holds_alternative<Token>(a) && (types.find(std::get<Token>(a).type()) != types.end()); });
 }
 
-static void S_REPLACE_UNARY_MINUSES(AstToken::TempTokenList& tempTokens, ParserInfo& info) {
+static void S_REPLACE_UNARY_MINUSES(AstToken::TempTokenList& tempTokens, err::ParserInfo& info) {
     static const std::set<Token::TYPE> s{Token::TYPE::UNARY_MINUS};
     for (auto it = S_TOKEN_IT(tempTokens, tempTokens.begin(), s); it != tempTokens.end(); it = S_TOKEN_IT(tempTokens, std::next(it), s)) {
         assert(std::holds_alternative<Token>(*it));
@@ -32,7 +32,7 @@ static void S_REPLACE_UNARY_MINUSES(AstToken::TempTokenList& tempTokens, ParserI
     }
 }
 
-static void S_REPLACE_POWERS(AstToken::TempTokenList& tempTokens, ParserInfo& info) {
+static void S_REPLACE_POWERS(AstToken::TempTokenList& tempTokens, err::ParserInfo& info) {
     static const std::set<Token::TYPE> s{Token::TYPE::POWER};
     for (auto it = S_TOKEN_IT(tempTokens, tempTokens.begin(), s); it != tempTokens.end(); it = S_TOKEN_IT(tempTokens, it, s)) {
         assert(std::holds_alternative<Token>(*it));
@@ -46,7 +46,7 @@ static void S_REPLACE_POWERS(AstToken::TempTokenList& tempTokens, ParserInfo& in
     }
 }
 
-static void S_REPLACE_TIMES_DIVIDE(AstToken::TempTokenList& tempTokens, ParserInfo& info) {
+static void S_REPLACE_TIMES_DIVIDE(AstToken::TempTokenList& tempTokens, err::ParserInfo& info) {
     static const std::set<Token::TYPE> s{Token::TYPE::TIMES, Token::TYPE::DIVIDE};
     for (auto it = S_TOKEN_IT(tempTokens, tempTokens.begin(), s); it != tempTokens.end(); it = S_TOKEN_IT(tempTokens, it, s)) {
         assert(std::holds_alternative<Token>(*it));
@@ -61,7 +61,7 @@ static void S_REPLACE_TIMES_DIVIDE(AstToken::TempTokenList& tempTokens, ParserIn
     }
 }
 
-static void S_REPLACE_PLUS_MINUS(AstToken::TempTokenList& tempTokens, ParserInfo& info) {
+static void S_REPLACE_PLUS_MINUS(AstToken::TempTokenList& tempTokens, err::ParserInfo& info) {
     static const std::set<Token::TYPE> s{Token::TYPE::PLUS, Token::TYPE::MINUS};
     for (auto it = S_TOKEN_IT(tempTokens, tempTokens.begin(), s); it != tempTokens.end(); it = S_TOKEN_IT(tempTokens, it, s)) {
         assert(std::holds_alternative<Token>(*it));
@@ -96,7 +96,7 @@ static std::string S_OPERATOR_TYPE_TO_STRING(AstToken::OPERATOR_TYPE type) {
     assert(false);
 }
 
-AstToken::AstToken(const std::list<StructuralToken>& structuralTokens, ParserInfo& info) {
+AstToken::AstToken(const std::list<StructuralToken>& structuralTokens, err::ParserInfo& info) {
     if (structuralTokens.empty()) {
         m_range = Range{};
         m_token = Empty{};
@@ -121,7 +121,7 @@ AstToken::AstToken(const std::list<StructuralToken>& structuralTokens, ParserInf
     S_REPLACE_PLUS_MINUS(tempTokens, info);
 
     if (tempTokens.size() > 1) {
-        info.addError(ParserError{ParserError::TYPE::GENERIC, std::string("More than one token left at AstToken? ") + TT_WHERE_STRING});
+        info.addError(err::ParserError{err::ParserError::TYPE::GENERIC, std::string("More than one token left at AstToken? ") + TT_WHERE_STRING});
     }
     assert(not tempTokens.empty());
     assert(std::holds_alternative<AstToken>(tempTokens.front()));
@@ -129,7 +129,7 @@ AstToken::AstToken(const std::list<StructuralToken>& structuralTokens, ParserInf
     m_token    = std::get<AstToken>(tempTokens.front()).m_token;
 }
 
-AstToken::AstToken(const StructuralToken::Bracketed& bracketed, Range range, ParserInfo& info) : m_token(VectorToken{bracketed.m_tokenLists.size()}), m_range(range) {
+AstToken::AstToken(const StructuralToken::Bracketed& bracketed, Range range, err::ParserInfo& info) : m_token(VectorToken{bracketed.m_tokenLists.size()}), m_range(range) {
     for (const auto& el : bracketed.m_tokenLists) {
         m_children.emplace_back(el, info);
     }
@@ -139,7 +139,7 @@ AstToken::AstToken(const StructuralToken::Bracketed& bracketed, Range range, Par
     }
 }
 
-AstToken::AstToken(const StructuralToken::Function& function, Range range, ParserInfo& info)
+AstToken::AstToken(const StructuralToken::Function& function, Range range, err::ParserInfo& info)
     : m_token(CustomFunctionToken{function.m_name, function.m_arguments.m_tokenLists.size()}), m_range(range) {
     for (const auto& el : function.m_arguments.m_tokenLists) {
         m_children.emplace_back(el, info);
@@ -151,30 +151,30 @@ AstToken::AstToken(const StructuralToken::Function& function, Range range, Parse
     maybeCastToReservedFunction(info);
 }
 
-AstToken::AstToken(const std::string& string, Range range, ParserInfo& info) : m_token(string), m_range(range) {
+AstToken::AstToken(const std::string& string, Range range, err::ParserInfo& info) : m_token(string), m_range(range) {
 }
 
-AstToken::AstToken(long long int value, Range range, ParserInfo& info) : m_token(value), m_range(range) {
+AstToken::AstToken(long long int value, Range range, err::ParserInfo& info) : m_token(value), m_range(range) {
 }
 
-AstToken::AstToken(double value, Range range, ParserInfo& info) : m_token(value), m_range(range) {
+AstToken::AstToken(double value, Range range, err::ParserInfo& info) : m_token(value), m_range(range) {
 }
 
-AstToken::AstToken(AstToken::OPERATOR_TYPE type, AstToken astToken, Range range, ParserInfo& info) : m_token(type), m_children({std::move(astToken)}), m_range(range) {
+AstToken::AstToken(AstToken::OPERATOR_TYPE type, AstToken astToken, Range range, err::ParserInfo& info) : m_token(type), m_children({std::move(astToken)}), m_range(range) {
 }
 
-AstToken::AstToken(AstToken::OPERATOR_TYPE type, AstToken left, AstToken right, Range range, ParserInfo& info)
+AstToken::AstToken(AstToken::OPERATOR_TYPE type, AstToken left, AstToken right, Range range, err::ParserInfo& info)
     : m_token(type), m_children({std::move(left), std::move(right)}), m_range(range) {
 }
 
-void AstToken::maybeCastToReservedFunction(ParserInfo& info) {
+void AstToken::maybeCastToReservedFunction(err::ParserInfo& info) {
     assert(std::holds_alternative<CustomFunctionToken>(m_token));
     if (auto reserved = rsrvd::S_GET_RESERVED(std::get<CustomFunctionToken>(m_token).name()); reserved.has_value()) {
         const auto val                   = reserved.value();
         const auto argumentCount         = std::get<CustomFunctionToken>(m_token).argumentCount();
         const auto requiredArgumentCount = S_GET_ARGUMENT_COUNT(val);
         if (requiredArgumentCount != argumentCount) {
-            info.addError({ParserError::TYPE::WRONG_ARGUMENT_COUNT_RESERVED,
+            info.addError({err::ParserError::TYPE::WRONG_ARGUMENT_COUNT_RESERVED,
                            S_GET_NAME(val) + " takes " + std::to_string(requiredArgumentCount) + " arguments, not " + std::to_string(argumentCount),
                            m_range});
         }

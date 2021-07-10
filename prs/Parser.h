@@ -9,12 +9,14 @@
 
 #include <string>
 
-class ParserInfo;
+namespace err {
+    class ParserInfo;
+}
 
 class Parser {
 
   public:
-    static std::optional<AstToken> S_PARSE(const std::string& string, ParserInfo& info);
+    static std::optional<AstToken> S_PARSE(const std::string& string, err::ParserInfo& info);
 };
 
 #endif // PRS_PARSER_H

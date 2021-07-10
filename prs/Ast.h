@@ -7,7 +7,7 @@
 
 #include "AstToken.h"
 #include "Header.h"
-#include "ParserInfo.h"
+#include "err/ParserInfo.h"
 
 class Ast {
 
@@ -22,7 +22,7 @@ class Ast {
     [[nodiscard]] CustomFunctionToken           getCustomFunctionToken() const;
     [[nodiscard]] bool                          success() const;
     [[nodiscard]] bool                          hasCustomDependencies() const;
-    [[nodiscard]] const ParserInfo&             info() const;
+    [[nodiscard]] const err::ParserInfo&        info() const;
     [[nodiscard]] const Header&                 header() const;
     [[nodiscard]] std::set<CustomFunctionToken> functionDependencies() const;
     [[nodiscard]] std::set<std::string>         constantDependencies() const;
@@ -38,7 +38,7 @@ class Ast {
     void checkAndSetHeader();
     void buildNonEmptyHeader();
 
-    ParserInfo                    m_info;
+    err::ParserInfo               m_info;
     bool                          m_headerWasSet = false;
     Header                        m_header;
     AstToken                      m_rootNode;

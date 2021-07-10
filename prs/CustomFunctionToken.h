@@ -8,7 +8,6 @@
 #include <string>
 
 class CustomFunctionToken {
-
     friend bool operator<(const CustomFunctionToken& left, const CustomFunctionToken& right);
 
   public:
@@ -18,7 +17,7 @@ class CustomFunctionToken {
     [[nodiscard]] const std::string& name() const;
     [[nodiscard]] size_t             argumentCount() const;
 
-    friend bool operator==(const CustomFunctionToken&r, const CustomFunctionToken& l);
+    friend bool operator==(const CustomFunctionToken& r, const CustomFunctionToken& l);
 
   private:
     std::string m_name;
