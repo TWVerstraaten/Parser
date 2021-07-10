@@ -32,7 +32,7 @@ class AstToken {
     typedef std::variant<AstToken, Token>                                                                                                    TempToken;
     typedef std::list<TempToken>                                                                                                             TempTokenList;
 
-    AstToken() = default;
+    AstToken();
     explicit AstToken(const std::list<StructuralToken>& structuralTokens, err::ParserInfo& info);
     AstToken(const StructuralToken::Bracketed& bracketed, Range range, err::ParserInfo& info);
     AstToken(const StructuralToken::Function& function, Range range, err::ParserInfo& info);

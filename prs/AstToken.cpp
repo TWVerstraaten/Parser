@@ -96,6 +96,8 @@ static std::string S_OPERATOR_TYPE_TO_STRING(AstToken::OPERATOR_TYPE type) {
     assert(false);
 }
 
+AstToken::AstToken() = default;
+
 AstToken::AstToken(const std::list<StructuralToken>& structuralTokens, err::ParserInfo& info) {
     if (structuralTokens.empty()) {
         m_range = Range{};
@@ -306,7 +308,6 @@ std::string AstToken::toStringFlat() const {
                                  }},
                       m_token);
 }
-
 std::set<std::string> AstToken::getUndeclaredVariables(const std::set<std::string>& declared) const {
     std::set<std::string> result;
     for (const auto& el : m_children) {
