@@ -5,9 +5,8 @@
 #include "FormulaChangedCommand.h"
 
 #include "../FormulaWidget.h"
+#include "../TextEdit.h"
 #include "../UndoRedoHandler.h"
-
-#include <QLineEdit>
 
 namespace app::cmd {
     FormulaChangedCommand::FormulaChangedCommand(app::FormulaWidget* formula, QString old, QString newString)
@@ -16,14 +15,14 @@ namespace app::cmd {
 
     void FormulaChangedCommand::undo() {
         UndoRedoHandler::setPushBlocked(true);
-        m_formula->lineEdit()->setText(m_old);
+        m_formula->textEdit()->setText(m_old);
         m_formula->processFormula();
         UndoRedoHandler::setPushBlocked(false);
     }
 
     void FormulaChangedCommand::redo() {
         UndoRedoHandler::setPushBlocked(true);
-        m_formula->lineEdit()->setText(m_new);
+        m_formula->textEdit()->setText(m_new);
         m_formula->processFormula();
         UndoRedoHandler::setPushBlocked(false);
     }

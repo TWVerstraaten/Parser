@@ -5,24 +5,22 @@
 #include "FormulaWidget.h"
 
 #include "../alg/StringAlg.h"
+#include "../ast/par/Parser.h"
+#include "TextEdit.h"
 #include "UndoRedoConsumer.h"
 #include "UndoRedoHandler.h"
 #include "cmd/FormulaChangedCommand.h"
 #include "cmd/SkipFirstRedoCommand.h"
 
 #include <QCheckBox>
+#include <QDebug>
 #include <QGridLayout>
 #include <QLabel>
-#include <QLineEdit>
 #include <QPushButton>
 #include <QToolTip>
+#include <iostream>
 
 namespace app {
-    static void setTextColor(QWidget* widget, const QColor& color) {
-        auto* palette = new QPalette();
-        palette->setColor(QPalette::Text, color);
-        widget->setPalette(*palette);
-    }
 
     FormulaWidget::FormulaWidget(QWidget* parent) : QWidget(parent), m_index(S_MAX_INDEX) {
         ++S_MAX_INDEX;
@@ -30,23 +28,32 @@ namespace app {
 
         initPointers();
         initButtons();
-
-        m_layout->addWidget(m_activeCheckBox, 0, 0);
-        m_layout->addWidget(m_lineEdit, 0, 1);
-        m_layout->addWidget(m_deleteButton, 0, 2);
-        m_layout->addWidget(m_errorMessageLabel, 1, 0, 1, 3);
-        m_layout->addWidget(m_collapseButton, 2, 0, 1, 3);
+        initTextEdit();
+        initLayout();
 
         connectSignals();
-        m_lineEdit->installEventFilter(UndoRedoConsumer::undoRedoConsumer());
+        m_textEdit->installEventFilter(UndoRedoConsumer::undoRedoConsumer());
 
         m_layout->setAlignment(Qt::AlignTop);
     }
 
     void FormulaWidget::processFormula() {
-        const auto string = m_lineEdit->text();
+        const auto string = m_textEdit->document()->toPlainText();
         UndoRedoHandler::push(new cmd::SkipFirstRedoCommand(new cmd::FormulaChangedCommand(this, m_oldFormula, string)));
         m_oldFormula = string;
+
+        m_textEdit->blockSignals(true);
+        QTextCursor     cursor(m_textEdit->document());
+        QTextCharFormat fmt;
+        cursor.setPosition(0, QTextCursor::MoveAnchor);
+        cursor.setPosition(string.length(), QTextCursor::KeepAnchor);
+        cursor.setCharFormat(fmt);
+        m_textEdit->blockSignals(false);
+
+        const auto           str = string.toStdString();
+        ast::err::ParserInfo info;
+        const auto           astOptional = ast::par::Parser::S_PARSE(str, info);
+        m_textEdit->setInfo(std::move(info));
 
         // TODO
         //        m_formula           = std::make_unique<fml::Formula>(string.toStdString());
@@ -56,7 +63,6 @@ namespace app {
     }
 
     void FormulaWidget::handleCorrectFormula() {
-        setTextColor(m_lineEdit, Qt::black);
         QToolTip::hideText();
 
         // TODO
@@ -72,10 +78,6 @@ namespace app {
     }
 
     void FormulaWidget::handleWrongFormula() {
-        setTextColor(m_lineEdit, Qt::red);
-        //        showToolTipAtLineEdit(16449536, QString::fromStdString(m_errorString));
-        m_errorMessageLabel->setText(QString::fromStdString(m_errorString));
-        m_errorMessageLabel->setStyleSheet("QLabel { color : rgb(251,0,0); }");
         update();
     }
 
@@ -83,61 +85,43 @@ namespace app {
         return m_index;
     }
 
-    void FormulaWidget::toggleOptionsView() {
-        if (m_optionsExpanded) {
-            for (int i = 2; i != 5; ++i) {
-                for (int j = 0; j != m_layout->rowCount(); ++j) {
-                    QLayoutItem* item = m_layout->itemAtPosition(i, j);
-                    if (item) {
-                        QWidget* widget = item->widget();
-                        widget->hide();
-                    }
-                }
-            }
-        } else {
-        }
-        m_optionsExpanded = !m_optionsExpanded;
-    }
-
     void FormulaWidget::initPointers() {
         m_layout         = new QGridLayout(this);
         m_activeCheckBox = new QCheckBox(this);
         m_activeCheckBox->setChecked(true);
-        m_lineEdit          = new QLineEdit(this);
-        m_deleteButton      = new QPushButton{this};
-        m_collapseButton    = new QPushButton(this);
-        m_errorMessageLabel = new QLabel(this);
+        m_textEdit     = new TextEdit(this);
+        m_deleteButton = new QPushButton{this};
     }
 
     void FormulaWidget::initButtons() {
         m_deleteButton->setText("x");
         m_deleteButton->setFixedSize(20, 20);
-        m_collapseButton->setFixedHeight(9);
+    }
+
+    void FormulaWidget::initTextEdit() {
+        m_textEdit->setLineWrapMode(QTextEdit::NoWrap);
+        QFontMetrics metrics(m_textEdit->font());
+        m_textEdit->setFixedHeight(metrics.lineSpacing() + 4);
+        m_textEdit->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        m_textEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        m_textEdit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+    }
+
+    void FormulaWidget::initLayout() {
+        m_layout->addWidget(m_activeCheckBox, 0, 0);
+        m_layout->addWidget(m_textEdit, 0, 1);
+        m_layout->addWidget(m_deleteButton, 0, 2);
     }
 
     void FormulaWidget::connectSignals() {
-        connect(m_lineEdit, &QLineEdit::textChanged, this, &FormulaWidget::processFormula);
+        connect(m_textEdit, &QTextEdit::textChanged, this, &FormulaWidget::processFormula);
         connect(m_deleteButton, &QPushButton::clicked, [this]() { emit deleteClicked(m_index); });
-        connect(m_collapseButton, &QPushButton::clicked, this, &FormulaWidget::toggleOptionsView);
         connect(m_activeCheckBox, &QCheckBox::toggled, [this]() { emit updated(m_index); });
     }
 
-    void FormulaWidget::showToolTipAtLineEdit(QRgb textColor, const QString& message) {
-        QPalette palette = QToolTip::palette();
-        palette.setColor(QPalette::ToolTipBase, QColor(16185078));
-        palette.setColor(QPalette::ToolTipText, QColor(textColor));
-        QToolTip::setPalette(palette);
-
-        QToolTip::showText(mapToGlobal(m_lineEdit->pos()), message);
+    TextEdit* FormulaWidget::textEdit() {
+        return m_textEdit;
     }
-
-    QLineEdit* FormulaWidget::lineEdit() {
-        return m_lineEdit;
-    }
-
-    //    const fml::Formula* FormulaWidget::formula() const {
-    //        return m_formula.get();
-    //    }
 
     void FormulaWidget::updateWidget() {
         if (m_success) {
@@ -155,7 +139,6 @@ namespace app {
     bool FormulaWidget::formulaWasUpdated() const {
         return m_formulaWasUpdated;
     }
-
     void FormulaWidget::setFormulaWasUpdated(bool formulaWasUpdated) {
         m_formulaWasUpdated = formulaWasUpdated;
     }

@@ -2,9 +2,10 @@
 // Created by pc on 09-04-21.
 //
 
-#ifndef PARSER_FORMULAWIDGET_H
-#define PARSER_FORMULAWIDGET_H
+#ifndef APP_FORMULAWIDGET_H
+#define APP_FORMULAWIDGET_H
 
+#include "../ast/Ast.h"
 #include "../gen/ErrorBase.h"
 
 #include <QWidget>
@@ -13,7 +14,11 @@ class QCheckBox;
 class QGridLayout;
 class QLabel;
 class QPushButton;
-class QLineEdit;
+class TextEdit;
+
+namespace ast::err {
+    class ParserInfo;
+}
 
 namespace app {
     namespace cmd {
@@ -30,8 +35,8 @@ namespace app {
 
         void updateWidget();
 
-        [[nodiscard]] size_t     index() const;
-        [[nodiscard]] QLineEdit* lineEdit();
+        [[nodiscard]] size_t    index() const;
+        [[nodiscard]] TextEdit* textEdit();
         //        [[nodiscard]] const fml::Formula* formula() const;
         [[nodiscard]] bool isActive() const;
         [[nodiscard]] bool formulaWasUpdated() const;
@@ -43,30 +48,27 @@ namespace app {
 
       private slots:
         void processFormula();
-        void toggleOptionsView();
 
       private:
         void handleCorrectFormula();
         void handleWrongFormula();
         void initPointers();
         void initButtons();
+        void initTextEdit();
+        void initLayout();
         void connectSignals();
-        void showToolTipAtLineEdit(QRgb textColor, const QString& message);
 
-        inline static size_t S_MAX_INDEX = 0;
+        static inline size_t S_MAX_INDEX = 0;
 
-        const size_t                  m_index;
-        bool                          m_optionsExpanded   = true;
-        bool                          m_formulaWasUpdated = false;
-        QGridLayout*                  m_layout            = nullptr;
-        QCheckBox*                    m_activeCheckBox    = nullptr;
-        QLineEdit*                    m_lineEdit          = nullptr;
-        QPushButton*                  m_deleteButton      = nullptr;
-        QPushButton*                  m_collapseButton    = nullptr;
-        QLabel*                       m_errorMessageLabel = nullptr;
-        QString                       m_oldFormula        = "";
-//        std::unique_ptr<fml::Formula> m_formula;
+        const size_t              m_index;
+        bool                      m_formulaWasUpdated = false;
+        QGridLayout*              m_layout            = nullptr;
+        QCheckBox*                m_activeCheckBox    = nullptr;
+        TextEdit*                 m_textEdit          = nullptr;
+        QPushButton*              m_deleteButton      = nullptr;
+        QString                   m_oldFormula        = "";
+        std::unique_ptr<ast::Ast> m_ast;
     };
 } // namespace app
 
-#endif // PARSER_FORMULAWIDGET_H
+#endif // APP_FORMULAWIDGET_H
