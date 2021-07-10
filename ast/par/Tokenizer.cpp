@@ -203,11 +203,9 @@ namespace ast::par {
         for (auto it = m_tokenList.begin(); std::next(it) != m_tokenList.end(); ++it) {
             auto next = std::next(it);
             if (it->type() == Token::TYPE::IDENTIFIER && next->type() == Token::TYPE::NUMBER) {
-                if (it->range().endIndex() + 1 == next->range().startIndex()) {
-                    m_info.addWarning(
-                        {err::ParserWarning::TYPE::SUSPICIOUS_IDENTIFIER_NUM_PATTERN, it->string() + "*" + next->toString(), {it->range().startIndex(), next->range().endIndex()}});
-                }
+                m_info.addWarning(
+                    {err::ParserWarning::TYPE::SUSPICIOUS_IDENTIFIER_NUM_PATTERN, it->string() + "*" + next->string(), {it->range().startIndex(), next->range().endIndex()}});
             }
         }
     }
-} // namespace ast
+} // namespace ast::par

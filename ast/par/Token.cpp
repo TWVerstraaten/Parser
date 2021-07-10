@@ -38,4 +38,4 @@ namespace ast::par {
     void Token::setType(Token::TYPE type) {
         m_type = type;
     }
-} // namespace ast
+} // namespace ast::par

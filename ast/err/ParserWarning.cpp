@@ -20,4 +20,8 @@ namespace ast::err {
         assert(false);
         return "";
     }
+
+    const par::Range& ParserWarning::range() const {
+        return m_range;
+    }
 } // namespace err

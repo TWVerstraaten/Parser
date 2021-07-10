@@ -19,21 +19,23 @@ namespace ast::err {
         void addWarning(ParserWarning&& warning);
         void addMessage(ParserMessage&& warning);
 
+        void printAll() const;
+        void clear();
+
         [[nodiscard]] bool                              success() const;
         [[nodiscard]] bool                              hasErrors() const;
         [[nodiscard]] bool                              hasWarnings() const;
         [[nodiscard]] bool                              hasMessages() const;
         [[nodiscard]] const std::vector<ParserError>&   errors() const;
         [[nodiscard]] const std::vector<ParserWarning>& warnings() const;
-        [[nodiscard]] const std::vector<ParserMessage>& messages() const;
 
-        void printAll() const;
+        [[nodiscard]] const std::vector<ParserMessage>& messages() const;
 
       private:
         std::vector<ParserError>   m_errors;
         std::vector<ParserWarning> m_warnings;
         std::vector<ParserMessage> m_messages;
     };
-} // namespace err
+} // namespace ast::err
 
 #endif // PRS_PARSERINFO_H

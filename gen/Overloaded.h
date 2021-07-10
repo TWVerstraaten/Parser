@@ -2,8 +2,8 @@
 // Created by pc on 08-06-21.
 //
 
-#ifndef PARSER_OVERLOADED_H
-#define PARSER_OVERLOADED_H
+#ifndef GEN_OVERLOADED_H
+#define GEN_OVERLOADED_H
 
 // https://en.cppreference.com/w/cpp/utility/variant/visit
 // helper type for the visitor #4
@@ -15,4 +15,4 @@ struct Overloaded : Ts... {
 template <class... Ts>
 Overloaded(Ts...) -> Overloaded<Ts...>;
 
-#endif // PARSER_OVERLOADED_H
+#endif // GEN_OVERLOADED_H

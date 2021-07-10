@@ -15,6 +15,7 @@ namespace ast::par {
         Range() = default;
 
         [[nodiscard]] bool        isEmpty() const;
+        [[nodiscard]] bool        isInRange(size_t position) const;
         [[nodiscard]] std::string toString() const;
         [[nodiscard]] size_t      startIndex() const;
         [[nodiscard]] size_t      endIndex() const;
@@ -23,6 +24,6 @@ namespace ast::par {
         size_t m_startIndex = std::numeric_limits<size_t>::max();
         size_t m_endIndex   = std::numeric_limits<size_t>::max();
     };
-} // namespace ast
+} // namespace ast::par
 
 #endif // PRS_RANGE_H

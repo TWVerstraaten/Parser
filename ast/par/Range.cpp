@@ -28,4 +28,8 @@ namespace ast::par {
     bool Range::isEmpty() const {
         return m_endIndex == std::numeric_limits<size_t>::max() && m_startIndex == std::numeric_limits<size_t>::max();
     }
+
+    bool Range::isInRange(size_t position) const {
+        return m_startIndex <= position && position <= m_endIndex;
+    }
 } // namespace ast

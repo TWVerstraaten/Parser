@@ -2,8 +2,8 @@
 // Created by pc on 03-06-21.
 //
 
-#ifndef PARSER_DEPENDENCYGRAPH_H
-#define PARSER_DEPENDENCYGRAPH_H
+#ifndef GEN_DEPENDENCYGRAPH_H
+#define GEN_DEPENDENCYGRAPH_H
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/properties.hpp>
@@ -13,8 +13,7 @@ namespace gen {
 
     class DependencyGraph {
         typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS, boost::property<boost::vertex_name_t, std::string>> Graph;
-
-        typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
+        typedef boost::graph_traits<Graph>::vertex_descriptor                                                                              Vertex;
 
       public:
         void addVertex(const std::string& vertexName);
@@ -37,4 +36,4 @@ namespace gen {
     };
 } // namespace gen
 
-#endif // PARSER_DEPENDENCYGRAPH_H
+#endif // GEN_DEPENDENCYGRAPH_H

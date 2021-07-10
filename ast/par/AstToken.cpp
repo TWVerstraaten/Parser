@@ -22,8 +22,8 @@ namespace ast::par {
     }
 
     static void S_REPLACE_UNARY_MINUSES(AstToken::TempTokenList& tempTokens, err::ParserInfo& info) {
-        static const std::set<Token::TYPE> s{Token::TYPE::UNARY_MINUS};
-        for (auto it = S_TOKEN_IT(tempTokens, tempTokens.begin(), s); it != tempTokens.end(); it = S_TOKEN_IT(tempTokens, std::next(it), s)) {
+        static const std::set<Token::TYPE> S_TYPES{Token::TYPE::UNARY_MINUS};
+        for (auto it = S_TOKEN_IT(tempTokens, tempTokens.begin(), S_TYPES); it != tempTokens.end(); it = S_TOKEN_IT(tempTokens, std::next(it), S_TYPES)) {
             assert(std::holds_alternative<Token>(*it));
             const auto& token = std::get<Token>(*it);
             assert(token.type() == Token::TYPE::UNARY_MINUS);
@@ -36,8 +36,8 @@ namespace ast::par {
     }
 
     static void S_REPLACE_POWERS(AstToken::TempTokenList& tempTokens, err::ParserInfo& info) {
-        static const std::set<Token::TYPE> s{Token::TYPE::POWER};
-        for (auto it = S_TOKEN_IT(tempTokens, tempTokens.begin(), s); it != tempTokens.end(); it = S_TOKEN_IT(tempTokens, it, s)) {
+        static const std::set<Token::TYPE> S_TYPES{Token::TYPE::POWER};
+        for (auto it = S_TOKEN_IT(tempTokens, tempTokens.begin(), S_TYPES); it != tempTokens.end(); it = S_TOKEN_IT(tempTokens, it, S_TYPES)) {
             assert(std::holds_alternative<Token>(*it));
             assert(std::get<Token>(*it).type() == Token::TYPE::POWER);
             assert(std::holds_alternative<AstToken>(*std::next(it)));
@@ -51,8 +51,8 @@ namespace ast::par {
     }
 
     static void S_REPLACE_TIMES_DIVIDE(AstToken::TempTokenList& tempTokens, err::ParserInfo& info) {
-        static const std::set<Token::TYPE> s{Token::TYPE::TIMES, Token::TYPE::DIVIDE};
-        for (auto it = S_TOKEN_IT(tempTokens, tempTokens.begin(), s); it != tempTokens.end(); it = S_TOKEN_IT(tempTokens, it, s)) {
+        static const std::set<Token::TYPE> S_TYPES{Token::TYPE::TIMES, Token::TYPE::DIVIDE};
+        for (auto it = S_TOKEN_IT(tempTokens, tempTokens.begin(), S_TYPES); it != tempTokens.end(); it = S_TOKEN_IT(tempTokens, it, S_TYPES)) {
             assert(std::holds_alternative<Token>(*it));
             const auto type = std::get<Token>(*it).type();
             assert(std::holds_alternative<AstToken>(*std::next(it)));
@@ -66,8 +66,8 @@ namespace ast::par {
     }
 
     static void S_REPLACE_PLUS_MINUS(AstToken::TempTokenList& tempTokens, err::ParserInfo& info) {
-        static const std::set<Token::TYPE> s{Token::TYPE::PLUS, Token::TYPE::MINUS};
-        for (auto it = S_TOKEN_IT(tempTokens, tempTokens.begin(), s); it != tempTokens.end(); it = S_TOKEN_IT(tempTokens, it, s)) {
+        static const std::set<Token::TYPE> S_TYPES{Token::TYPE::PLUS, Token::TYPE::MINUS};
+        for (auto it = S_TOKEN_IT(tempTokens, tempTokens.begin(), S_TYPES); it != tempTokens.end(); it = S_TOKEN_IT(tempTokens, it, S_TYPES)) {
             assert(std::holds_alternative<Token>(*it));
             const auto type = std::get<Token>(*it).type();
             assert(std::holds_alternative<AstToken>(*std::next(it)));

@@ -36,4 +36,8 @@ namespace ast::err {
         }
         assert(false);
     }
+
+    const par::Range& ParserError::range() const {
+        return m_range;
+    }
 } // namespace ast::err

@@ -68,4 +68,10 @@ namespace ast::err {
             }
         }
     }
+
+    void ParserInfo::clear() {
+        m_errors.clear();
+        m_warnings.clear();
+        m_messages.clear();
+    }
 } // namespace err
