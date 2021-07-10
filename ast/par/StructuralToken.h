@@ -11,7 +11,7 @@
 #include <variant>
 #include <vector>
 
-namespace ast {
+namespace ast::par {
 
     class StructuralToken {
 

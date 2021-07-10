@@ -7,8 +7,7 @@
 
 #include <string>
 
-namespace ast {
-
+namespace ast::par {
     class Range {
 
       public:

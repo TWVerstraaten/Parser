@@ -12,7 +12,7 @@
 #include <cassert>
 #include <sstream>
 
-namespace ast {
+namespace ast::par {
 
     StructuralTokenizer::StructuralTokenizer(const std::list<Token>& rawTokenList, err::ParserInfo& info) : m_info(info) {
         if (not m_info.success()) {

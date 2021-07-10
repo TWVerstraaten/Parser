@@ -5,12 +5,12 @@
 #include "StructuralToken.h"
 
 #include "../../gen/defines.h"
-#include "../TokenWriter.h"
+#include "TokenWriter.h"
 
 #include <algorithm>
 #include <cassert>
 
-namespace ast {
+namespace ast::par {
 
     StructuralToken::StructuralToken(const Token& token) : m_token(token), m_range(token.range()) {
     }
@@ -31,7 +31,7 @@ namespace ast {
     }
 
     std::string StructuralToken::toString() const {
-        return std::visit([this](const auto& a) { return TokenWriter::toString(a, m_range); }, m_token);
+        return std::visit([this](const auto& a) { return TokenWriter::S_TO_STRING(a, m_range); }, m_token);
     }
 
     bool StructuralToken::holdsString() const {

@@ -8,9 +8,9 @@
 #include "StructuralTokenizer.h"
 #include "Tokenizer.h"
 
-namespace ast {
+namespace ast::par {
 
-    std::optional<AstToken> Parser::S_PARSE(const std::string& string, err::ParserInfo& info) {
+    std::optional<AstToken> Parser::S_PARSE(const std::string& string, ast::err::ParserInfo& info) {
         try {
             Tokenizer tokenizer(string, info);
             if (info.success()) {
@@ -22,4 +22,4 @@ namespace ast {
             return {};
         } catch (...) { return {}; }
     }
-} // namespace ast
+} // namespace ast::par

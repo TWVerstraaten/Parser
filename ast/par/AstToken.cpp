@@ -7,14 +7,14 @@
 #include "../../alg/StringAlg.h"
 #include "../../gen/Overloaded.h"
 #include "../../gen/defines.h"
-#include "../TokenWriter.h"
 #include "../err/ParserInfo.h"
+#include "TokenWriter.h"
 
 #include <algorithm>
 #include <cassert>
 #include <sstream>
 
-namespace ast {
+namespace ast::par {
 
     [[nodiscard]] static AstToken::TempTokenList::iterator
     S_TOKEN_IT(AstToken::TempTokenList& tempTokens, AstToken::TempTokenList::iterator it, const std::set<Token::TYPE>& types) {
@@ -177,7 +177,7 @@ namespace ast {
 
     void AstToken::maybeCastToReservedFunction(err::ParserInfo& info) {
         assert(std::holds_alternative<CustomFunctionToken>(m_token));
-        if (auto reserved = rsrvd::S_GET_RESERVED(std::get<CustomFunctionToken>(m_token).name()); reserved.has_value()) {
+        if (auto reserved = S_GET_RESERVED(std::get<CustomFunctionToken>(m_token).name()); reserved.has_value()) {
             const auto val                   = reserved.value();
             const auto argumentCount         = std::get<CustomFunctionToken>(m_token).argumentCount();
             const auto requiredArgumentCount = S_GET_ARGUMENT_COUNT(val);
@@ -273,7 +273,7 @@ namespace ast {
     }
 
     std::string AstToken::toStringAsTree() const {
-        return TokenWriter::toStringAsTree("", *this, false);
+        return TokenWriter::S_TO_STRING_AS_TREE("", *this, false);
     }
 
     void AstToken::replaceFunction(const Header::FullHeader& header, const AstToken& functionToken) {
@@ -304,7 +304,7 @@ namespace ast {
                                          }
                                      },
                                      [&](const CustomFunctionToken& function) { return function.name() + "(" + writeChildren() + ")"; },
-                                     [&](const rsrvd::Reserved& function) { return rsrvd::S_GET_NAME(function) + "(" + writeChildren() + ")"; },
+                                     [&](const ReservedToken& function) { return S_GET_NAME(function) + "(" + writeChildren() + ")"; },
                                      [&](const VectorToken& vectorToken) { return "(" + writeChildren() + ")"; },
                                      [](const std::string& str) { return str; },
                                      [](const auto& a) {
@@ -327,4 +327,4 @@ namespace ast {
         }
         return result;
     }
-}
+} // namespace ast::par

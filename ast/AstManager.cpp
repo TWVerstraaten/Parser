@@ -104,7 +104,7 @@ namespace ast {
         return {};
     }
 
-    std::optional<UnrollCompanion*> AstManager::fromFunctionToken(const CustomFunctionToken& functionToken) {
+    std::optional<UnrollCompanion*> AstManager::fromFunctionToken(const par::CustomFunctionToken& functionToken) {
         return fromComparator([functionToken](const UnrollCompanion& a) {
             return (std::holds_alternative<Header::FullHeader>(a.originalAst().header().headerVariant())) && (a.originalAst().getCustomFunctionToken() == functionToken);
         });

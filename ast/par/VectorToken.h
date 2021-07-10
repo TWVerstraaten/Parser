@@ -7,11 +7,11 @@
 
 #include <cstddef>
 
-namespace ast {
+namespace ast::par {
 
     struct VectorToken {
         size_t m_dimension;
     };
-} // namespace ast
+} // namespace ast::par
 
 #endif // PRS_VECTORTOKEN_H

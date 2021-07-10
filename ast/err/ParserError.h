@@ -26,15 +26,15 @@ namespace ast::err {
             GENERIC
         };
 
-        ParserError(TYPE type, std::string message, Range range = {});
+        ParserError(TYPE type, std::string message, par::Range range = {});
 
         [[nodiscard]] std::string toString() const;
 
       private:
         TYPE        m_type;
         std::string m_message;
-        Range       m_range;
+        par::Range  m_range;
     };
-} // namespace err
+} // namespace ast::err
 
 #endif // PRS_PARSERERROR_H

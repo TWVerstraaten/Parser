@@ -15,14 +15,14 @@ namespace ast::err {
       public:
         enum TYPE { SUSPICIOUS_IDENTIFIER_NUM_PATTERN };
 
-        ParserWarning(TYPE type, std::string message, Range range = {});
+        ParserWarning(TYPE type, std::string message, par::Range range = {});
 
         [[nodiscard]] std::string toString() const;
 
       private:
         TYPE        m_type;
         std::string m_message;
-        Range       m_range;
+        par::Range       m_range;
     };
 } // namespace ast::err
 

@@ -5,11 +5,11 @@
 #ifndef PRS_ASTTOKEN_H
 #define PRS_ASTTOKEN_H
 
-#include "../CustomFunctionToken.h"
 #include "../Header.h"
-#include "../ReservedFunction.h"
-#include "../VectorToken.h"
+#include "CustomFunctionToken.h"
+#include "ReservedToken.h"
 #include "StructuralToken.h"
+#include "VectorToken.h"
 
 #include <map>
 #include <memory>
@@ -17,12 +17,11 @@
 #include <variant>
 #include <vector>
 
-namespace ast {
+namespace ast::err {
+    class ParserInfo;
+}
 
-    namespace err {
-        class ParserInfo;
-    }
-
+namespace ast::par {
     class AstToken {
 
       public:
@@ -30,9 +29,9 @@ namespace ast {
         struct Error {};
         enum class OPERATOR_TYPE { PLUS, MINUS, TIMES, DIVIDE, POWER, UNARY_MINUS, EQUALS };
 
-        typedef std::variant<Error, OPERATOR_TYPE, Empty, CustomFunctionToken, rsrvd::Reserved, VectorToken, std::string, double, long long int> AstTokenVariant;
-        typedef std::variant<AstToken, Token>                                                                                                    TempToken;
-        typedef std::list<TempToken>                                                                                                             TempTokenList;
+        typedef std::variant<Error, OPERATOR_TYPE, Empty, CustomFunctionToken, ReservedToken, VectorToken, std::string, double, long long int> AstTokenVariant;
+        typedef std::variant<AstToken, Token>                                                                                             TempToken;
+        typedef std::list<TempToken>                                                                                                      TempTokenList;
 
         AstToken();
         explicit AstToken(const std::list<StructuralToken>& structuralTokens, err::ParserInfo& info);
@@ -65,6 +64,6 @@ namespace ast {
         std::vector<AstToken> m_children;
         Range                 m_range;
     };
-} // namespace ast
+} // namespace ast::par
 
 #endif // PRS_ASTTOKEN_H

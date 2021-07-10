@@ -4,7 +4,7 @@
 
 #include "Token.h"
 
-namespace ast {
+namespace ast::par {
 
     Token::Token(Token::TYPE type, std::string value, Range range) : m_type(type), m_string(std::move(value)), m_range(range) {
     }

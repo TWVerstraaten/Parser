@@ -17,13 +17,13 @@ namespace ast {
         return "Header:\t" + m_header.toString() + "\nBody:\t" + m_token.toString() + "\n";
     }
 
-    UnrolledAstToken UnrolledAst::setVariable(const std::string& variable, const gen::Number& number) const {
+    par::UnrolledAstToken UnrolledAst::setVariable(const std::string& variable, const gen::Number& number) const {
         auto result = m_token;
         result.setVariableInPlace(variable, number);
         return result;
     }
 
-    UnrolledAstToken UnrolledAst::setVariables(const std::map<std::string, gen::Number>& variableMap) const {
+    par::UnrolledAstToken UnrolledAst::setVariables(const std::map<std::string, gen::Number>& variableMap) const {
         assert(not variableMap.empty());
         auto result = m_token;
         for (const auto& [v, n] : variableMap) {

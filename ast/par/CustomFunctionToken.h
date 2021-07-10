@@ -7,7 +7,7 @@
 
 #include <string>
 
-namespace ast {
+namespace ast::par {
     class CustomFunctionToken {
         friend bool operator<(const CustomFunctionToken& left, const CustomFunctionToken& right);
 
@@ -24,6 +24,6 @@ namespace ast {
         std::string m_name;
         size_t      m_argumentCount;
     };
-} // namespace ast
+} // namespace ast::par
 
 #endif // PRS_CUSTOMFUNCTIONTOKEN_H

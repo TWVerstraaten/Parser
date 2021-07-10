@@ -4,7 +4,7 @@
 
 #include "Range.h"
 
-namespace ast {
+namespace ast::par {
 
     Range::Range(size_t startIndex, size_t endIndex) : m_startIndex(startIndex), m_endIndex(endIndex) {
     }

@@ -5,13 +5,13 @@
 #ifndef PRS_TOKEN_H
 #define PRS_TOKEN_H
 
-#include "../TokenTemplates.h"
 #include "Range.h"
+#include "TokenTemplates.h"
 
 #include <string>
 #include <variant>
 
-namespace ast {
+namespace ast::par {
 
     class Token {
 

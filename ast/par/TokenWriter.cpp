@@ -4,21 +4,21 @@
 
 #include "TokenWriter.h"
 
-#include "../alg/StringAlg.h"
-#include "../gen/Overloaded.h"
-#include "../gen/defines.h"
+#include "../../alg/StringAlg.h"
+#include "../../gen/Overloaded.h"
+#include "../../gen/defines.h"
 #include "UnrolledAstToken.h"
 
 #include <algorithm>
 #include <cassert>
 
-namespace ast {
+namespace ast::par {
 
-    std::string TokenWriter::toString(const Token& token, const Range& range) {
+    std::string TokenWriter::S_TO_STRING(const Token& token, const Range& range) {
         return "t" + range.toString() + "(" + token.toString() + ")";
     }
 
-    std::string TokenWriter::toString(const StructuralToken::Bracketed& token, const Range& range) {
+    std::string TokenWriter::S_TO_STRING(const StructuralToken::Bracketed& token, const Range& range) {
         std::stringstream ss;
         ss << "Br" << range.toString() << "(";
         bool writeComma = false;
@@ -33,27 +33,27 @@ namespace ast {
         return ss.str();
     }
 
-    std::string TokenWriter::toString(const StructuralToken::Function& token, const Range& range) {
+    std::string TokenWriter::S_TO_STRING(const StructuralToken::Function& token, const Range& range) {
         std::stringstream ss;
         ss << "F" << range.toString() << token.m_name << "(";
-        ss << toString(token.m_arguments, range);
+        ss << S_TO_STRING(token.m_arguments, range);
         ss << ")";
         return ss.str();
     }
 
-    std::string TokenWriter::toString(const std::string& string, const Range& range) {
+    std::string TokenWriter::S_TO_STRING(const std::string& string, const Range& range) {
         return "x" + range.toString() + "(" + string + ")";
     }
 
-    std::string TokenWriter::toString(double val, const Range& range) {
+    std::string TokenWriter::S_TO_STRING(double val, const Range& range) {
         return "d" + range.toString() + "(" + std::to_string(val) + ")";
     }
 
-    std::string TokenWriter::toString(long long int val, const Range& range) {
+    std::string TokenWriter::S_TO_STRING(long long int val, const Range& range) {
         return "d" + range.toString() + "(" + std::to_string(val) + ")";
     }
 
-    std::string TokenWriter::toString(AstToken::OPERATOR_TYPE type) {
+    std::string TokenWriter::S_TO_STRING(AstToken::OPERATOR_TYPE type) {
         switch (type) {
             case AstToken::OPERATOR_TYPE::PLUS:
                 return "+";
@@ -74,15 +74,15 @@ namespace ast {
         return "";
     }
 
-    std::string TokenWriter::toStringAsTree(const std::string& prefix, const AstToken& node, bool isLeft) {
+    std::string TokenWriter::S_TO_STRING_AS_TREE(const std::string& prefix, const AstToken& node, bool isLeft) {
         std::stringstream ss;
         ss << prefix;
         ss << (isLeft ? "├── " : "└── ");
 
-        std::visit(Overloaded{[&](AstToken::OPERATOR_TYPE type) { ss << TokenWriter::toString(type); },
+        std::visit(Overloaded{[&](AstToken::OPERATOR_TYPE type) { ss << TokenWriter::S_TO_STRING(type); },
                               [&](const CustomFunctionToken& function) { ss << "Fun(" << function.argumentCount() << ")@_" << function.name(); },
                               [&](const VectorToken& vector) { ss << "Vec(" << vector.m_dimension << ")"; },
-                              [&](const rsrvd::Reserved& reservedFunction) { ss << S_GET_NAME(reservedFunction); },
+                              [&](const ReservedToken& reservedFunction) { ss << S_GET_NAME(reservedFunction); },
                               [&](const AstToken::Empty&) { ss << "_empty_"; },
                               [&](const AstToken::Error&) { ss << "_error_"; },
                               [&](const auto& val) { ss << val; }},
@@ -93,12 +93,12 @@ namespace ast {
             return ss.str();
         }
         for (auto it = node.children().begin(); it != node.children().end(); ++it) {
-            ss << toStringAsTree(prefix + (isLeft ? "│    " : "     "), *it, std::next(it) != node.children().end());
+            ss << S_TO_STRING_AS_TREE(prefix + (isLeft ? "│    " : "     "), *it, std::next(it) != node.children().end());
         }
         return ss.str();
     }
 
-    std::string TokenWriter::toString(const UnrolledAstToken& unrolledAstToken) {
+    std::string TokenWriter::S_TO_STRING(const UnrolledAstToken& unrolledAstToken) {
         return std::visit(
             Overloaded{
                 [&](const UnrolledAstToken::Plus& p) { return "(" + unrolledAstToken.children().front().toString() + "+" + unrolledAstToken.children().back().toString() + ")"; },
@@ -107,7 +107,7 @@ namespace ast {
                 [&](const UnrolledAstToken::Divide& p) { return "(" + unrolledAstToken.children().front().toString() + "/" + unrolledAstToken.children().back().toString() + ")"; },
                 [&](const UnrolledAstToken::Power& p) { return "(" + unrolledAstToken.children().front().toString() + "^" + unrolledAstToken.children().back().toString() + ")"; },
                 [&](const UnrolledAstToken::UnaryMinus& p) { return "(-" + unrolledAstToken.children().front().toString() + ")"; },
-                [&](const rsrvd::Reserved& p) {
+                [&](const ReservedToken& p) {
                     return S_GET_NAME(p) + "(" + alg::StringAlg::S_CONCATENATE_STRINGS<UnrolledAstToken>(unrolledAstToken.children(), [](const auto& a) { return a.toString(); }) +
                            ")";
                 },
@@ -121,4 +121,4 @@ namespace ast {
                 }},
             unrolledAstToken.token());
     }
-} // namespace ast
+} // namespace ast::par

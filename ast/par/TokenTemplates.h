@@ -7,7 +7,7 @@
 
 #include <variant>
 
-namespace ast {
+namespace ast::par {
     class TokenTemplates {
 
       public:
@@ -21,6 +21,6 @@ namespace ast {
             return std::holds_alternative<T>(variant) && std::get<T>(variant).type() == type;
         }
     };
-} // namespace ast
+} // namespace ast::par
 
 #endif // PRS_TOKENTEMPLATES_H

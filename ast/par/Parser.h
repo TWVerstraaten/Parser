@@ -9,17 +9,16 @@
 
 #include <string>
 
-namespace ast {
+namespace ast::err {
+    class ParserInfo;
+}
 
-    namespace err {
-        class ParserInfo;
-    }
-
+namespace ast::par {
     class Parser {
 
       public:
-        static std::optional<AstToken> S_PARSE(const std::string& string, err::ParserInfo& info);
+        static std::optional<AstToken> S_PARSE(const std::string& string, ast::err::ParserInfo& info);
     };
-} // namespace ast
+} // namespace ast::par
 
 #endif // PRS_PARSER_H

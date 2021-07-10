@@ -10,15 +10,14 @@
 #include <list>
 #include <string>
 
-namespace ast {
+namespace ast::err {
+    class ParserInfo;
+}
 
-    namespace err {
-        class ParserInfo;
-    }
-
+namespace ast::par {
     class Tokenizer {
       public:
-        Tokenizer(std::string string, err::ParserInfo& info);
+        Tokenizer(std::string string, ast::err::ParserInfo& info);
 
         [[nodiscard]] std::string             toString() const;
         [[nodiscard]] const std::list<Token>& tokenList() const;
@@ -33,10 +32,10 @@ namespace ast {
         void checkRepeatedOperators();
         void checkIdentifierNumberPatternWithNoSpace();
 
-        const std::string m_string;
-        std::list<Token>  m_tokenList;
-        err::ParserInfo&  m_info;
+        const std::string     m_string;
+        std::list<Token>      m_tokenList;
+        ast::err::ParserInfo& m_info;
     };
-} // namespace ast
+} // namespace ast::par
 
 #endif // PRS_TOKENIZER_H

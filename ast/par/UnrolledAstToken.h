@@ -5,15 +5,15 @@
 #ifndef PRS_UNROLLEDASTTOKEN_H
 #define PRS_UNROLLEDASTTOKEN_H
 
-#include "../gen/Number.h"
-#include "ReservedFunction.h"
+#include "../../gen/Number.h"
+#include "ReservedToken.h"
 #include "VectorToken.h"
 
 #include <map>
 #include <variant>
 #include <vector>
 
-namespace ast {
+namespace ast::par {
 
     class AstToken;
 
@@ -27,7 +27,7 @@ namespace ast {
         struct Power {};
         struct UnaryMinus {};
 
-        typedef std::variant<Plus, Minus, Times, Divide, Power, UnaryMinus, rsrvd::Reserved, VectorToken, std::string, double, long long> UnrolledToken;
+        typedef std::variant<Plus, Minus, Times, Divide, Power, UnaryMinus, ReservedToken, VectorToken, std::string, double, long long> UnrolledToken;
 
         explicit UnrolledAstToken(const AstToken& astToken);
 
@@ -50,6 +50,6 @@ namespace ast {
         UnrolledToken                 m_token;
         std::vector<UnrolledAstToken> m_children;
     };
-} // namespace ast
+} // namespace ast::par
 
 #endif // PRS_UNROLLEDASTTOKEN_H

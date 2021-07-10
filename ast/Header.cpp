@@ -22,7 +22,7 @@ namespace ast {
         }
     }
 
-    Header::Header(const CustomFunctionToken& customFunction, const AstToken& headerToken) {
+    Header::Header(const par::CustomFunctionToken& customFunction, const ast::par::AstToken& headerToken) {
         std::vector<std::string> variableNames;
         variableNames.reserve(customFunction.argumentCount());
         for (const auto& child : headerToken.children()) {
@@ -32,7 +32,7 @@ namespace ast {
         m_header = FullHeader{customFunction.name(), std::move(variableNames)};
     }
 
-    Header::Header(const VectorToken& vectorToken, const AstToken& headerToken) {
+    Header::Header(const par::VectorToken& vectorToken, const ast::par::AstToken& headerToken) {
         std::vector<std::string> variableNames;
         variableNames.reserve(vectorToken.m_dimension);
         for (const auto& child : headerToken.children()) {
@@ -64,4 +64,4 @@ namespace ast {
     const Header::HeaderVariant& Header::headerVariant() const {
         return m_header;
     }
-}
+} // namespace ast

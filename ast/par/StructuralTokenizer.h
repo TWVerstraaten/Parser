@@ -13,16 +13,16 @@
 #include <string>
 #include <vector>
 
-namespace ast {
+namespace ast::err {
+    class ParserInfo;
+}
 
-    namespace err {
-        class ParserInfo;
-    }
+namespace ast::par {
 
     class StructuralTokenizer {
 
       public:
-        StructuralTokenizer(const std::list<Token>& rawTokenList, err::ParserInfo& info);
+        StructuralTokenizer(const std::list<Token>& rawTokenList, ast::err::ParserInfo& info);
 
         void                                            extractFunctionsAndBracketsFromStructuralTokens();
         [[nodiscard]] std::string                       toString() const;
@@ -38,9 +38,9 @@ namespace ast {
         [[nodiscard]] static std::optional<std::string>                     S_PARSE_IDENTIFIER_TOKEN(const Token& token);
         [[nodiscard]] static std::optional<std::variant<double, long long>> S_PARSE_NUMBER_TOKEN(const Token& token);
 
-        err::ParserInfo&           m_info;
+        ast::err::ParserInfo&      m_info;
         std::list<StructuralToken> m_tokenList;
     };
-} // namespace ast
+} // namespace ast::par
 
 #endif // PRS_STRUCTURALTOKENIZER_H

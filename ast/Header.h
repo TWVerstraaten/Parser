@@ -11,9 +11,11 @@
 
 namespace ast {
 
-    class CustomFunctionToken;
-    class AstToken;
-    struct VectorToken;
+    namespace par {
+        class AstToken;
+        struct VectorToken;
+        class CustomFunctionToken;
+    } // namespace par
 
     class Header {
 
@@ -38,8 +40,8 @@ namespace ast {
 
         Header() = default;
         explicit Header(const std::string& name);
-        Header(const CustomFunctionToken& customFunction, const AstToken& headerToken);
-        Header(const VectorToken& vectorToken, const AstToken& headerToken);
+        Header(const par::CustomFunctionToken& customFunction, const ast::par::AstToken& headerToken);
+        Header(const par::VectorToken& vectorToken, const ast::par::AstToken& headerToken);
 
         [[nodiscard]] const HeaderVariant& headerVariant() const;
         [[nodiscard]] HEADER_TYPE          type() const;

@@ -12,7 +12,7 @@
 #include <set>
 #include <sstream>
 
-namespace ast {
+namespace ast::par {
 
     Tokenizer::Tokenizer(std::string string, err::ParserInfo& info) : m_string(std::move(string)), m_info(info) {
         findIllegalCharacters();

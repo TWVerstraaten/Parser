@@ -4,15 +4,15 @@
 
 #include "UnrolledAstToken.h"
 
-#include "../gen/Overloaded.h"
-#include "../gen/defines.h"
+#include "../../gen/Overloaded.h"
+#include "../../gen/defines.h"
+#include "AstToken.h"
 #include "TokenWriter.h"
-#include "par/AstToken.h"
 
 #include <algorithm>
 #include <cassert>
 
-namespace ast {
+namespace ast::par {
 
     static UnrolledAstToken::UnrolledToken S_FROM_NUMBER(const gen::Number& number) {
         if (number.holdsLongLong()) {
@@ -59,7 +59,7 @@ namespace ast {
     }
 
     std::string UnrolledAstToken::toString() const {
-        return TokenWriter::toString(*this);
+        return TokenWriter::S_TO_STRING(*this);
     }
 
     bool UnrolledAstToken::isNumeric() const {
@@ -97,7 +97,7 @@ namespace ast {
                                       m_children.clear();
                                   }
                               },
-                              [&](const rsrvd::Reserved& p) { simplifyFunction(); },
+                              [&](const ReservedToken& p) { simplifyFunction(); },
                               [](const auto& a) {}},
                    m_token);
     }
@@ -127,8 +127,8 @@ namespace ast {
         if (std::any_of(TT_IT(m_children), TT_LAMBDA(a, return not a.isNumeric();))) {
             return;
         }
-        assert(std::holds_alternative<rsrvd::Reserved>(m_token));
-        const auto& p = std::get<rsrvd::Reserved>(m_token);
+        assert(std::holds_alternative<ReservedToken>(m_token));
+        const auto& p = std::get<ReservedToken>(m_token);
         switch (S_GET_ARGUMENT_COUNT(p)) {
             case 1:
                 m_token = S_EVAL(p, m_children.at(0).toDouble());
@@ -174,4 +174,4 @@ namespace ast {
     const std::vector<UnrolledAstToken>& UnrolledAstToken::children() const {
         return m_children;
     }
-} // namespace ast
+} // namespace ast::par

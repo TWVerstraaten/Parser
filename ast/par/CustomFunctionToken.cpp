@@ -4,7 +4,7 @@
 
 #include "CustomFunctionToken.h"
 
-namespace ast {
+namespace ast::par {
 
     CustomFunctionToken::CustomFunctionToken(std::string name, size_t argumentCount) : m_name(std::move(name)), m_argumentCount(argumentCount) {
     }
@@ -32,4 +32,4 @@ namespace ast {
     bool operator==(const CustomFunctionToken& r, const CustomFunctionToken& l) {
         return l.m_name == r.m_name && l.m_argumentCount == r.m_argumentCount;
     }
-} // namespace ast
+} // namespace ast::par

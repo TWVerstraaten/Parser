@@ -32,7 +32,7 @@ namespace ast {
         [[nodiscard]] std::vector<UnrollCompanion>&   fromHeaderType(Header::HEADER_TYPE type);
         [[nodiscard]] std::optional<UnrollCompanion*> fromIndex(size_t index);
         [[nodiscard]] std::optional<UnrollCompanion*> fromFunctionName(const std::string& functionName);
-        [[nodiscard]] std::optional<UnrollCompanion*> fromFunctionToken(const CustomFunctionToken& functionToken);
+        [[nodiscard]] std::optional<UnrollCompanion*> fromFunctionToken(const par::CustomFunctionToken& functionToken);
         [[nodiscard]] std::optional<UnrollCompanion*> fromComparator(const std::function<bool(const UnrollCompanion&)>& comparator);
 
         std::map<Header::HEADER_TYPE, std::vector<UnrollCompanion>> m_astTokens;
