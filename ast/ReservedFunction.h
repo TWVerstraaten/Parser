@@ -9,44 +9,47 @@
 #include <string>
 #include <variant>
 
-namespace rsrvd {
-    struct Sin {
-        static const size_t       s_argumentCount = 1;
-        inline static const char* s_name          = "sin";
-    };
-    struct Cos {
-        static const size_t       s_argumentCount = 1;
-        inline static const char* s_name          = "cos";
-    };
-    struct Tan {
-        static const size_t       s_argumentCount = 1;
-        inline static const char* s_name          = "tan";
-    };
-    struct ASin {
-        static const size_t       s_argumentCount = 1;
-        inline static const char* s_name          = "asin";
-    };
-    struct ACos {
-        static const size_t       s_argumentCount = 1;
-        inline static const char* s_name          = "acos";
-    };
-    struct ATan {
-        static const size_t       s_argumentCount = 1;
-        inline static const char* s_name          = "atan";
-    };
-    struct ATan2 {
-        static const size_t       s_argumentCount = 2;
-        inline static const char* s_name          = "atan2";
-    };
+namespace ast {
 
-    typedef std::variant<Sin, Cos, Tan, ASin, ACos, ATan, ATan2> Reserved;
+    namespace rsrvd {
+        struct Sin {
+            static const size_t       s_argumentCount = 1;
+            inline static const char* s_name          = "sin";
+        };
+        struct Cos {
+            static const size_t       s_argumentCount = 1;
+            inline static const char* s_name          = "cos";
+        };
+        struct Tan {
+            static const size_t       s_argumentCount = 1;
+            inline static const char* s_name          = "tan";
+        };
+        struct ASin {
+            static const size_t       s_argumentCount = 1;
+            inline static const char* s_name          = "asin";
+        };
+        struct ACos {
+            static const size_t       s_argumentCount = 1;
+            inline static const char* s_name          = "acos";
+        };
+        struct ATan {
+            static const size_t       s_argumentCount = 1;
+            inline static const char* s_name          = "atan";
+        };
+        struct ATan2 {
+            static const size_t       s_argumentCount = 2;
+            inline static const char* s_name          = "atan2";
+        };
 
-    [[nodiscard]] size_t                  S_GET_ARGUMENT_COUNT(const Reserved& reserved);
-    [[nodiscard]] std::string             S_GET_NAME(const Reserved& reserved);
-    [[nodiscard]] std::optional<Reserved> S_GET_RESERVED(const std::string& string);
+        typedef std::variant<Sin, Cos, Tan, ASin, ACos, ATan, ATan2> Reserved;
 
-    [[nodiscard]] double S_EVAL(const Reserved& reserved, double argument);
-    [[nodiscard]] double S_EVAL(const Reserved& reserved, double first, double second);
-} // namespace rsrvd
+        [[nodiscard]] size_t                  S_GET_ARGUMENT_COUNT(const Reserved& reserved);
+        [[nodiscard]] std::string             S_GET_NAME(const Reserved& reserved);
+        [[nodiscard]] std::optional<Reserved> S_GET_RESERVED(const std::string& string);
+
+        [[nodiscard]] double S_EVAL(const Reserved& reserved, double argument);
+        [[nodiscard]] double S_EVAL(const Reserved& reserved, double first, double second);
+    } // namespace rsrvd
+} // namespace ast
 
 #endif // PRS_RESERVEDFUNCTION_H

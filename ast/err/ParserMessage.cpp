@@ -6,7 +6,7 @@
 
 #include <cassert>
 
-namespace err {
+namespace ast::err {
     ParserMessage::ParserMessage(TYPE type, std::string message, Range range) : m_type(type), m_message(std::move(message)), m_range(range) {
     }
 

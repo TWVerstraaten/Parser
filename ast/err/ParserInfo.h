@@ -11,7 +11,7 @@
 
 #include <vector>
 
-namespace err {
+namespace ast::err {
     class ParserInfo {
 
       public:

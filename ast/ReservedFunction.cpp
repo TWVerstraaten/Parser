@@ -11,7 +11,7 @@
 #include <cassert>
 #include <cmath>
 
-namespace rsrvd {
+namespace ast::rsrvd {
 
     std::optional<rsrvd::Reserved> S_GET_RESERVED(const std::string& string) {
         static const std::vector<rsrvd::Reserved> S_ALL_RESERVED = {rsrvd::Sin(), rsrvd::Cos(), rsrvd::Tan(), rsrvd::ASin(), rsrvd::ACos(), rsrvd::ATan(), rsrvd::ATan2()};
@@ -57,4 +57,4 @@ namespace rsrvd {
                           },
                           reserved);
     }
-} // namespace rsrvd
+} // namespace ast::rsrvd

@@ -5,10 +5,10 @@
 #ifndef PRS_ERR_DEFINITIONERROR_H
 #define PRS_ERR_DEFINITIONERROR_H
 
-namespace err {
+namespace ast::err {
 
     class DefinitionError {};
 
-} // namespace err
+} // namespace ast::err
 
 #endif // PRS_ERR_DEFINITIONERROR_H

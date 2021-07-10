@@ -7,18 +7,20 @@
 
 #include <variant>
 
-class TokenTemplates {
+namespace ast {
+    class TokenTemplates {
 
-  public:
-    template <class T, class... Ts, class Type>
-    [[nodiscard]] static bool tokenEquals(const std::variant<Ts...>& variant, Type type) {
-        return std::holds_alternative<T>(variant) && std::get<T>(variant) == type;
-    }
+      public:
+        template <class T, class... Ts, class Type>
+        [[nodiscard]] static bool tokenEquals(const std::variant<Ts...>& variant, Type type) {
+            return std::holds_alternative<T>(variant) && std::get<T>(variant) == type;
+        }
 
-    template <class T, class... Ts, class Type>
-    [[nodiscard]] static bool isTokenOfType(const std::variant<Ts...>& variant, Type type) {
-        return std::holds_alternative<T>(variant) && std::get<T>(variant).type() == type;
-    }
-};
+        template <class T, class... Ts, class Type>
+        [[nodiscard]] static bool isTokenOfType(const std::variant<Ts...>& variant, Type type) {
+            return std::holds_alternative<T>(variant) && std::get<T>(variant).type() == type;
+        }
+    };
+} // namespace ast
 
 #endif // PRS_TOKENTEMPLATES_H

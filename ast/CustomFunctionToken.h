@@ -7,21 +7,23 @@
 
 #include <string>
 
-class CustomFunctionToken {
-    friend bool operator<(const CustomFunctionToken& left, const CustomFunctionToken& right);
+namespace ast {
+    class CustomFunctionToken {
+        friend bool operator<(const CustomFunctionToken& left, const CustomFunctionToken& right);
 
-  public:
-    CustomFunctionToken(std::string name, size_t argumentCount);
+      public:
+        CustomFunctionToken(std::string name, size_t argumentCount);
 
-    void                             setArgumentCount(size_t argumentCount);
-    [[nodiscard]] const std::string& name() const;
-    [[nodiscard]] size_t             argumentCount() const;
+        void                             setArgumentCount(size_t argumentCount);
+        [[nodiscard]] const std::string& name() const;
+        [[nodiscard]] size_t             argumentCount() const;
 
-    friend bool operator==(const CustomFunctionToken& r, const CustomFunctionToken& l);
+        friend bool operator==(const CustomFunctionToken& r, const CustomFunctionToken& l);
 
-  private:
-    std::string m_name;
-    size_t      m_argumentCount;
-};
+      private:
+        std::string m_name;
+        size_t      m_argumentCount;
+    };
+} // namespace ast
 
 #endif // PRS_CUSTOMFUNCTIONTOKEN_H

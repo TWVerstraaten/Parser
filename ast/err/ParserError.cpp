@@ -7,7 +7,7 @@
 #include <cassert>
 #include <utility>
 
-namespace err {
+namespace ast::err {
     ParserError::ParserError(TYPE type, std::string message, Range range) : m_type(type), m_message(std::move(message)), m_range(range) {
     }
 
@@ -36,4 +36,4 @@ namespace err {
         }
         assert(false);
     }
-} // namespace err
+} // namespace ast::err

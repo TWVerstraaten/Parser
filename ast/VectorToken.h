@@ -7,8 +7,11 @@
 
 #include <cstddef>
 
-struct VectorToken {
-    size_t m_dimension;
-};
+namespace ast {
+
+    struct VectorToken {
+        size_t m_dimension;
+    };
+} // namespace ast
 
 #endif // PRS_VECTORTOKEN_H

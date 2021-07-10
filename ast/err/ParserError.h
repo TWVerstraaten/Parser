@@ -5,11 +5,11 @@
 #ifndef PRS_PARSERERROR_H
 #define PRS_PARSERERROR_H
 
-#include "../Range.h"
+#include "../par/Range.h"
 
 #include <string>
 
-namespace err {
+namespace ast::err {
     class ParserError {
 
       public:

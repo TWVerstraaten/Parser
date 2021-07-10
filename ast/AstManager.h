@@ -14,27 +14,30 @@
 #include <map>
 #include <vector>
 
-class AstManager {
-  public:
-    AstManager();
+namespace ast {
 
-    void add(size_t index, Ast&& ast);
+    class AstManager {
+      public:
+        AstManager();
 
-    [[nodiscard]] std::string                 toString() const;
-    [[nodiscard]] const gen::DependencyGraph& dependencyGraph() const;
+        void add(size_t index, Ast&& ast);
 
-  private:
-    void setUnrollStatuses();
+        [[nodiscard]] std::string                 toString() const;
+        [[nodiscard]] const gen::DependencyGraph& dependencyGraph() const;
 
-    [[nodiscard]] UnrolledAst                     unroll(const Ast& ast) const;
-    [[nodiscard]] std::vector<UnrollCompanion>&   fromHeaderType(Header::HEADER_TYPE type);
-    [[nodiscard]] std::optional<UnrollCompanion*> fromIndex(size_t index);
-    [[nodiscard]] std::optional<UnrollCompanion*> fromFunctionName(const std::string& functionName);
-    [[nodiscard]] std::optional<UnrollCompanion*> fromFunctionToken(const CustomFunctionToken& functionToken);
-    [[nodiscard]] std::optional<UnrollCompanion*> fromComparator(const std::function<bool(const UnrollCompanion&)>& comparator);
+      private:
+        void setUnrollStatuses();
 
-    std::map<Header::HEADER_TYPE, std::vector<UnrollCompanion>> m_astTokens;
-    gen::DependencyGraph                                        m_dependencyGraph;
-};
+        [[nodiscard]] UnrolledAst                     unroll(const Ast& ast) const;
+        [[nodiscard]] std::vector<UnrollCompanion>&   fromHeaderType(Header::HEADER_TYPE type);
+        [[nodiscard]] std::optional<UnrollCompanion*> fromIndex(size_t index);
+        [[nodiscard]] std::optional<UnrollCompanion*> fromFunctionName(const std::string& functionName);
+        [[nodiscard]] std::optional<UnrollCompanion*> fromFunctionToken(const CustomFunctionToken& functionToken);
+        [[nodiscard]] std::optional<UnrollCompanion*> fromComparator(const std::function<bool(const UnrollCompanion&)>& comparator);
+
+        std::map<Header::HEADER_TYPE, std::vector<UnrollCompanion>> m_astTokens;
+        gen::DependencyGraph                                        m_dependencyGraph;
+    };
+} // namespace ast
 
 #endif // PRS_ASTMANAGER_H

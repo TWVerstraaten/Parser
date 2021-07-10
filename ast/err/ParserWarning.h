@@ -5,11 +5,11 @@
 #ifndef PRS_PARSERWARNING_H
 #define PRS_PARSERWARNING_H
 
-#include "../Range.h"
+#include "../par/Range.h"
 
 #include <string>
 
-namespace err {
+namespace ast::err {
     class ParserWarning {
 
       public:
@@ -24,6 +24,6 @@ namespace err {
         std::string m_message;
         Range       m_range;
     };
-} // namespace err
+} // namespace ast::err
 
 #endif // PRS_PARSERWARNING_H

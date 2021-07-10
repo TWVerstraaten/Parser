@@ -6,7 +6,7 @@
 
 #include <iostream>
 
-namespace err {
+namespace ast::err {
 
     void ParserInfo::addError(ParserError&& error) {
         m_errors.emplace_back(std::move(error));

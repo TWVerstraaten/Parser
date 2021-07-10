@@ -13,40 +13,43 @@
 #include <variant>
 #include <vector>
 
-class AstToken;
+namespace ast {
 
-class UnrolledAstToken {
+    class AstToken;
 
-  public:
-    struct Plus {};
-    struct Minus {};
-    struct Times {};
-    struct Divide {};
-    struct Power {};
-    struct UnaryMinus {};
+    class UnrolledAstToken {
 
-    typedef std::variant<Plus, Minus, Times, Divide, Power, UnaryMinus, rsrvd::Reserved, VectorToken, std::string, double, long long> UnrolledToken;
+      public:
+        struct Plus {};
+        struct Minus {};
+        struct Times {};
+        struct Divide {};
+        struct Power {};
+        struct UnaryMinus {};
 
-    explicit UnrolledAstToken(const AstToken& astToken);
+        typedef std::variant<Plus, Minus, Times, Divide, Power, UnaryMinus, rsrvd::Reserved, VectorToken, std::string, double, long long> UnrolledToken;
 
-    void simplify();
+        explicit UnrolledAstToken(const AstToken& astToken);
 
-    void setVariableInPlace(const std::string& variable, const gen::Number& number);
+        void simplify();
 
-    [[nodiscard]] bool                                 isNumeric() const;
-    [[nodiscard]] double                               toDouble() const;
-    [[nodiscard]] gen::Number                          toNumber() const;
-    [[nodiscard]] std::string                          toString() const;
-    [[nodiscard]] const UnrolledToken&                 token() const;
-    [[nodiscard]] const std::vector<UnrolledAstToken>& children() const;
+        void setVariableInPlace(const std::string& variable, const gen::Number& number);
 
-  private:
-    void simplifyFunction();
-    void unWrap1DVectors();
-    void setVariableInternal(const std::string& variable, const gen::Number& number);
+        [[nodiscard]] bool                                 isNumeric() const;
+        [[nodiscard]] double                               toDouble() const;
+        [[nodiscard]] gen::Number                          toNumber() const;
+        [[nodiscard]] std::string                          toString() const;
+        [[nodiscard]] const UnrolledToken&                 token() const;
+        [[nodiscard]] const std::vector<UnrolledAstToken>& children() const;
 
-    UnrolledToken                 m_token;
-    std::vector<UnrolledAstToken> m_children;
-};
+      private:
+        void simplifyFunction();
+        void unWrap1DVectors();
+        void setVariableInternal(const std::string& variable, const gen::Number& number);
+
+        UnrolledToken                 m_token;
+        std::vector<UnrolledAstToken> m_children;
+    };
+} // namespace ast
 
 #endif // PRS_UNROLLEDASTTOKEN_H

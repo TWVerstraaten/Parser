@@ -5,11 +5,11 @@
 #ifndef PRS_PARSERMESSAGE_H
 #define PRS_PARSERMESSAGE_H
 
-#include "../Range.h"
+#include "../par/Range.h"
 
 #include <string>
 
-namespace err {
+namespace ast::err {
     class ParserMessage {
 
       public:
