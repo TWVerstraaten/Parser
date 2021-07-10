@@ -4,7 +4,7 @@
 
 #include "Surface.h"
 
-#include "../fml/Formula.h"
+#include "../gen/Number.h"
 
 #include <QOpenGLShaderProgram>
 #include <cmath>
@@ -32,8 +32,10 @@ namespace app {
     }
 
     void Surface::fillBuffers(const fml::Formula& formula) {
-        const auto& variables = formula.declaredVariables();
-        assert(variables.size() == 2);
+        // TODO
+
+        //        const auto& variables = formula.declaredVariables();
+        //        assert(variables.size() == 2);
 
         std::map<std::string, gen::Number> valueMap;
 
@@ -48,13 +50,15 @@ namespace app {
 
         for (size_t i = 0; i != i_lim; ++i) {
             for (size_t j = 0; j != j_lim; ++j) {
-                const float x = 0.05f * i;
-                const float y = 0.05f * j;
-                valueMap.clear();
-                valueMap.insert({*variables.begin(), gen::Number(x)});
-                valueMap.insert({*std::next(variables.begin()), gen::Number(y)});
+//                const float x = 0.05f * i;
+//                const float y = 0.05f * j;
+//                valueMap.clear();
+                // TODO
+                //                valueMap.insert({*variables.begin(), gen::Number(x)});
+                //                valueMap.insert({*std::next(variables.begin()), gen::Number(y)});
 
-                vertices.push_back({{x, y, static_cast<float>(formula.eval(valueMap).toDouble())}, {0.3, 0.4, 0.8}});
+                // TODO
+                //                vertices.push_back({{x, y, static_cast<float>(formula.eval(valueMap).toDouble())}, {0.3, 0.4, 0.8}});
             }
         }
 
@@ -90,8 +94,8 @@ namespace app {
 
         for (size_t i = 0; i != i_lim; ++i) {
             for (size_t j = 0; j != j_lim; ++j) {
-                vertices.push_back({{o - 0.5f + 0.2f * i, o - 0.5f + 0.2f * j, -5.0f + o + 0.2f * sinf(1.3f * i * 0.3 * j - 0.2 * i)},
-                                    {0.15f * i, 0.15f * j, 0.02f * i + 0.04f * j}});
+                vertices.push_back(
+                    {{o - 0.5f + 0.2f * i, o - 0.5f + 0.2f * j, -5.0f + o + 0.2f * sinf(1.3f * i * 0.3 * j - 0.2 * i)}, {0.15f * i, 0.15f * j, 0.02f * i + 0.04f * j}});
             }
         }
         o -= 1.0f;

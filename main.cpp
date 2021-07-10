@@ -20,8 +20,8 @@ int main(int argc, char* argv[]) {
     //
     //    std::cout << m.toString() << '\n';
 
-    //            QApplication       a(argc, argv);
-    //            app::CentralWidget w;
-    //            w.show();
-    //            return a.exec();
+    QApplication       a(argc, argv);
+    app::CentralWidget w;
+    w.show();
+    return a.exec();
 }

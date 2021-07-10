@@ -24,8 +24,8 @@ namespace app {
         widget->setPalette(*palette);
     }
 
-    FormulaWidget::FormulaWidget(QWidget* parent) : QWidget(parent), m_index(m_maxIndex) {
-        ++m_maxIndex;
+    FormulaWidget::FormulaWidget(QWidget* parent) : QWidget(parent), m_index(S_MAX_INDEX) {
+        ++S_MAX_INDEX;
         m_success = false;
 
         initPointers();
@@ -48,7 +48,8 @@ namespace app {
         UndoRedoHandler::push(new cmd::SkipFirstRedoCommand(new cmd::FormulaChangedCommand(this, m_oldFormula, string)));
         m_oldFormula = string;
 
-        m_formula           = std::make_unique<fml::Formula>(string.toStdString());
+        // TODO
+        //        m_formula           = std::make_unique<fml::Formula>(string.toStdString());
         m_formulaWasUpdated = true;
 
         emit updated(m_index);
@@ -58,13 +59,15 @@ namespace app {
         setTextColor(m_lineEdit, Qt::black);
         QToolTip::hideText();
 
-        if (const auto hint = m_formula->getHints(); not hint.empty()) {
-            //            showToolTipAtLineEdit(251, QString::fromStdString(hint));
-            m_errorMessageLabel->setText(QString::fromStdString(hint));
-            m_errorMessageLabel->setStyleSheet("QLabel { color : rgb(0,0,251); }");
-        } else {
-            m_errorMessageLabel->setText("");
-        }
+        // TODO
+
+        //        if (const auto hint = m_formula->getHints(); not hint.empty()) {
+        //            //            showToolTipAtLineEdit(251, QString::fromStdString(hint));
+        //            m_errorMessageLabel->setText(QString::fromStdString(hint));
+        //            m_errorMessageLabel->setStyleSheet("QLabel { color : rgb(0,0,251); }");
+        //        } else {
+        //            m_errorMessageLabel->setText("");
+        //        }
         update();
     }
 
@@ -132,9 +135,9 @@ namespace app {
         return m_lineEdit;
     }
 
-    const fml::Formula* FormulaWidget::formula() const {
-        return m_formula.get();
-    }
+    //    const fml::Formula* FormulaWidget::formula() const {
+    //        return m_formula.get();
+    //    }
 
     void FormulaWidget::updateWidget() {
         if (m_success) {

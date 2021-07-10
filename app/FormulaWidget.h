@@ -5,7 +5,7 @@
 #ifndef PARSER_FORMULAWIDGET_H
 #define PARSER_FORMULAWIDGET_H
 
-#include "../fml/Formula.h"
+#include "../gen/ErrorBase.h"
 
 #include <QWidget>
 
@@ -30,12 +30,12 @@ namespace app {
 
         void updateWidget();
 
-        [[nodiscard]] size_t              index() const;
-        [[nodiscard]] QLineEdit*          lineEdit();
-        [[nodiscard]] const fml::Formula* formula() const;
-        [[nodiscard]] bool                isActive() const;
-        [[nodiscard]] bool                formulaWasUpdated() const;
-        void                              setFormulaWasUpdated(bool formulaWasUpdated);
+        [[nodiscard]] size_t     index() const;
+        [[nodiscard]] QLineEdit* lineEdit();
+        //        [[nodiscard]] const fml::Formula* formula() const;
+        [[nodiscard]] bool isActive() const;
+        [[nodiscard]] bool formulaWasUpdated() const;
+        void               setFormulaWasUpdated(bool formulaWasUpdated);
 
       signals:
         void deleteClicked(size_t index);
@@ -53,7 +53,7 @@ namespace app {
         void connectSignals();
         void showToolTipAtLineEdit(QRgb textColor, const QString& message);
 
-        inline static size_t m_maxIndex = 0;
+        inline static size_t S_MAX_INDEX = 0;
 
         const size_t                  m_index;
         bool                          m_optionsExpanded   = true;
@@ -65,7 +65,7 @@ namespace app {
         QPushButton*                  m_collapseButton    = nullptr;
         QLabel*                       m_errorMessageLabel = nullptr;
         QString                       m_oldFormula        = "";
-        std::unique_ptr<fml::Formula> m_formula;
+//        std::unique_ptr<fml::Formula> m_formula;
     };
 } // namespace app
 

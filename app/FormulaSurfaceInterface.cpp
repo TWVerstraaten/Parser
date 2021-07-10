@@ -4,7 +4,6 @@
 
 #include "FormulaSurfaceInterface.h"
 
-#include "../fml/Formula.h"
 #include "FormulaSideBar.h"
 #include "FormulaWidget.h"
 #include "OpenGlWidget.h"
@@ -28,12 +27,13 @@ void app::FormulaSurfaceInterface::updateSurfaces() {
         if (formulaWidget->isHidden() || not formulaWidget->isActive() || not formulaWidget->success()) {
             continue;
         }
-        const auto* formula = formulaWidget->formula();
-        if (formula->declaredVariables().size() == 2) {
-            std::unique_ptr<Surface> newSurface = std::make_unique<Surface>();
-            newSurface->fillBuffers(*formula);
-            surfaceManager->add(std::move(newSurface));
-        }
+        // TODO
+        //        const auto* formula = formulaWidget->formula();
+        //        if (formula->declaredVariables().size() == 2) {
+        //            std::unique_ptr<Surface> newSurface = std::make_unique<Surface>();
+        //            newSurface->fillBuffers(*formula);
+        //            surfaceManager->add(std::move(newSurface));
+        //        }
     }
     m_openGlWidget->repaint();
 }
