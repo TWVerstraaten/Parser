@@ -15,10 +15,8 @@
 #include <QCheckBox>
 #include <QDebug>
 #include <QGridLayout>
-#include <QLabel>
 #include <QPushButton>
 #include <QToolTip>
-#include <iostream>
 
 namespace app {
 
@@ -28,12 +26,11 @@ namespace app {
 
         initPointers();
         initButtons();
-        initTextEdit();
         initLayout();
 
         connectSignals();
         m_textEdit->installEventFilter(UndoRedoConsumer::undoRedoConsumer());
-
+        m_layout->setSpacing(0);
         m_layout->setAlignment(Qt::AlignTop);
     }
 
@@ -50,9 +47,11 @@ namespace app {
         cursor.setCharFormat(fmt);
         m_textEdit->blockSignals(false);
 
-        const auto           str = string.toStdString();
-        ast::err::ParserInfo info;
-        const auto           astOptional = ast::par::Parser::S_PARSE(str, info);
+        const auto str = string.toStdString();
+        //        ast::err::ParserInfo info;
+        //        const auto           astOptional = ast::par::Parser::S_PARSE(str, info);
+        ast::Ast ast(str);
+        auto     info = ast.info();
         m_textEdit->setInfo(std::move(info));
 
         // TODO
@@ -86,11 +85,14 @@ namespace app {
     }
 
     void FormulaWidget::initPointers() {
-        m_layout         = new QGridLayout(this);
+        m_textEdit = new TextEdit(this);
+        m_layout   = new QGridLayout(this);
+
         m_activeCheckBox = new QCheckBox(this);
         m_activeCheckBox->setChecked(true);
-        m_textEdit     = new TextEdit(this);
+
         m_deleteButton = new QPushButton{this};
+        m_deleteButton->setFixedHeight(m_textEdit->height());
     }
 
     void FormulaWidget::initButtons() {
@@ -98,19 +100,11 @@ namespace app {
         m_deleteButton->setFixedSize(20, 20);
     }
 
-    void FormulaWidget::initTextEdit() {
-        m_textEdit->setLineWrapMode(QTextEdit::NoWrap);
-        QFontMetrics metrics(m_textEdit->font());
-        m_textEdit->setFixedHeight(metrics.lineSpacing() + 4);
-        m_textEdit->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        m_textEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        m_textEdit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-    }
-
     void FormulaWidget::initLayout() {
         m_layout->addWidget(m_activeCheckBox, 0, 0);
         m_layout->addWidget(m_textEdit, 0, 1);
         m_layout->addWidget(m_deleteButton, 0, 2);
+        m_layout->setContentsMargins(3, 0, 0, 3);
     }
 
     void FormulaWidget::connectSignals() {

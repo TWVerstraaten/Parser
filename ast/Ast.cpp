@@ -7,6 +7,7 @@
 #include "../gen/Overloaded.h"
 #include "par/Parser.h"
 
+#include <QDebug>
 #include <cassert>
 #include <iostream>
 
@@ -18,7 +19,6 @@ namespace ast {
         }
         if (success()) {
             checkAndSetHeader();
-            m_functionDependencies = m_rootNode.getCustomFunctionDependencies();
         } else {
             m_info.printAll();
         }
@@ -33,7 +33,7 @@ namespace ast {
     }
 
     std::set<par::CustomFunctionToken> Ast::functionDependencies() const {
-        return m_functionDependencies;
+        return m_rootNode.getCustomFunctionDependencies();
     }
 
     std::set<std::string> Ast::variablesUsed() const {
@@ -66,7 +66,10 @@ namespace ast {
             assert(headerAst.children().empty());
             m_header = Header{std::get<std::string>(headerAst.token())};
         } else if (std::holds_alternative<par::CustomFunctionToken>(headerAst.token())) {
-            m_header = Header(std::get<par::CustomFunctionToken>(headerAst.token()), headerAst);
+            checkArgumentsIfFullHeader();
+            if (m_info.success()) {
+                m_header = Header(std::get<par::CustomFunctionToken>(headerAst.token()), headerAst);
+            }
         } else {
             assert(std::holds_alternative<par::VectorToken>(headerAst.token()));
             m_header = Header(std::get<par::VectorToken>(headerAst.token()), headerAst);
@@ -115,12 +118,10 @@ namespace ast {
         assert(std::holds_alternative<ast::par::AstToken::OPERATOR_TYPE>(functionToken.m_rootNode.token()));
         assert(std::get<ast::par::AstToken::OPERATOR_TYPE>(functionToken.m_rootNode.token()) == ast::par::AstToken::OPERATOR_TYPE::EQUALS);
         m_rootNode.replaceFunction(fullHeader, functionToken.body());
-        m_functionDependencies = m_rootNode.getCustomFunctionDependencies();
     }
 
     bool Ast::hasCustomDependencies() const {
-        assert(m_functionDependencies == m_rootNode.getCustomFunctionDependencies());
-        return not m_functionDependencies.empty();
+        return not m_rootNode.getCustomFunctionDependencies().empty();
     }
 
     std::string Ast::toStringFlat() const {
@@ -146,5 +147,60 @@ namespace ast {
 
                           },
                           m_header.headerVariant());
+    }
+
+    void Ast::checkArgumentsIfFullHeader() {
+        assert(std::holds_alternative<ast::par::CustomFunctionToken>(m_rootNode.children().front().token()));
+        const auto& arguments = m_rootNode.children().front().children();
+        if (arguments.empty()) {
+            m_info.addError(err::ParserError{err::ParserError::TYPE::NO_ARGUMENTS, "", m_rootNode.children().front().range()});
+        }
+        checkIfArgumentsAreStrings();
+        if (m_info.success()) {
+            checkRepeatedArguments();
+        }
+        if (m_info.success()) {
+            checkUnusedArguments();
+        }
+    }
+
+    void Ast::checkIfArgumentsAreStrings() {
+        assert(std::holds_alternative<ast::par::CustomFunctionToken>(m_rootNode.children().front().token()));
+        const auto& arguments = m_rootNode.children().front().children();
+        for (const auto& argument : arguments) {
+            if (not std::holds_alternative<std::string>(argument.token())) {
+                if (std::holds_alternative<ast::par::AstToken::Empty>(argument.token())) {
+                    m_info.addError(err::ParserError{err::ParserError::TYPE::EMPTY_ARGUMENT, "", m_rootNode.children().front().range()});
+                } else {
+                    m_info.addError(err::ParserError{err::ParserError::TYPE::NOT_AN_ARGUMENT, argument.toStringFlat(), argument.range()});
+                }
+            }
+        }
+    }
+
+    void Ast::checkRepeatedArguments() {
+        assert(std::holds_alternative<ast::par::CustomFunctionToken>(m_rootNode.children().front().token()));
+        const auto& arguments = m_rootNode.children().front().children();
+        if (arguments.size() > 1) {
+            for (auto it1 = arguments.begin(); std::next(it1) != arguments.end(); ++it1) {
+                const auto& argument = std::get<std::string>(it1->token());
+                if (auto it2 = std::find_if(std::next(it1), arguments.end(), [&](const auto& a) { return std::get<std::string>(a.token()) == argument; }); it2 != arguments.end()) {
+                    m_info.addError(err::ParserError{err::ParserError::TYPE::REPEATED_ARGUMENT, argument, it2->range()});
+                    m_info.addError(err::ParserError{err::ParserError::TYPE::REPEATED_ARGUMENT, argument, it1->range()});
+                }
+            }
+        }
+    }
+
+    void Ast::checkUnusedArguments() {
+        assert(std::holds_alternative<ast::par::CustomFunctionToken>(m_rootNode.children().front().token()));
+        const auto& arguments     = m_rootNode.children().front().children();
+        const auto  usedVariables = variablesUsed();
+        for (const auto& el : arguments) {
+            const auto& argument = std::get<std::string>(el.token());
+            if (usedVariables.find(argument) == usedVariables.end()) {
+                m_info.addMessage(err::ParserMessage{err::ParserMessage::UNUSED_ARGUMENT, argument, el.range()});
+            }
+        }
     }
 } // namespace ast

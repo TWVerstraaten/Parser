@@ -33,6 +33,14 @@ namespace ast::err {
                 return "Generic Parser Error: " + m_message + " at " + m_range.toString();
             case TYPE::UNFINISHED:
                 return "Unfinished Formula: naked ending " + m_message + " at " + m_range.toString();
+            case TYPE::NOT_AN_ARGUMENT:
+                return "Not an argument: " + m_message + " at " + m_range.toString();
+            case TYPE::EMPTY_ARGUMENT:
+                return "Empty argument: at " + m_range.toString();
+            case TYPE::NO_ARGUMENTS:
+                return "Constant should have no argument brackets: at " + m_range.toString();
+            case TYPE::REPEATED_ARGUMENT:
+                return "Repeated argument: " + m_message + " at " + m_range.toString();
         }
         assert(false);
     }

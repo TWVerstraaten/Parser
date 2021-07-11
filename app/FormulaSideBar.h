@@ -34,7 +34,7 @@ namespace app {
         void sendUpdate();
 
       private slots:
-        void RemoveFormulaWidget(size_t indexOfWidget);
+        void removeFormulaWidget(size_t indexOfWidget);
         void addNewFormulaWidget();
         void checkForRedeclarations();
 

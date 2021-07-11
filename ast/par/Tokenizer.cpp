@@ -27,6 +27,27 @@ namespace ast::par {
         replaceUnaryMinuses();
         checkIdentifierNumberPatternWithNoSpace();
         checkLeadingDotsInNumbers();
+        insertMultiplications();
+    }
+
+    void Tokenizer::insertMultiplications() {
+        if (m_tokenList.size() <= 1) {
+            return;
+        }
+        static const std::set<std::pair<Token::TYPE, Token::TYPE>> S_INSERT_MULTIPLICATION_PATTERN = {{Token::TYPE::IDENTIFIER, Token::TYPE::IDENTIFIER},
+                                                                                                      {Token::TYPE::NUMBER, Token::TYPE::NUMBER},
+                                                                                                      {Token::TYPE::IDENTIFIER, Token::TYPE::NUMBER},
+                                                                                                      {Token::TYPE::NUMBER, Token::TYPE::IDENTIFIER},
+                                                                                                      {Token::TYPE::RIGHT_BR, Token::TYPE::LEFT_BR},
+                                                                                                      {Token::TYPE::RIGHT_BR, Token::TYPE::NUMBER},
+                                                                                                      {Token::TYPE::RIGHT_BR, Token::TYPE::IDENTIFIER},
+                                                                                                      {Token::TYPE::NUMBER, Token::TYPE::LEFT_BR}};
+        for (auto it = m_tokenList.begin(); std::next(it) != m_tokenList.end(); ++it) {
+            if (S_INSERT_MULTIPLICATION_PATTERN.find({it->type(), std::next(it)->type()}) != S_INSERT_MULTIPLICATION_PATTERN.end()) {
+                m_info.addMessage({err::ParserMessage::TYPE::INSERT_MULTIPLICATION, "", {it->range().startIndex(), std::next(it)->range().endIndex()}});
+                it = m_tokenList.insert(std::next(it), Token{Token::TYPE::TIMES, "", {}});
+            }
+        }
     }
 
     const std::list<Token>& Tokenizer::tokenList() const {
@@ -34,10 +55,10 @@ namespace ast::par {
     }
 
     void Tokenizer::findIllegalCharacters() {
-        static const std::string ALLOWED_SPECIAL_CHARACTERS = ".,()+-*/^=\t ";
+        static const std::string S_ALLOWED_SPECIAL_CHARACTERS = ".,()+-*/^=\t ";
         for (size_t i = 0; i != m_string.size(); ++i) {
             const char c = m_string.at(i);
-            if (not isalnum(c) && ALLOWED_SPECIAL_CHARACTERS.find_first_of(c) == std::string::npos) {
+            if (not isalnum(c) && S_ALLOWED_SPECIAL_CHARACTERS.find_first_of(c) == std::string::npos) {
                 m_info.addError({err::ParserError::TYPE::ILLEGAL_CHARACTER, std::string(1, c), {i, i}});
             }
         }
@@ -131,16 +152,16 @@ namespace ast::par {
     }
 
     void Tokenizer::checkBrackets() {
-        size_t bracketDepth = 0;
-        for (auto& token : m_tokenList) {
-            if (token.type() == Token::TYPE::LEFT_BR) {
+        int bracketDepth = 0;
+        for (auto it = m_tokenList.begin(); it != m_tokenList.end(); ++it) {
+            if (it->type() == Token::TYPE::LEFT_BR) {
                 ++bracketDepth;
-            } else if (token.type() == Token::TYPE::RIGHT_BR) {
-                if (bracketDepth == 0) {
-                    m_info.addError({err::ParserError::TYPE::UNMATCHED_CLOSING_BR, "", token.range()});
-                    return;
+            } else if (it->type() == Token::TYPE::RIGHT_BR) {
+                if (bracketDepth <= 0) {
+                    m_info.addError({err::ParserError::TYPE::UNMATCHED_CLOSING_BR, "", it->range()});
+                } else {
+                    --bracketDepth;
                 }
-                --bracketDepth;
             }
         }
         bracketDepth = 0;
@@ -148,20 +169,22 @@ namespace ast::par {
             if (it->type() == Token::TYPE::RIGHT_BR) {
                 ++bracketDepth;
             } else if (it->type() == Token::TYPE::LEFT_BR) {
-                if (bracketDepth == 0) {
+                if (bracketDepth <= 0) {
                     m_info.addError({err::ParserError::TYPE::UNMATCHED_OPEN_BR, "", it->range()});
-                    return;
+                } else {
+                    --bracketDepth;
                 }
-                --bracketDepth;
             }
         }
     }
 
     void Tokenizer::checkDoubleEquals() {
-        if (auto it = std::find_if(TT_IT(m_tokenList), TT_LAMBDA(a, return a.type() == Token::TYPE::EQUALS;)); it == m_tokenList.end()) {
-            return;
-        } else if (it = std::find_if(std::next(it), m_tokenList.end(), TT_LAMBDA(a, return a.type() == Token::TYPE::EQUALS;)); it != m_tokenList.end()) {
-            m_info.addError({err::ParserError::TYPE::TOO_MANY_EQUALS, "", it->range()});
+        const size_t equalCount = std::count_if(TT_IT(m_tokenList), TT_LAMBDA(a, return a.type() == Token::TYPE::EQUALS;));
+        if (equalCount >= 2) {
+            for (auto it = std::find_if(TT_IT(m_tokenList), TT_LAMBDA(a, return a.type() == Token::TYPE::EQUALS;)); it != m_tokenList.end();
+                 it      = std::find_if(std::next(it), m_tokenList.end(), TT_LAMBDA(a, return a.type() == Token::TYPE::EQUALS;))) {
+                m_info.addError({err::ParserError::TYPE::TOO_MANY_EQUALS, "", it->range()});
+            }
         }
     }
 
@@ -221,4 +244,5 @@ namespace ast::par {
             }
         }
     }
+
 } // namespace ast::par

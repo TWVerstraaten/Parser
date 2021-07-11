@@ -33,7 +33,7 @@ namespace ast::par {
       private:
         void addStringTokenToStructuralTokens(const Token& token);
         void addNumberTokenToStructuralTokens(const Token& token);
-        void insertMultiplicationWhereNeeded(std::list<StructuralToken>& structuralTokens);
+//        void insertMultiplicationWhereNeeded(std::list<StructuralToken>& structuralTokens);
 
         [[nodiscard]] static std::optional<std::string>                     S_PARSE_IDENTIFIER_TOKEN(const Token& token);
         [[nodiscard]] static std::optional<std::variant<double, long long>> S_PARSE_NUMBER_TOKEN(const Token& token);

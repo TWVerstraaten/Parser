@@ -23,6 +23,10 @@ namespace ast::err {
             WRONG_ARGUMENT_COUNT_RESERVED,
             NUMBER_ERROR,
             UNFINISHED,
+            NOT_AN_ARGUMENT,
+            EMPTY_ARGUMENT,
+            NO_ARGUMENTS,
+            REPEATED_ARGUMENT,
             GENERIC
         };
 

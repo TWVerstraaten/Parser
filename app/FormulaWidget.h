@@ -12,7 +12,6 @@
 
 class QCheckBox;
 class QGridLayout;
-class QLabel;
 class QPushButton;
 class TextEdit;
 
@@ -54,7 +53,6 @@ namespace app {
         void handleWrongFormula();
         void initPointers();
         void initButtons();
-        void initTextEdit();
         void initLayout();
         void connectSignals();
 

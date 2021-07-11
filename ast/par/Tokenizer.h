@@ -32,6 +32,7 @@ namespace ast::par {
         void checkRepeatedOperators();
         void checkIdentifierNumberPatternWithNoSpace();
         void checkLeadingDotsInNumbers();
+        void insertMultiplications();
 
         const std::string     m_string;
         std::list<Token>      m_tokenList;

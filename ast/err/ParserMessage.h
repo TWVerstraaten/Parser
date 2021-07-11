@@ -13,11 +13,12 @@ namespace ast::err {
     class ParserMessage {
 
       public:
-        enum TYPE { INSERT_MULTIPLICATION };
+        enum TYPE { INSERT_MULTIPLICATION, UNUSED_ARGUMENT };
 
         ParserMessage(TYPE type, std::string message, par::Range range = {});
 
-        [[nodiscard]] std::string toString() const;
+        [[nodiscard]] std::string       toString() const;
+        [[nodiscard]] const par::Range& range() const;
 
       private:
         TYPE        m_type;

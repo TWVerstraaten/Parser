@@ -9,17 +9,22 @@
 #include <QMouseEvent>
 #include <QToolTip>
 
-enum class CHAR_FORMATS { ERROR, WARNING };
+enum class CHAR_FORMATS { ERROR, WARNING, MESSAGE };
 
 QTextCharFormat S_CHAR_FORMAT(CHAR_FORMATS charFormat) {
     QTextCharFormat qTextCharFormat;
     switch (charFormat) {
         case CHAR_FORMATS::ERROR:
-            qTextCharFormat.setForeground(Qt::red);
+            qTextCharFormat.setUnderlineColor(Qt::red);
+            qTextCharFormat.setUnderlineStyle(QTextCharFormat::WaveUnderline);
             break;
         case CHAR_FORMATS::WARNING:
             qTextCharFormat.setUnderlineColor(Qt::blue);
             qTextCharFormat.setUnderlineStyle(QTextCharFormat::WaveUnderline);
+            break;
+        case CHAR_FORMATS::MESSAGE:
+            qTextCharFormat.setUnderlineColor(Qt::darkGray);
+            qTextCharFormat.setUnderlineStyle(QTextCharFormat::SingleUnderline);
             break;
     }
     return qTextCharFormat;
@@ -48,35 +53,53 @@ static void S_SET_TOOLTIP_PALETTE(const QColor& base, const QColor& text) {
 
 TextEdit::TextEdit(QWidget* parent) : QTextEdit(parent) {
     setMouseTracking(true);
+    setLineWrapMode(QTextEdit::NoWrap);
+    QFontMetrics metrics(font());
+    setFixedHeight(metrics.lineSpacing() + 8);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+    //    QFont font("Monospace");
+    //    font.setStyleHint(QFont::TypeWriter);
+    //    setFont(font);
 }
 
 void TextEdit::mouseMoveEvent(QMouseEvent* e) {
-    size_t charPosition = QTextCursor(cursorForPosition(e->pos())).position();
+    const auto charPosition = QTextCursor(cursorForPosition(e->pos())).position();
+    const auto rangeCheck   = [charPosition](const auto& a) { return a.range().isInRange(charPosition); };
 
-    if (auto it = std::find_if(TT_IT(m_info.errors()), TT_LAMBDA_REF(a, return a.range().isInRange(charPosition);)); it != m_info.errors().end()) {
+    if (auto errorIt = std::find_if(TT_IT(m_info.errors()), rangeCheck); errorIt != m_info.errors().end()) {
         S_SET_TOOLTIP_PALETTE(QColor(16185078), Qt::red);
-        QToolTip::showText(mapToGlobal(e->pos()), QString::fromStdString(it->toString()));
-    } else if (auto it2 = std::find_if(TT_IT(m_info.warnings()), TT_LAMBDA_REF(a, return a.range().isInRange(charPosition);)); it2 != m_info.warnings().end()) {
+        QToolTip::showText(mapToGlobal(e->pos()), QString::fromStdString(errorIt->toString()));
+    } else if (auto warningIt = std::find_if(TT_IT(m_info.warnings()), rangeCheck); warningIt != m_info.warnings().end()) {
         S_SET_TOOLTIP_PALETTE(QColor(16185078), Qt::blue);
-        QToolTip::showText(mapToGlobal(e->pos()), QString::fromStdString(it2->toString()));
+        QToolTip::showText(mapToGlobal(e->pos()), QString::fromStdString(warningIt->toString()));
+    } else if (auto messageIt = std::find_if(TT_IT(m_info.messages()), rangeCheck); messageIt != m_info.messages().end()) {
+        S_SET_TOOLTIP_PALETTE(QColor(16185078), Qt::black);
+        QToolTip::showText(mapToGlobal(e->pos()), QString::fromStdString(messageIt->toString()));
     }
-
     QTextEdit::mouseMoveEvent(e);
 }
 
 void TextEdit::setInfo(ast::err::ParserInfo&& info) {
     m_info = std::move(info);
+    blockSignals(true);
     highlightInfo();
+    determineAndSetTextColor();
+
+    blockSignals(false);
 }
 
 void TextEdit::highlightInfo() {
-    blockSignals(true);
+    S_HIGHLIGHT_FROM_CONTAINER(m_info.messages(), document(), S_CHAR_FORMAT(CHAR_FORMATS::MESSAGE));
+    S_HIGHLIGHT_FROM_CONTAINER(m_info.warnings(), document(), S_CHAR_FORMAT(CHAR_FORMATS::WARNING));
+    S_HIGHLIGHT_FROM_CONTAINER(m_info.errors(), document(), S_CHAR_FORMAT(CHAR_FORMATS::ERROR));
+}
 
-    const auto& errors   = m_info.errors();
-    const auto& warnings = m_info.warnings();
-
-    S_HIGHLIGHT_FROM_CONTAINER(errors, document(), S_CHAR_FORMAT(CHAR_FORMATS::ERROR));
-    S_HIGHLIGHT_FROM_CONTAINER(warnings, document(), S_CHAR_FORMAT(CHAR_FORMATS::WARNING));
-
-    blockSignals(false);
+void TextEdit::determineAndSetTextColor() {
+    const auto& textColor = m_info.success() ? Qt::black : Qt::red;
+    QTextCursor cursor    = textCursor();
+    selectAll();
+    setTextColor(textColor);
+    setTextCursor(cursor);
 }

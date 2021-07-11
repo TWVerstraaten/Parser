@@ -21,6 +21,7 @@ class TextEdit : public QTextEdit {
 
   private:
     void highlightInfo();
+    void determineAndSetTextColor();
 
     ast::err::ParserInfo m_info;
 };

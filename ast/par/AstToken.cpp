@@ -101,7 +101,7 @@ namespace ast::par {
         S_REPLACE_TOKEN_OPERATORS(tempTokens, info, {{Token::TYPE::PLUS, AstToken::OPERATOR_TYPE::PLUS}, {Token::TYPE::MINUS, AstToken::OPERATOR_TYPE::MINUS}});
 
         if (tempTokens.size() > 1) {
-            info.addError(err::ParserError{err::ParserError::TYPE::GENERIC, std::string("More than one token left at AstToken? ") + TT_WHERE_STRING, m_range});
+            info.addError(err::ParserError{err::ParserError::TYPE::GENERIC, std::string("More than one token left at AstToken? "), m_range});
             return;
         }
         if (not std::holds_alternative<AstToken>(tempTokens.front())) {

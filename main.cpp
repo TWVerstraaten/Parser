@@ -5,12 +5,13 @@
 #include <iostream>
 
 int main(int argc, char* argv[]) {
-    ast::Ast a1{"f(y)=a*(x,y)"};
-    std::cout << a1.toStringFlat() << "\t csts:\t";
-    for (const auto& el : a1.constantDependencies()) {
-        std::cout << el << "\t";
-    }
-    std::cout << "\n\n";
+    ast::Ast a1{"f(y)=2*(1+2) -4"};
+    //    std::cout << a1.toStringFlat() << "\t csts:\t";
+    //    for (const auto& el : a1.constantDependencies()) {
+    //        std::cout << el << "\t";
+    //    }
+    //    std::cout << "\n\n";
+    std::cout << a1.toStringAsTree() << '\n';
 
     //    AstManager m;
     //

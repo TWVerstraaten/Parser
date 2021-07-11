@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <iostream>
 #include <sstream>
 
 namespace ast::par {
@@ -34,7 +35,7 @@ namespace ast::par {
         }
         if (info.success()) {
             extractFunctionsAndBracketsFromStructuralTokens();
-            insertMultiplicationWhereNeeded(m_tokenList);
+            //            insertMultiplicationWhereNeeded(m_tokenList);
         }
     }
 
@@ -91,10 +92,10 @@ namespace ast::par {
             return {};
         }
         try {
-            if (string.at(0) == '.') {
-                return dotCount == 0 ? std::variant<double, long long>(std::stoll("0" + string)) : std::stod("0" + string);
+            if (dotCount == 0) {
+                return std::variant<double, long long>(std::stoll(string));
             } else {
-                return dotCount == 0 ? std::variant<double, long long>(std::stoll(string)) : std::stod(string);
+                return std::variant<double, long long>(std::stod(string.at(0) == '.' ? "0" + string : string));
             }
         } catch (...) { return {}; }
     }
@@ -116,22 +117,4 @@ namespace ast::par {
         return m_tokenList;
     }
 
-    void StructuralTokenizer::insertMultiplicationWhereNeeded(std::list<StructuralToken>& structuralTokens) {
-        if (structuralTokens.empty()) {
-            return;
-        }
-        for (auto it = structuralTokens.begin(); it != structuralTokens.end(); ++it) {
-            if (std::next(it) != structuralTokens.end() && not(std::holds_alternative<Token>((*it).token()) || std::holds_alternative<Token>((*std::next(it)).token()))) {
-                m_info.addMessage({err::ParserMessage::TYPE::INSERT_MULTIPLICATION, "", {it->range().endIndex() + 1, it->range().endIndex() + 1}});
-                it = structuralTokens.insert(std::next(it), StructuralToken{Token{Token::TYPE::TIMES, "* (inferred)", {}}});
-            }
-            std::visit(
-                Overloaded{[this](StructuralToken::Function& function) {
-                               std::for_each(TT_IT(function.m_arguments.m_tokenLists), [this](auto& a) { insertMultiplicationWhereNeeded(a); });
-                           },
-                           [this](StructuralToken::Bracketed& bracketed) { std::for_each(TT_IT(bracketed.m_tokenLists), [this](auto& a) { insertMultiplicationWhereNeeded(a); }); },
-                           [](const auto) {}},
-                (*it).token());
-        }
-    }
 } // namespace ast::par

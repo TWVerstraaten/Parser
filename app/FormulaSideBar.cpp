@@ -27,7 +27,8 @@ namespace app {
         addNewFormulaWidget();
         addNewFormulaWidget();
         UndoRedoHandler::setPushBlocked(false);
-
+        m_layout->setSpacing(0);
+        m_layout->setContentsMargins(2, 0, 0, 2);
         m_layout->setAlignment(Qt::AlignTop);
         setBaseSize({400, 800});
         installEventFilter(UndoRedoConsumer::undoRedoConsumer());
@@ -37,7 +38,7 @@ namespace app {
         auto*      newFormulaWidget = new FormulaWidget(m_scrollArea->widget());
         const auto newFormulaIndex  = newFormulaWidget->index();
         connect(newFormulaWidget, &FormulaWidget::updated, [this](size_t index) { updateAt(index); });
-        connect(newFormulaWidget, &FormulaWidget::deleteClicked, this, &FormulaSideBar::RemoveFormulaWidget);
+        connect(newFormulaWidget, &FormulaWidget::deleteClicked, this, &FormulaSideBar::removeFormulaWidget);
 
         m_formulaWidgets.push_back(newFormulaWidget);
         UndoRedoHandler::push(new cmd::NewFormulaWidgetCommand(this, newFormulaIndex));
@@ -51,7 +52,7 @@ namespace app {
         return *std::find_if(m_formulaWidgets.begin(), m_formulaWidgets.end(), [index](FormulaWidget* widget) { return widget->index() == index; });
     }
 
-    void FormulaSideBar::RemoveFormulaWidget(size_t indexOfWidget) {
+    void FormulaSideBar::removeFormulaWidget(size_t indexOfWidget) {
         UndoRedoHandler::push(new cmd::RemoveFormulaWidgetCommand(this, indexOfWidget));
         updateAt(indexOfWidget);
     }

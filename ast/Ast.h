@@ -38,12 +38,15 @@ namespace ast {
       private:
         void checkAndSetHeader();
         void buildNonEmptyHeader();
+        void checkArgumentsIfFullHeader();
+        void checkIfArgumentsAreStrings();
+        void checkRepeatedArguments();
+        void checkUnusedArguments();
 
-        err::ParserInfo                    m_info;
-        bool                               m_headerWasSet = false;
-        Header                             m_header;
-        par::AstToken                      m_rootNode;
-        std::set<par::CustomFunctionToken> m_functionDependencies;
+        bool            m_headerWasSet = false;
+        err::ParserInfo m_info;
+        Header          m_header;
+        par::AstToken   m_rootNode;
     };
 } // namespace ast
 
