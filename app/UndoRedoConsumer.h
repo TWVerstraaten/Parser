@@ -20,7 +20,7 @@ namespace app {
       protected:
         bool eventFilter(QObject* obj, QEvent* event) override;
 
-        static inline std::unique_ptr<UndoRedoConsumer> m_undoRedoConsumer{nullptr};
+        static inline std::unique_ptr<UndoRedoConsumer> S_UNDO_REDO_CONSUMER{nullptr};
     };
 } // namespace app
 

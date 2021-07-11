@@ -4,13 +4,10 @@
 
 #include "FormulaWidget.h"
 
-#include "../alg/StringAlg.h"
+#include "../ast/Ast.h"
 #include "../ast/par/Parser.h"
 #include "TextEdit.h"
-#include "UndoRedoConsumer.h"
-#include "UndoRedoHandler.h"
-#include "cmd/FormulaChangedCommand.h"
-#include "cmd/SkipFirstRedoCommand.h"
+#include "cmd/TextEditChangedCommand.h"
 
 #include <QCheckBox>
 #include <QDebug>
@@ -27,17 +24,14 @@ namespace app {
         initPointers();
         initButtons();
         initLayout();
-
         connectSignals();
-        m_textEdit->installEventFilter(UndoRedoConsumer::undoRedoConsumer());
+
         m_layout->setSpacing(0);
         m_layout->setAlignment(Qt::AlignTop);
     }
 
     void FormulaWidget::processFormula() {
         const auto string = m_textEdit->document()->toPlainText();
-        UndoRedoHandler::push(new cmd::SkipFirstRedoCommand(new cmd::FormulaChangedCommand(this, m_oldFormula, string)));
-        m_oldFormula = string;
 
         m_textEdit->blockSignals(true);
         QTextCursor     cursor(m_textEdit->document());
@@ -48,14 +42,12 @@ namespace app {
         m_textEdit->blockSignals(false);
 
         const auto str = string.toStdString();
-        //        ast::err::ParserInfo info;
-        //        const auto           astOptional = ast::par::Parser::S_PARSE(str, info);
-        ast::Ast ast(str);
-        auto     info = ast.info();
+        ast::Ast   ast(str);
+        auto       info = ast.info();
         m_textEdit->setInfo(std::move(info));
 
         // TODO
-        //        m_formula           = std::make_unique<fml::Formula>(string.toStdString());
+        //        m_textEdit           = std::make_unique<fml::Formula>(string.toStdString());
         m_formulaWasUpdated = true;
 
         emit updated(m_index);
@@ -66,7 +58,7 @@ namespace app {
 
         // TODO
 
-        //        if (const auto hint = m_formula->getHints(); not hint.empty()) {
+        //        if (const auto hint = m_textEdit->getHints(); not hint.empty()) {
         //            //            showToolTipAtLineEdit(251, QString::fromStdString(hint));
         //            m_errorMessageLabel->setText(QString::fromStdString(hint));
         //            m_errorMessageLabel->setStyleSheet("QLabel { color : rgb(0,0,251); }");
@@ -133,6 +125,7 @@ namespace app {
     bool FormulaWidget::formulaWasUpdated() const {
         return m_formulaWasUpdated;
     }
+
     void FormulaWidget::setFormulaWasUpdated(bool formulaWasUpdated) {
         m_formulaWasUpdated = formulaWasUpdated;
     }

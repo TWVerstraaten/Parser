@@ -4,40 +4,42 @@
 
 #include "UndoRedoHandler.h"
 
+#include <QDebug>
+
 namespace app {
-    void UndoRedoHandler::init() {
-        m_undoStack = std::make_unique<QUndoStack>(nullptr);
-        //        m_undoView  = std::make_unique<QUndoView>(m_undoStack.get());
-        //        m_undoView->show();
-        m_initialized = true;
-        m_undoStack->setUndoLimit(250);
+    void UndoRedoHandler::S_INIT() {
+        S_UNDO_STACK  = std::make_unique<QUndoStack>(nullptr);
+        S_INITIALIZED = true;
+        S_UNDO_STACK->setUndoLimit(250);
     }
 
-    void UndoRedoHandler::undo() {
-        if (not m_initialized) {
-            init();
+    void UndoRedoHandler::S_UNDO() {
+        if (not S_INITIALIZED) {
+            S_INIT();
         }
-        m_undoStack->undo();
+        qDebug() << "Undo!";
+        S_UNDO_STACK->undo();
     }
 
-    void UndoRedoHandler::redo() {
-        if (not m_initialized) {
-            init();
+    void UndoRedoHandler::S_REDO() {
+        if (not S_INITIALIZED) {
+            S_INIT();
         }
-        m_undoStack->redo();
+        qDebug() << "Redo!";
+        S_UNDO_STACK->redo();
     }
 
-    void UndoRedoHandler::push(QUndoCommand* undoCommand) {
-        if (not m_initialized) {
-            init();
+    void UndoRedoHandler::S_PUSH(QUndoCommand* undoCommand) {
+        if (not S_INITIALIZED) {
+            S_INIT();
         }
-        if (m_pushBlocked) {
+        if (S_PUSH_BLOCKED) {
             return;
         }
-        m_undoStack->push(undoCommand);
+        S_UNDO_STACK->push(undoCommand);
     }
 
-    void UndoRedoHandler::setPushBlocked(bool blocked) {
-        m_pushBlocked = blocked;
+    void UndoRedoHandler::S_SET_PUSH_BLOCKED(bool blocked) {
+        S_PUSH_BLOCKED = blocked;
     }
 } // namespace app

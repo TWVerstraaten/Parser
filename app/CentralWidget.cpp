@@ -7,6 +7,7 @@
 #include "FormulaSideBar.h"
 #include "OpenGlWidget.h"
 
+#include <QAction>
 #include <QHBoxLayout>
 #include <QKeyEvent>
 #include <QSplitter>
@@ -14,6 +15,7 @@
 app::CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent) {
     m_openGlWidget   = new OpenGlWidget(this);
     m_formulaSideBar = new FormulaSideBar(this);
+    m_formulaSideBar->setFocus();
 
     m_formulaSurfaceInterface = std::make_unique<FormulaSurfaceInterface>(m_openGlWidget, m_formulaSideBar);
 

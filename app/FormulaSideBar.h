@@ -5,6 +5,7 @@
 #ifndef PARSER_FORMULASIDEBAR_H
 #define PARSER_FORMULASIDEBAR_H
 
+#include <QUndoStack>
 #include <QWidget>
 #include <vector>
 
@@ -13,6 +14,7 @@ class QScrollArea;
 class QPushButton;
 
 namespace app {
+
     namespace cmd {
         class RemoveFormulaWidgetCommand;
     }
@@ -25,7 +27,7 @@ namespace app {
         friend class cmd::RemoveFormulaWidgetCommand;
 
       public:
-        explicit FormulaSideBar(QWidget* parent = nullptr);
+        FormulaSideBar(QWidget* parent);
 
         [[nodiscard]] FormulaWidget*                     fromIndex(size_t index);
         [[nodiscard]] const std::vector<FormulaWidget*>& formulaWidgets() const;

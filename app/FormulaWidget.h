@@ -5,7 +5,6 @@
 #ifndef APP_FORMULAWIDGET_H
 #define APP_FORMULAWIDGET_H
 
-#include "../ast/Ast.h"
 #include "../gen/ErrorBase.h"
 
 #include <QWidget>
@@ -13,33 +12,27 @@
 class QCheckBox;
 class QGridLayout;
 class QPushButton;
-class TextEdit;
 
 namespace ast::err {
     class ParserInfo;
 }
 
 namespace app {
-    namespace cmd {
-        class FormulaChangedCommand;
-    }
+    class TextEdit;
 
     class FormulaWidget : public QWidget, public gen::ErrorBase {
         Q_OBJECT
 
-        friend class cmd::FormulaChangedCommand;
-
       public:
-        explicit FormulaWidget(QWidget* parent = nullptr);
+        explicit FormulaWidget(QWidget* parent);
 
         void updateWidget();
 
         [[nodiscard]] size_t    index() const;
         [[nodiscard]] TextEdit* textEdit();
-        //        [[nodiscard]] const fml::Formula* formula() const;
-        [[nodiscard]] bool isActive() const;
-        [[nodiscard]] bool formulaWasUpdated() const;
-        void               setFormulaWasUpdated(bool formulaWasUpdated);
+        [[nodiscard]] bool      isActive() const;
+        [[nodiscard]] bool      formulaWasUpdated() const;
+        void                    setFormulaWasUpdated(bool formulaWasUpdated);
 
       signals:
         void deleteClicked(size_t index);
@@ -58,14 +51,12 @@ namespace app {
 
         static inline size_t S_MAX_INDEX = 0;
 
-        const size_t              m_index;
-        bool                      m_formulaWasUpdated = false;
-        QGridLayout*              m_layout            = nullptr;
-        QCheckBox*                m_activeCheckBox    = nullptr;
-        TextEdit*                 m_textEdit          = nullptr;
-        QPushButton*              m_deleteButton      = nullptr;
-        QString                   m_oldFormula        = "";
-        std::unique_ptr<ast::Ast> m_ast;
+        const size_t m_index;
+        bool         m_formulaWasUpdated = false;
+        QGridLayout* m_layout            = nullptr;
+        QCheckBox*   m_activeCheckBox    = nullptr;
+        TextEdit*    m_textEdit          = nullptr;
+        QPushButton* m_deleteButton      = nullptr;
     };
 } // namespace app
 

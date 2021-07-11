@@ -14,13 +14,13 @@ namespace app {
 
     bool UndoRedoConsumer::eventFilter(QObject* obj, QEvent* event) {
         if (event->type() == QEvent::KeyPress) {
-            auto*        key_event = dynamic_cast<QKeyEvent*>(event);
-            QKeySequence key_sequence{static_cast<int>(key_event->modifiers()) + key_event->key()};
-            if (key_sequence == QKeySequence::Undo) {
-                UndoRedoHandler::undo();
+            auto*        keyEvent = dynamic_cast<QKeyEvent*>(event);
+            QKeySequence keySequence{static_cast<int>(keyEvent->modifiers()) + keyEvent->key()};
+            if (keySequence == QKeySequence::Undo) {
+                UndoRedoHandler::S_UNDO();
                 return true;
-            } else if (key_sequence == QKeySequence::Redo) {
-                UndoRedoHandler::redo();
+            } else if (keySequence == QKeySequence::Redo) {
+                UndoRedoHandler::S_REDO();
                 return true;
             }
         }
@@ -28,9 +28,9 @@ namespace app {
     }
 
     UndoRedoConsumer* UndoRedoConsumer::undoRedoConsumer() {
-        if (not m_undoRedoConsumer) {
-            m_undoRedoConsumer = std::make_unique<UndoRedoConsumer>(nullptr);
+        if (not S_UNDO_REDO_CONSUMER) {
+            S_UNDO_REDO_CONSUMER = std::make_unique<UndoRedoConsumer>(nullptr);
         }
-        return m_undoRedoConsumer.get();
+        return S_UNDO_REDO_CONSUMER.get();
     }
 } // namespace app

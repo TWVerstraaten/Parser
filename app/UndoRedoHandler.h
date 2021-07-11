@@ -13,17 +13,16 @@ namespace app {
     class UndoRedoHandler {
 
       public:
-        static void init();
-        static void undo();
-        static void redo();
-        static void push(QUndoCommand* undoCommand);
-        static void setPushBlocked(bool blocked);
+        static void S_INIT();
+        static void S_UNDO();
+        static void S_REDO();
+        static void S_PUSH(QUndoCommand* undoCommand);
+        static void S_SET_PUSH_BLOCKED(bool blocked);
 
       private:
-        inline static bool                        m_pushBlocked = false;
-        inline static bool                        m_initialized = false;
-        inline static std::unique_ptr<QUndoStack> m_undoStack   = nullptr;
-        inline static std::unique_ptr<QUndoView>  m_undoView    = nullptr;
+        inline static bool                        S_PUSH_BLOCKED = false;
+        inline static bool                        S_INITIALIZED  = false;
+        inline static std::unique_ptr<QUndoStack> S_UNDO_STACK   = nullptr;
     };
 } // namespace app
 

@@ -6,42 +6,40 @@
 
 #include "../gen/DependencyGraph.h"
 #include "FormulaWidget.h"
-#include "UndoRedoConsumer.h"
-#include "UndoRedoHandler.h"
 #include "cmd/NewFormulaWidgetCommand.h"
 #include "cmd/RemoveFormulaWidgetCommand.h"
 
+#include <QAction>
+#include <QDebug>
 #include <QPushButton>
 #include <QScrollArea>
+#include <QTime>
 #include <QVBoxLayout>
 #include <iostream>
 
 namespace app {
     FormulaSideBar::FormulaSideBar(QWidget* parent) : QWidget(parent) {
         m_layout = new QVBoxLayout();
+
         makeScrollArea();
-
         addNewFormulaWidgetButton();
+        addNewFormulaWidget();
+        addNewFormulaWidget();
 
-        UndoRedoHandler::setPushBlocked(true);
-        addNewFormulaWidget();
-        addNewFormulaWidget();
-        UndoRedoHandler::setPushBlocked(false);
-        m_layout->setSpacing(0);
-        m_layout->setContentsMargins(2, 0, 0, 2);
+        m_layout->setSpacing(5);
+        m_layout->setContentsMargins(2, 12, 12, 2);
         m_layout->setAlignment(Qt::AlignTop);
         setBaseSize({400, 800});
-        installEventFilter(UndoRedoConsumer::undoRedoConsumer());
     }
 
     void FormulaSideBar::addNewFormulaWidget() {
-        auto*      newFormulaWidget = new FormulaWidget(m_scrollArea->widget());
-        const auto newFormulaIndex  = newFormulaWidget->index();
+        auto* newFormulaWidget = new FormulaWidget(m_scrollArea->widget());
+        //        const auto newFormulaIndex  = newFormulaWidget->index();
         connect(newFormulaWidget, &FormulaWidget::updated, [this](size_t index) { updateAt(index); });
         connect(newFormulaWidget, &FormulaWidget::deleteClicked, this, &FormulaSideBar::removeFormulaWidget);
 
         m_formulaWidgets.push_back(newFormulaWidget);
-        UndoRedoHandler::push(new cmd::NewFormulaWidgetCommand(this, newFormulaIndex));
+        //        UndoRedoHandler::S_PUSH(new cmd::NewFormulaWidgetCommand(this, newFormulaIndex));
 
         m_layout->removeWidget(m_newFormulaPushButton);
         m_layout->addWidget(m_formulaWidgets.back());
@@ -53,20 +51,20 @@ namespace app {
     }
 
     void FormulaSideBar::removeFormulaWidget(size_t indexOfWidget) {
-        UndoRedoHandler::push(new cmd::RemoveFormulaWidgetCommand(this, indexOfWidget));
+        //        UndoRedoHandler::S_PUSH(new cmd::RemoveFormulaWidgetCommand(this, indexOfWidget));
         updateAt(indexOfWidget);
     }
 
     void FormulaSideBar::updateAt(size_t index) {
-        checkFormulaWidgetsParsed();
-        checkForRedeclarations();
+        //        checkFormulaWidgetsParsed();
+        //        checkForRedeclarations();
         //        checkReferenceToUndefined();
-        checkCircularDependenciesAndUndefined();
+        //        checkCircularDependenciesAndUndefined();
 
-        for (auto& formulaWidget : m_formulaWidgets) {
-            formulaWidget->updateWidget();
-        }
-        emit sendUpdate();
+        //        for (auto& formulaWidget : m_formulaWidgets) {
+        //            formulaWidget->updateWidget();
+        //        }
+        //        emit sendUpdate();
     }
 
     const std::vector<FormulaWidget*>& FormulaSideBar::formulaWidgets() const {
@@ -157,4 +155,5 @@ namespace app {
         //            const auto currentName = formulaWidget->formula()->formulaHeader().name();
         //        }
     }
+
 } // namespace app
