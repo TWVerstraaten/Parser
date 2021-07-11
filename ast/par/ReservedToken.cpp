@@ -24,11 +24,11 @@ namespace ast::par {
     }
 
     size_t S_GET_ARGUMENT_COUNT(const ReservedToken& reserved) {
-        return std::visit([](const auto& a) { return std::remove_reference_t<decltype(a)>::s_argumentCount; }, reserved);
+        return std::visit([](const auto& a) { return std::remove_reference_t<decltype(a)>::S_ARGUMENT_COUNT; }, reserved);
     }
 
     std::string S_GET_NAME(const ReservedToken& reserved) {
-        return std::visit([](const auto& a) { return std::string(std::remove_reference_t<decltype(a)>::s_name); }, reserved);
+        return std::visit([](const auto& a) { return std::string(std::remove_reference_t<decltype(a)>::S_NAME); }, reserved);
     }
 
     double S_EVAL(const ReservedToken& reserved, double argument) {

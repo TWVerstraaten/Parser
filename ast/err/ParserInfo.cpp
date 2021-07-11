@@ -74,4 +74,4 @@ namespace ast::err {
         m_warnings.clear();
         m_messages.clear();
     }
-} // namespace err
+} // namespace ast::err

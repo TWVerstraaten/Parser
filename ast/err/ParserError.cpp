@@ -24,13 +24,13 @@ namespace ast::err {
             case TYPE::ILLEGAL_SEQUENCE:
                 return "Illegal sequence " + m_message + " at " + m_range.toString();
             case TYPE::IDENTIFIER_ERROR:
-                return "Can't S_PARSE identifier " + m_message + " at " + m_range.toString();
+                return "Can't parse identifier " + m_message + " at " + m_range.toString();
             case TYPE::NUMBER_ERROR:
-                return "Can't S_PARSE number " + m_message + " at " + m_range.toString();
+                return "Can't parse number " + m_message + " at " + m_range.toString();
             case TYPE::WRONG_ARGUMENT_COUNT_RESERVED:
                 return "Wrong argument count " + m_message + " at " + m_range.toString();
             case TYPE::GENERIC:
-                return "Generic Parser Error " + m_message + " at " + m_range.toString();
+                return "Generic Parser Error: " + m_message + " at " + m_range.toString();
             case TYPE::UNFINISHED:
                 return "Unfinished Formula: naked ending " + m_message + " at " + m_range.toString();
         }

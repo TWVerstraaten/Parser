@@ -51,7 +51,7 @@ namespace ast {
     }
 
     void Ast::checkAndSetHeader() {
-        if (not par::TokenTemplates::tokenEquals<par::AstToken::OPERATOR_TYPE>(m_rootNode.token(), par::AstToken::OPERATOR_TYPE::EQUALS)) {
+        if (not par::TokenTemplates::S_TOKEN_EQUALS<par::AstToken::OPERATOR_TYPE>(m_rootNode.token(), par::AstToken::OPERATOR_TYPE::EQUALS)) {
             m_header = Header{};
         } else {
             buildNonEmptyHeader();

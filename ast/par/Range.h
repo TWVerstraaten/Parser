@@ -2,8 +2,8 @@
 // Created by pc on 07-06-21.
 //
 
-#ifndef PRS_RANGE_H
-#define PRS_RANGE_H
+#ifndef AST_PAR_RANGE_H
+#define AST_PAR_RANGE_H
 
 #include <string>
 
@@ -26,4 +26,4 @@ namespace ast::par {
     };
 } // namespace ast::par
 
-#endif // PRS_RANGE_H
+#endif // AST_PAR_RANGE_H

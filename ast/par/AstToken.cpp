@@ -22,6 +22,9 @@ namespace ast::par {
     }
 
     static void S_REPLACE_UNARY_MINUSES(AstToken::TempTokenList& tempTokens, err::ParserInfo& info) {
+        if (tempTokens.size() <= 1) {
+            return;
+        }
         static const std::set<Token::TYPE> S_TYPES{Token::TYPE::UNARY_MINUS};
         for (auto it = S_TOKEN_IT(tempTokens, tempTokens.begin(), S_TYPES); it != tempTokens.end(); it = S_TOKEN_IT(tempTokens, std::next(it), S_TYPES)) {
             assert(std::holds_alternative<Token>(*it));
@@ -36,6 +39,9 @@ namespace ast::par {
     }
 
     static void S_REPLACE_POWERS(AstToken::TempTokenList& tempTokens, err::ParserInfo& info) {
+        if (tempTokens.size() <= 2) {
+            return;
+        }
         static const std::set<Token::TYPE> S_TYPES{Token::TYPE::POWER};
         for (auto it = S_TOKEN_IT(tempTokens, tempTokens.begin(), S_TYPES); it != tempTokens.end(); it = S_TOKEN_IT(tempTokens, it, S_TYPES)) {
             assert(std::holds_alternative<Token>(*it));
@@ -51,6 +57,9 @@ namespace ast::par {
     }
 
     static void S_REPLACE_TIMES_DIVIDE(AstToken::TempTokenList& tempTokens, err::ParserInfo& info) {
+        if (tempTokens.size() <= 2) {
+            return;
+        }
         static const std::set<Token::TYPE> S_TYPES{Token::TYPE::TIMES, Token::TYPE::DIVIDE};
         for (auto it = S_TOKEN_IT(tempTokens, tempTokens.begin(), S_TYPES); it != tempTokens.end(); it = S_TOKEN_IT(tempTokens, it, S_TYPES)) {
             assert(std::holds_alternative<Token>(*it));
@@ -66,6 +75,9 @@ namespace ast::par {
     }
 
     static void S_REPLACE_PLUS_MINUS(AstToken::TempTokenList& tempTokens, err::ParserInfo& info) {
+        if (tempTokens.size() <= 2) {
+            return;
+        }
         static const std::set<Token::TYPE> S_TYPES{Token::TYPE::PLUS, Token::TYPE::MINUS};
         for (auto it = S_TOKEN_IT(tempTokens, tempTokens.begin(), S_TYPES); it != tempTokens.end(); it = S_TOKEN_IT(tempTokens, it, S_TYPES)) {
             assert(std::holds_alternative<Token>(*it));
@@ -110,7 +122,7 @@ namespace ast::par {
         }
         m_range = {structuralTokens.front().range().startIndex(), structuralTokens.back().range().endIndex()};
 
-        if (auto it = std::find_if(TT_IT(structuralTokens), TT_LAMBDA(a, return TokenTemplates::isTokenOfType<Token>(a.token(), Token::TYPE::EQUALS);));
+        if (auto it = std::find_if(TT_IT(structuralTokens), TT_LAMBDA(a, return TokenTemplates::S_IS_TOKEN_OF_TYPE<Token>(a.token(), Token::TYPE::EQUALS);));
             it != structuralTokens.end()) {
             m_token    = OPERATOR_TYPE::EQUALS;
             m_children = {AstToken{std::list<StructuralToken>(structuralTokens.begin(), it), info},
@@ -122,17 +134,17 @@ namespace ast::par {
         for (const auto& el : structuralTokens) {
             std::visit(Overloaded{[&](const Token& a) { tempTokens.emplace_back(a); }, [&](const auto& a) { tempTokens.emplace_back(AstToken{a, el.range(), info}); }}, el.token());
         }
-
         S_REPLACE_POWERS(tempTokens, info);
         S_REPLACE_TIMES_DIVIDE(tempTokens, info);
         S_REPLACE_UNARY_MINUSES(tempTokens, info);
         S_REPLACE_PLUS_MINUS(tempTokens, info);
-
         if (tempTokens.size() > 1) {
-            info.addError(err::ParserError{err::ParserError::TYPE::GENERIC, std::string("More than one token left at AstToken? ") + TT_WHERE_STRING});
+            info.addError(err::ParserError{err::ParserError::TYPE::GENERIC, std::string("More than one token left at AstToken? ") + TT_WHERE_STRING, m_range});
+        }
+        if (not std::holds_alternative<AstToken>(tempTokens.front())) {
+            info.addError(err::ParserError{err::ParserError::TYPE::GENERIC, std::string("Cannot parse "), m_range});
         }
         assert(not tempTokens.empty());
-        assert(std::holds_alternative<AstToken>(tempTokens.front()));
         m_children = std::move(std::get<AstToken>(tempTokens.front()).m_children);
         m_token    = std::get<AstToken>(tempTokens.front()).m_token;
     }

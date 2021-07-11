@@ -2,8 +2,8 @@
 // Created by pc on 14-06-21.
 //
 
-#ifndef PRS_UNROLLEDASTTOKEN_H
-#define PRS_UNROLLEDASTTOKEN_H
+#ifndef AST_PAR_UNROLLEDASTTOKEN_H
+#define AST_PAR_UNROLLEDASTTOKEN_H
 
 #include "../../gen/Number.h"
 #include "ReservedToken.h"
@@ -52,4 +52,4 @@ namespace ast::par {
     };
 } // namespace ast::par
 
-#endif // PRS_UNROLLEDASTTOKEN_H
+#endif // AST_PAR_UNROLLEDASTTOKEN_H

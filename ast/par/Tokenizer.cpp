@@ -26,6 +26,7 @@ namespace ast::par {
         checkRepeatedOperators();
         replaceUnaryMinuses();
         checkIdentifierNumberPatternWithNoSpace();
+        checkLeadingDotsInNumbers();
     }
 
     const std::list<Token>& Tokenizer::tokenList() const {
@@ -169,16 +170,16 @@ namespace ast::par {
             return;
         }
         using T = Token::TYPE;
-        static const std::set<T> OPERATOR_TYPES{T::POWER, T::PLUS, T::MINUS, T::TIMES, T::DIVIDE, T::UNARY_MINUS};
-        static const std::set<T> REQUIRED_AFTER_OPERATORS{T::IDENTIFIER, T::NUMBER, Token::TYPE::LEFT_BR};
+        static const std::set<T> S_OPERATOR_TYPES{T::POWER, T::PLUS, T::MINUS, T::TIMES, T::DIVIDE, T::UNARY_MINUS};
+        static const std::set<T> S_REQUIRED_AFTER_OPERATORS{T::IDENTIFIER, T::NUMBER, Token::TYPE::LEFT_BR};
 
         for (auto it = m_tokenList.begin(); it != m_tokenList.end(); ++it) {
-            if (OPERATOR_TYPES.find(it->type()) != OPERATOR_TYPES.end()) {
+            if (S_OPERATOR_TYPES.find(it->type()) != S_OPERATOR_TYPES.end()) {
                 if (std::next(it) == m_tokenList.end()) {
                     m_info.addError({err::ParserError::TYPE::UNFINISHED, it->string(), it->range()});
                 }
                 auto next = std::next(it);
-                if (REQUIRED_AFTER_OPERATORS.find(next->type()) == REQUIRED_AFTER_OPERATORS.end()) {
+                if (S_REQUIRED_AFTER_OPERATORS.find(next->type()) == S_REQUIRED_AFTER_OPERATORS.end()) {
                     m_info.addError({err::ParserError::TYPE::ILLEGAL_SEQUENCE, it->string() + " " + next->string(), {it->range().startIndex(), next->range().endIndex()}});
                 }
             }
@@ -205,6 +206,18 @@ namespace ast::par {
             if (it->type() == Token::TYPE::IDENTIFIER && next->type() == Token::TYPE::NUMBER) {
                 m_info.addWarning(
                     {err::ParserWarning::TYPE::SUSPICIOUS_IDENTIFIER_NUM_PATTERN, it->string() + "*" + next->string(), {it->range().startIndex(), next->range().endIndex()}});
+            }
+        }
+    }
+
+    void Tokenizer::checkLeadingDotsInNumbers() {
+        for (auto& token : m_tokenList) {
+            if (token.type() == Token::TYPE::NUMBER) {
+                const auto&  string   = token.string();
+                const size_t dotCount = std::count_if(TT_IT(string), TT_LAMBDA(a, return a == '.';));
+                if (dotCount == 1 && string.at(0) == '.') {
+                    m_info.addWarning({err::ParserWarning::TYPE::SUSPICIOUS_MISSING_LEADING_ZERO, "0" + string, token.range()});
+                }
             }
         }
     }

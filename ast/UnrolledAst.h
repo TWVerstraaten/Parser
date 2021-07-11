@@ -2,8 +2,8 @@
 // Created by pc on 14-06-21.
 //
 
-#ifndef PRS_UNROLLEDAST_H
-#define PRS_UNROLLEDAST_H
+#ifndef AST_UNROLLEDAST_H
+#define AST_UNROLLEDAST_H
 
 #include "Header.h"
 #include "par/UnrolledAstToken.h"
@@ -31,4 +31,4 @@ namespace ast {
     };
 } // namespace ast
 
-#endif // PRS_UNROLLEDAST_H
+#endif // AST_UNROLLEDAST_H

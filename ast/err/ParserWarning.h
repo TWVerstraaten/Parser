@@ -2,8 +2,8 @@
 // Created by pc on 07-06-21.
 //
 
-#ifndef PRS_PARSERWARNING_H
-#define PRS_PARSERWARNING_H
+#ifndef AST_ERR_PARSERWARNING_H
+#define AST_ERR_PARSERWARNING_H
 
 #include "../par/Range.h"
 
@@ -13,7 +13,7 @@ namespace ast::err {
     class ParserWarning {
 
       public:
-        enum TYPE { SUSPICIOUS_IDENTIFIER_NUM_PATTERN };
+        enum TYPE { SUSPICIOUS_IDENTIFIER_NUM_PATTERN, SUSPICIOUS_MISSING_LEADING_ZERO };
 
         ParserWarning(TYPE type, std::string message, par::Range range = {});
 
@@ -27,4 +27,4 @@ namespace ast::err {
     };
 } // namespace ast::err
 
-#endif // PRS_PARSERWARNING_H
+#endif // AST_ERR_PARSERWARNING_H

@@ -2,8 +2,8 @@
 // Created by pc on 07-06-21.
 //
 
-#ifndef PRS_ASTTOKEN_H
-#define PRS_ASTTOKEN_H
+#ifndef AST_PAR_ASTTOKEN_H
+#define AST_PAR_ASTTOKEN_H
 
 #include "../Header.h"
 #include "CustomFunctionToken.h"
@@ -30,8 +30,8 @@ namespace ast::par {
         enum class OPERATOR_TYPE { PLUS, MINUS, TIMES, DIVIDE, POWER, UNARY_MINUS, EQUALS };
 
         typedef std::variant<Error, OPERATOR_TYPE, Empty, CustomFunctionToken, ReservedToken, VectorToken, std::string, double, long long int> AstTokenVariant;
-        typedef std::variant<AstToken, Token>                                                                                             TempToken;
-        typedef std::list<TempToken>                                                                                                      TempTokenList;
+        typedef std::variant<AstToken, Token>                                                                                                  TempToken;
+        typedef std::list<TempToken>                                                                                                           TempTokenList;
 
         AstToken();
         explicit AstToken(const std::list<StructuralToken>& structuralTokens, err::ParserInfo& info);
@@ -66,4 +66,4 @@ namespace ast::par {
     };
 } // namespace ast::par
 
-#endif // PRS_ASTTOKEN_H
+#endif // AST_PAR_ASTTOKEN_H

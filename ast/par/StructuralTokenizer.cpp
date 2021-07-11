@@ -48,11 +48,11 @@ namespace ast::par {
     }
 
     void StructuralTokenizer::extractFunctionsAndBracketsFromStructuralTokens() {
-        const size_t bracketCount = std::count_if(TT_IT(m_tokenList), TT_LAMBDA(a, return TokenTemplates::isTokenOfType<Token>(a.token(), Token::TYPE::RIGHT_BR);));
+        const size_t bracketCount = std::count_if(TT_IT(m_tokenList), TT_LAMBDA(a, return TokenTemplates::S_IS_TOKEN_OF_TYPE<Token>(a.token(), Token::TYPE::RIGHT_BR);));
         for (size_t dummy = 0; dummy != bracketCount; ++dummy) {
-            auto rightIt = std::find_if(TT_IT(m_tokenList), TT_LAMBDA(a, return TokenTemplates::isTokenOfType<Token>(a.token(), Token::TYPE::RIGHT_BR);));
+            auto rightIt = std::find_if(TT_IT(m_tokenList), TT_LAMBDA(a, return TokenTemplates::S_IS_TOKEN_OF_TYPE<Token>(a.token(), Token::TYPE::RIGHT_BR);));
             auto leftIt  = rightIt;
-            while (not(TokenTemplates::isTokenOfType<Token>((--leftIt)->token(), Token::TYPE::LEFT_BR))) {}
+            while (not(TokenTemplates::S_IS_TOKEN_OF_TYPE<Token>((--leftIt)->token(), Token::TYPE::LEFT_BR))) {}
 
             if (leftIt != m_tokenList.begin() && std::prev(leftIt)->holdsString()) {
                 --leftIt;
@@ -60,7 +60,7 @@ namespace ast::par {
             auto                       insertPosition = std::next(rightIt);
             std::list<StructuralToken> listInBrackets;
             listInBrackets.splice(listInBrackets.begin(), m_tokenList, leftIt, std::next(rightIt));
-            m_tokenList.insert(insertPosition, StructuralToken::makeFromCommaSeparated(std::move(listInBrackets)));
+            m_tokenList.insert(insertPosition, StructuralToken::S_MAKE_FROM_COMMA_SEPARATED(std::move(listInBrackets)));
         }
     }
 
@@ -91,7 +91,11 @@ namespace ast::par {
             return {};
         }
         try {
-            return dotCount == 0 ? std::variant<double, long long>(std::stoll(string)) : std::stod(string);
+            if (string.at(0) == '.') {
+                return dotCount == 0 ? std::variant<double, long long>(std::stoll("0" + string)) : std::stod("0" + string);
+            } else {
+                return dotCount == 0 ? std::variant<double, long long>(std::stoll(string)) : std::stod(string);
+            }
         } catch (...) { return {}; }
     }
 
@@ -130,4 +134,4 @@ namespace ast::par {
                 (*it).token());
         }
     }
-} // namespace ast
+} // namespace ast::par

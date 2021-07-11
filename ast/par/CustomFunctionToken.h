@@ -2,8 +2,8 @@
 // Created by pc on 08-06-21.
 //
 
-#ifndef PRS_CUSTOMFUNCTIONTOKEN_H
-#define PRS_CUSTOMFUNCTIONTOKEN_H
+#ifndef AST_PAR_CUSTOMFUNCTIONTOKEN_H
+#define AST_PAR_CUSTOMFUNCTIONTOKEN_H
 
 #include <string>
 
@@ -26,4 +26,4 @@ namespace ast::par {
     };
 } // namespace ast::par
 
-#endif // PRS_CUSTOMFUNCTIONTOKEN_H
+#endif // AST_PAR_CUSTOMFUNCTIONTOKEN_H

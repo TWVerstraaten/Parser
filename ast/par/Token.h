@@ -2,8 +2,8 @@
 // Created by pc on 06-06-21.
 //
 
-#ifndef PRS_TOKEN_H
-#define PRS_TOKEN_H
+#ifndef AST_PAR_TOKEN_H
+#define AST_PAR_TOKEN_H
 
 #include "Range.h"
 #include "TokenTemplates.h"
@@ -31,6 +31,6 @@ namespace ast::par {
         std::string m_string;
         Range       m_range;
     };
-} // namespace ast
+} // namespace ast::par
 
-#endif // PRS_TOKEN_H
+#endif // AST_PAR_TOKEN_H

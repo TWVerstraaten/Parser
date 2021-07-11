@@ -14,6 +14,7 @@ namespace ast::err {
     std::string ParserWarning::toString() const {
         switch (m_type) {
             case SUSPICIOUS_IDENTIFIER_NUM_PATTERN:
+            case SUSPICIOUS_MISSING_LEADING_ZERO:
                 return "Suspicious pattern: will be parsed as " + m_message + " at " + m_range.toString();
         }
 
@@ -24,4 +25,4 @@ namespace ast::err {
     const par::Range& ParserWarning::range() const {
         return m_range;
     }
-} // namespace err
+} // namespace ast::err

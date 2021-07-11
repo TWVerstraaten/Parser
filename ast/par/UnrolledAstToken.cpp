@@ -32,7 +32,7 @@ namespace ast::par {
     };
 
     UnrolledAstToken::UnrolledAstToken(const AstToken& astToken) {
-        assert(not TokenTemplates::tokenEquals<AstToken::OPERATOR_TYPE>(astToken.token(), AstToken::OPERATOR_TYPE::EQUALS));
+        assert(not TokenTemplates::S_TOKEN_EQUALS<AstToken::OPERATOR_TYPE>(astToken.token(), AstToken::OPERATOR_TYPE::EQUALS));
         static const std::map<AstToken::OPERATOR_TYPE, UnrolledToken> S_OPERATOR_TO_UNROLLED = {{AstToken::OPERATOR_TYPE::PLUS, Plus{}},
                                                                                                 {AstToken::OPERATOR_TYPE::MINUS, Minus{}},
                                                                                                 {AstToken::OPERATOR_TYPE::TIMES, Times{}},

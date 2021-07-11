@@ -2,8 +2,8 @@
 // Created by pc on 07-06-21.
 //
 
-#ifndef PRS_PARSER_H
-#define PRS_PARSER_H
+#ifndef AST_PAR_PARSER_H
+#define AST_PAR_PARSER_H
 
 #include "AstToken.h"
 
@@ -21,4 +21,4 @@ namespace ast::par {
     };
 } // namespace ast::par
 
-#endif // PRS_PARSER_H
+#endif // AST_PAR_PARSER_H

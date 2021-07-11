@@ -2,8 +2,8 @@
 // Created by pc on 08-06-21.
 //
 
-#ifndef PRS_PARSERMESSAGE_H
-#define PRS_PARSERMESSAGE_H
+#ifndef AST_ERR_PARSERMESSAGE_H
+#define AST_ERR_PARSERMESSAGE_H
 
 #include "../par/Range.h"
 
@@ -22,8 +22,8 @@ namespace ast::err {
       private:
         TYPE        m_type;
         std::string m_message;
-        par::Range       m_range;
+        par::Range  m_range;
     };
-} // namespace err
+} // namespace ast::err
 
-#endif // PRS_PARSERMESSAGE_H
+#endif // AST_ERR_PARSERMESSAGE_H

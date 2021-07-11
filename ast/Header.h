@@ -2,8 +2,8 @@
 // Created by pc on 13-06-21.
 //
 
-#ifndef PRS_HEADER_H
-#define PRS_HEADER_H
+#ifndef AST_HEADER_H
+#define AST_HEADER_H
 
 #include <string>
 #include <variant>
@@ -52,4 +52,4 @@ namespace ast {
     };
 } // namespace ast
 
-#endif // PRS_HEADER_H
+#endif // AST_HEADER_H

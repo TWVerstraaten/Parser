@@ -2,8 +2,8 @@
 // Created by pc on 07-06-21.
 //
 
-#ifndef PRS_PARSERINFO_H
-#define PRS_PARSERINFO_H
+#ifndef AST_ERR_PARSERINFO_H
+#define AST_ERR_PARSERINFO_H
 
 #include "ParserError.h"
 #include "ParserMessage.h"
@@ -38,4 +38,4 @@ namespace ast::err {
     };
 } // namespace ast::err
 
-#endif // PRS_PARSERINFO_H
+#endif // AST_ERR_PARSERINFO_H

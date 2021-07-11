@@ -2,8 +2,8 @@
 // Created by pc on 09-06-21.
 //
 
-#ifndef PRS_TOKENWRITER_H
-#define PRS_TOKENWRITER_H
+#ifndef AST_PAR_TOKENWRITER_H
+#define AST_PAR_TOKENWRITER_H
 
 #include "AstToken.h"
 #include "StructuralToken.h"
@@ -27,4 +27,4 @@ namespace ast::par {
     };
 } // namespace ast::par
 
-#endif // PRS_TOKENWRITER_H
+#endif // AST_PAR_TOKENWRITER_H

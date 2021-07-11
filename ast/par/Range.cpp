@@ -32,4 +32,4 @@ namespace ast::par {
     bool Range::isInRange(size_t position) const {
         return m_startIndex <= position && position <= m_endIndex;
     }
-} // namespace ast
+} // namespace ast::par

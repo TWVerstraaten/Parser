@@ -2,8 +2,8 @@
 // Created by pc on 07-06-21.
 //
 
-#ifndef PRS_STRUCTURALTOKENIZER_H
-#define PRS_STRUCTURALTOKENIZER_H
+#ifndef AST_PAR_STRUCTURALTOKENIZER_H
+#define AST_PAR_STRUCTURALTOKENIZER_H
 
 #include "StructuralToken.h"
 #include "Token.h"
@@ -43,4 +43,4 @@ namespace ast::par {
     };
 } // namespace ast::par
 
-#endif // PRS_STRUCTURALTOKENIZER_H
+#endif // AST_PAR_STRUCTURALTOKENIZER_H

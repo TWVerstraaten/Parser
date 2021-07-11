@@ -18,4 +18,4 @@ namespace ast::err {
         assert(false);
         return "";
     }
-} // namespace err
+} // namespace ast::err

@@ -2,8 +2,8 @@
 // Created by pc on 09-07-21.
 //
 
-#ifndef PRS_UNROLLCOMPANION_H
-#define PRS_UNROLLCOMPANION_H
+#ifndef AST_UNROLLCOMPANION_H
+#define AST_UNROLLCOMPANION_H
 
 #include "Ast.h"
 #include "UnrolledAst.h"
@@ -38,4 +38,4 @@ namespace ast {
     };
 } // namespace ast
 
-#endif // PRS_UNROLLCOMPANION_H
+#endif // AST_UNROLLCOMPANION_H

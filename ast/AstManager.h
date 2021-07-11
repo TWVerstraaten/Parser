@@ -2,8 +2,8 @@
 // Created by pc on 09-07-21.
 //
 
-#ifndef PRS_ASTMANAGER_H
-#define PRS_ASTMANAGER_H
+#ifndef AST_ASTMANAGER_H
+#define AST_ASTMANAGER_H
 
 #include "../gen/DependencyGraph.h"
 #include "Ast.h"
@@ -40,4 +40,4 @@ namespace ast {
     };
 } // namespace ast
 
-#endif // PRS_ASTMANAGER_H
+#endif // AST_ASTMANAGER_H

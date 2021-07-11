@@ -2,8 +2,8 @@
 // Created by pc on 10-07-21.
 //
 
-#ifndef PRS_ERR_DEFINITIONERROR_H
-#define PRS_ERR_DEFINITIONERROR_H
+#ifndef AST_ERR_DEFINITIONERROR_H
+#define AST_ERR_DEFINITIONERROR_H
 
 namespace ast::err {
 
@@ -11,4 +11,4 @@ namespace ast::err {
 
 } // namespace ast::err
 
-#endif // PRS_ERR_DEFINITIONERROR_H
+#endif // AST_ERR_DEFINITIONERROR_H

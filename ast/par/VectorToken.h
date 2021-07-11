@@ -2,8 +2,8 @@
 // Created by pc on 14-06-21.
 //
 
-#ifndef PRS_VECTORTOKEN_H
-#define PRS_VECTORTOKEN_H
+#ifndef AST_PAR_VECTORTOKEN_H
+#define AST_PAR_VECTORTOKEN_H
 
 #include <cstddef>
 
@@ -14,4 +14,4 @@ namespace ast::par {
     };
 } // namespace ast::par
 
-#endif // PRS_VECTORTOKEN_H
+#endif // AST_PAR_VECTORTOKEN_H

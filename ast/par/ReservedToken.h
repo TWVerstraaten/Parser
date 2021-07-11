@@ -2,8 +2,8 @@
 // Created by pc on 08-06-21.
 //
 
-#ifndef PRS_RESERVEDFUNCTION_H
-#define PRS_RESERVEDFUNCTION_H
+#ifndef AST_PAR_RESERVEDTOKEN_H
+#define AST_PAR_RESERVEDTOKEN_H
 
 #include <optional>
 #include <string>
@@ -12,32 +12,32 @@
 namespace ast::par {
 
     struct Sin {
-        static const size_t       s_argumentCount = 1;
-        inline static const char* s_name          = "sin";
+        static const size_t       S_ARGUMENT_COUNT = 1;
+        inline static const char* S_NAME           = "sin";
     };
     struct Cos {
-        static const size_t       s_argumentCount = 1;
-        inline static const char* s_name          = "cos";
+        static const size_t       S_ARGUMENT_COUNT = 1;
+        inline static const char* S_NAME           = "cos";
     };
     struct Tan {
-        static const size_t       s_argumentCount = 1;
-        inline static const char* s_name          = "tan";
+        static const size_t       S_ARGUMENT_COUNT = 1;
+        inline static const char* S_NAME           = "tan";
     };
     struct ASin {
-        static const size_t       s_argumentCount = 1;
-        inline static const char* s_name          = "asin";
+        static const size_t       S_ARGUMENT_COUNT = 1;
+        inline static const char* S_NAME           = "asin";
     };
     struct ACos {
-        static const size_t       s_argumentCount = 1;
-        inline static const char* s_name          = "acos";
+        static const size_t       S_ARGUMENT_COUNT = 1;
+        inline static const char* S_NAME           = "acos";
     };
     struct ATan {
-        static const size_t       s_argumentCount = 1;
-        inline static const char* s_name          = "atan";
+        static const size_t       S_ARGUMENT_COUNT = 1;
+        inline static const char* S_NAME           = "atan";
     };
     struct ATan2 {
-        static const size_t       s_argumentCount = 2;
-        inline static const char* s_name          = "atan2";
+        static const size_t       S_ARGUMENT_COUNT = 2;
+        inline static const char* S_NAME           = "atan2";
     };
 
     typedef std::variant<Sin, Cos, Tan, ASin, ACos, ATan, ATan2> ReservedToken;
@@ -50,4 +50,4 @@ namespace ast::par {
     [[nodiscard]] double S_EVAL(const ReservedToken& reserved, double first, double second);
 } // namespace ast::par
 
-#endif // PRS_RESERVEDFUNCTION_H
+#endif // AST_PAR_RESERVEDTOKEN_H

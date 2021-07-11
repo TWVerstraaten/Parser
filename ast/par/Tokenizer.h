@@ -2,8 +2,8 @@
 // Created by pc on 06-06-21.
 //
 
-#ifndef PRS_TOKENIZER_H
-#define PRS_TOKENIZER_H
+#ifndef AST_PAR_TOKENIZER_H
+#define AST_PAR_TOKENIZER_H
 
 #include "Token.h"
 
@@ -31,6 +31,7 @@ namespace ast::par {
         void checkRepeatedCommas();
         void checkRepeatedOperators();
         void checkIdentifierNumberPatternWithNoSpace();
+        void checkLeadingDotsInNumbers();
 
         const std::string     m_string;
         std::list<Token>      m_tokenList;
@@ -38,4 +39,4 @@ namespace ast::par {
     };
 } // namespace ast::par
 
-#endif // PRS_TOKENIZER_H
+#endif // AST_PAR_TOKENIZER_H

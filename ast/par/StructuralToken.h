@@ -2,8 +2,8 @@
 // Created by pc on 07-06-21.
 //
 
-#ifndef PRS_STRUCTURALTOKEN_H
-#define PRS_STRUCTURALTOKEN_H
+#ifndef AST_PAR_STRUCTURALTOKEN_H
+#define AST_PAR_STRUCTURALTOKEN_H
 
 #include "Token.h"
 
@@ -39,14 +39,14 @@ namespace ast::par {
         [[nodiscard]] const StructuralTokenVariant& token() const;
         [[nodiscard]] const Range&                  range() const;
 
-        [[nodiscard]] static StructuralToken makeFromCommaSeparated(std::list<StructuralToken>&& tokenList);
+        [[nodiscard]] static StructuralToken S_MAKE_FROM_COMMA_SEPARATED(std::list<StructuralToken>&& tokenList);
 
       private:
-        [[nodiscard]] static Bracketed makeBracketed(std::list<StructuralToken>& tokenList);
+        [[nodiscard]] static Bracketed S_MAKE_BRACKETED(std::list<StructuralToken>& tokenList);
 
         StructuralTokenVariant m_token;
         Range                  m_range;
     };
-} // namespace ast
+} // namespace ast::par
 
-#endif // PRS_STRUCTURALTOKEN_H
+#endif // AST_PAR_STRUCTURALTOKEN_H
