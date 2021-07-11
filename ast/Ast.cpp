@@ -9,7 +9,7 @@
 
 #include <QDebug>
 #include <cassert>
-#include <iostream>
+#include <variant>
 
 namespace ast {
 
@@ -37,7 +37,7 @@ namespace ast {
     }
 
     std::set<std::string> Ast::variablesUsed() const {
-        return m_rootNode.variablesUsed();
+        return body().variablesUsed();
     }
 
     std::vector<std::string> Ast::declaredVariables() const {
@@ -62,27 +62,27 @@ namespace ast {
     void Ast::buildNonEmptyHeader() {
         assert(m_rootNode.children().size() == 2);
         const auto& headerAst = m_rootNode.children().front();
-        if (std::holds_alternative<std::string>(headerAst.token())) {
-            assert(headerAst.children().empty());
-            m_header = Header{std::get<std::string>(headerAst.token())};
-        } else if (std::holds_alternative<par::CustomFunctionToken>(headerAst.token())) {
-            checkArgumentsIfFullHeader();
-            if (m_info.success()) {
-                m_header = Header(std::get<par::CustomFunctionToken>(headerAst.token()), headerAst);
-            }
-        } else {
-            assert(std::holds_alternative<par::VectorToken>(headerAst.token()));
-            m_header = Header(std::get<par::VectorToken>(headerAst.token()), headerAst);
-        }
+        std::visit(Overloaded{[this](const std::string& str) { m_header = Header{str}; },
+                              [&](const par::CustomFunctionToken& function) {
+                                  checkArgumentsIfFullHeader();
+                                  if (m_info.success()) {
+                                      m_header = Header(function, headerAst);
+                                  }
+                              },
+                              [&](const par::VectorToken& vectorToken) { m_header = Header(vectorToken, headerAst); },
+                              [&](const auto& a) {
+                                  m_info.addError(err::ParserError{err::ParserError::TYPE::HEADER_ERROR, headerAst.toStringFlat(), headerAst.range()});
+                              }},
+                   headerAst.token());
     }
 
     const par::AstToken& Ast::body() const {
-        switch (m_header.type()) {
-            case Header::HEADER_TYPE::EMPTY:
-                return m_rootNode;
-            default:
-                assert(m_rootNode.children().size() == 2);
-                return m_rootNode.children().back();
+        if (std::holds_alternative<par::AstToken::OPERATOR_TYPE>(m_rootNode.token()) &&
+            std::get<par::AstToken::OPERATOR_TYPE>(m_rootNode.token()) == par::AstToken::OPERATOR_TYPE::EQUALS) {
+            assert(m_rootNode.children().size() == 2);
+            return m_rootNode.children().back();
+        } else {
+            return m_rootNode;
         }
     }
 

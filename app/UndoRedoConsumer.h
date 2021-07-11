@@ -15,12 +15,12 @@ namespace app {
       public:
         explicit UndoRedoConsumer(QObject* parent);
 
-        static UndoRedoConsumer* undoRedoConsumer();
+        static UndoRedoConsumer* UNDO_REDO_CONSUMER();
 
       protected:
         bool eventFilter(QObject* obj, QEvent* event) override;
 
-        static inline std::unique_ptr<UndoRedoConsumer> S_UNDO_REDO_CONSUMER{nullptr};
+        static inline std::unique_ptr<UndoRedoConsumer> M_UNDO_REDO_CONSUMER{nullptr};
     };
 } // namespace app
 

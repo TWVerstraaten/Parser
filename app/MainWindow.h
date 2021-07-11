@@ -2,8 +2,8 @@
 // Created by pc on 09-04-21.
 //
 
-#ifndef PARSER_MAINWINDOW_H
-#define PARSER_MAINWINDOW_H
+#ifndef APP_MAINWINDOW_H
+#define APP_MAINWINDOW_H
 
 #include <QMainWindow>
 
@@ -17,4 +17,4 @@ namespace app {
     };
 } // namespace app
 
-#endif // PARSER_MAINWINDOW_H
+#endif // APP_MAINWINDOW_H

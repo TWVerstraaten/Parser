@@ -11,8 +11,7 @@
 namespace app {
 
     CameraManager::CameraManager(OpenGlWidget* openGlWidget) : m_openGlWidget(openGlWidget) {
-        m_cameraUpDirection -=
-            (QVector3D::dotProduct(m_cameraUpDirection, m_cameraPosition - m_lookAt) * (m_cameraPosition - m_lookAt)).normalized();
+        m_cameraUpDirection -= (QVector3D::dotProduct(m_cameraUpDirection, m_cameraPosition - m_lookAt) * (m_cameraPosition - m_lookAt)).normalized();
     }
 
     void CameraManager::rotateViewDirection(float dX, float dY) {

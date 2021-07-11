@@ -10,12 +10,13 @@
 
 namespace app {
     class TextEdit;
-}
+    class OldCursor;
+} // namespace app
 
 namespace app::cmd {
     class TextEditChangedCommand : public QUndoCommand {
       public:
-        TextEditChangedCommand(app::TextEdit* textEdit, QString oldString, int oldCursorPosition, int oldAnchorPosition);
+        TextEditChangedCommand(app::TextEdit* textEdit, QString oldString, const OldCursor& oldCursor);
 
         void undo() override;
         void redo() override;

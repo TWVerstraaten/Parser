@@ -2,8 +2,8 @@
 // Created by pc on 28-05-21.
 //
 
-#ifndef PARSER_STRINGALG_H
-#define PARSER_STRINGALG_H
+#ifndef ALG_STRINGALG_H
+#define ALG_STRINGALG_H
 
 #include <functional>
 #include <sstream>
@@ -29,4 +29,4 @@ namespace alg {
     };
 } // namespace alg
 
-#endif // PARSER_STRINGALG_H
+#endif // ALG_STRINGALG_H

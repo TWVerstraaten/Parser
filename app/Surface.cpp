@@ -16,14 +16,14 @@ namespace app {
         QVector3D m_colour;
     };
 
-    Surface::Surface() : m_index(m_maxIndex), m_vertexBuffer(QOpenGLBuffer::VertexBuffer), m_indexBuffer(QOpenGLBuffer::IndexBuffer) {
-        ++m_maxIndex;
+    Surface::Surface() : m_index(M_MAX_INDEX), m_vertexBuffer(QOpenGLBuffer::VertexBuffer), m_indexBuffer(QOpenGLBuffer::IndexBuffer) {
+        ++M_MAX_INDEX;
         initializeOpenGLFunctions();
 
         m_vertexBuffer.create();
         m_indexBuffer.create();
 
-        fillBuffers_testSurface();
+        fillBuffersTestSurface();
     }
 
     Surface::~Surface() {
@@ -45,14 +45,14 @@ namespace app {
         QVector<VertexData> vertices;
         QVector<GLuint>     indices;
 
-        const size_t i_lim = 70;
-        const size_t j_lim = 70;
+        const size_t iLim  = 70;
+        const size_t jLim  = 70;
 
-        for (size_t i = 0; i != i_lim; ++i) {
-            for (size_t j = 0; j != j_lim; ++j) {
-//                const float x = 0.05f * i;
-//                const float y = 0.05f * j;
-//                valueMap.clear();
+        for (size_t i = 0; i != iLim; ++i) {
+            for (size_t j = 0; j != jLim; ++j) {
+                //                const float x = 0.05f * i;
+                //                const float y = 0.05f * j;
+                //                valueMap.clear();
                 // TODO
                 //                valueMap.insert({*variables.begin(), gen::Number(x)});
                 //                valueMap.insert({*std::next(variables.begin()), gen::Number(y)});
@@ -62,15 +62,15 @@ namespace app {
             }
         }
 
-        for (size_t i = 0; i != i_lim - 1; ++i) {
-            for (size_t j = 0; j != j_lim - 1; ++j) {
-                indices.push_back(j + 1 + j_lim * i);
-                indices.push_back(j + j_lim * i);
-                indices.push_back(j + j_lim * (i + 1));
+        for (size_t i = 0; i != iLim - 1; ++i) {
+            for (size_t j = 0; j != jLim - 1; ++j) {
+                indices.push_back(j + 1 + jLim * i);
+                indices.push_back(j + jLim * i);
+                indices.push_back(j + jLim * (i + 1));
 
-                indices.push_back(j + 1 + j_lim * i);
-                indices.push_back(j + j_lim * (i + 1));
-                indices.push_back(j + 1 + j_lim * (i + 1));
+                indices.push_back(j + 1 + jLim * i);
+                indices.push_back(j + jLim * (i + 1));
+                indices.push_back(j + 1 + jLim * (i + 1));
             }
         }
         m_vertexBuffer.bind();
@@ -80,40 +80,40 @@ namespace app {
         m_indexBuffer.allocate(indices.data(), indices.size() * sizeof(GLuint));
     }
 
-    void Surface::fillBuffers_testSurface() {
+    void Surface::fillBuffersTestSurface() {
         m_vertexBuffer.release();
         m_indexBuffer.release();
 
         QVector<VertexData> vertices;
         QVector<GLuint>     indices;
 
-        const size_t i_lim = 15;
-        const size_t j_lim = 23;
+        const size_t iLim  = 15;
+        const size_t jLim  = 23;
 
         static float o = 0.0f;
 
-        for (size_t i = 0; i != i_lim; ++i) {
-            for (size_t j = 0; j != j_lim; ++j) {
+        for (size_t i = 0; i != iLim; ++i) {
+            for (size_t j = 0; j != jLim; ++j) {
                 vertices.push_back(
                     {{o - 0.5f + 0.2f * i, o - 0.5f + 0.2f * j, -5.0f + o + 0.2f * sinf(1.3f * i * 0.3 * j - 0.2 * i)}, {0.15f * i, 0.15f * j, 0.02f * i + 0.04f * j}});
             }
         }
         o -= 1.0f;
 
-        for (size_t i = 0; i != i_lim - 1; ++i) {
-            for (size_t j = 0; j != j_lim - 1; ++j) {
-                indices.push_back(j + 1 + j_lim * i);
-                indices.push_back(j + j_lim * i);
-                indices.push_back(j + j_lim * (i + 1));
+        for (size_t i = 0; i != iLim - 1; ++i) {
+            for (size_t j = 0; j != jLim - 1; ++j) {
+                indices.push_back(j + 1 + jLim * i);
+                indices.push_back(j + jLim * i);
+                indices.push_back(j + jLim * (i + 1));
 
-                indices.push_back(j + 1 + j_lim * i);
-                indices.push_back(j + j_lim * (i + 1));
-                indices.push_back(j + 1 + j_lim * (i + 1));
+                indices.push_back(j + 1 + jLim * i);
+                indices.push_back(j + jLim * (i + 1));
+                indices.push_back(j + 1 + jLim * (i + 1));
             }
         }
         //
-        //        //        const size_t i_lim = 15;
-        //        //        const size_t j_lim = 23;
+        //        //        const size_t iLim = 15;
+        //        //        const size_t jLim = 23;
         //
         //        static float o = 0.0f;
         //

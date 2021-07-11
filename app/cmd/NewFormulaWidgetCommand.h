@@ -2,8 +2,8 @@
 // Created by pc on 28-05-21.
 //
 
-#ifndef PARSER_NEWFORMULAWIDGETCOMMAND_H
-#define PARSER_NEWFORMULAWIDGETCOMMAND_H
+#ifndef APP_CMD_NEWFORMULAWIDGETCOMMAND_H
+#define APP_CMD_NEWFORMULAWIDGETCOMMAND_H
 
 #include <QUndoCommand>
 
@@ -25,4 +25,5 @@ namespace app::cmd {
         size_t               m_indexOfNewFormulaWidget;
     };
 } // namespace app::cmd
-#endif // PARSER_NEWFORMULAWIDGETCOMMAND_H
+
+#endif // APP_CMD_NEWFORMULAWIDGETCOMMAND_H

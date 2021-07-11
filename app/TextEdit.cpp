@@ -69,14 +69,9 @@ namespace app {
         //    QFont font("Monospace");
         //    font.setStyleHint(QFont::TypeWriter);
         //    setFont(font);
-        installEventFilter(UndoRedoConsumer::undoRedoConsumer());
+        installEventFilter(UndoRedoConsumer::UNDO_REDO_CONSUMER());
         connect(this, &QTextEdit::textChanged, this, &TextEdit::sendToUndoRedoHandler);
-        connect(this, &QTextEdit::cursorPositionChanged, [this] {
-            m_penUltCursorPosition = m_oldCursorPosition;
-            m_oldCursorPosition    = textCursor().position();
-            m_penUltAnchorPosition = m_oldAnchorPosition;
-            m_oldAnchorPosition    = textCursor().anchor();
-        });
+        connect(this, &QTextEdit::cursorPositionChanged, [this] { m_oldCursor.set(textCursor().position(), textCursor().anchor()); });
     }
 
     void TextEdit::mouseMoveEvent(QMouseEvent* e) {
@@ -96,8 +91,8 @@ namespace app {
         QTextEdit::mouseMoveEvent(e);
     }
 
-    void TextEdit::setInfo(ast::err::ParserInfo&& info) {
-        m_info = std::move(info);
+    void TextEdit::setInfo(const ast::err::ParserInfo& info) {
+        m_info = info;
         blockSignals(true);
         highlightInfo();
         determineAndSetTextColor();
@@ -120,7 +115,7 @@ namespace app {
 
     void TextEdit::sendToUndoRedoHandler() {
         blockSignals(true);
-        UndoRedoHandler::S_PUSH(new cmd::SkipFirstRedoCommand{new cmd::TextEditChangedCommand{this, m_oldString, m_penUltCursorPosition, m_penUltAnchorPosition}});
+        UndoRedoHandler::PUSH(new cmd::SkipFirstRedoCommand{new cmd::TextEditChangedCommand{this, m_oldString, m_oldCursor}});
         m_oldString = toPlainText();
     }
 

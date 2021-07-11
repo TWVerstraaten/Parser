@@ -2,8 +2,8 @@
 // Created by pc on 28-05-21.
 //
 
-#ifndef PARSER_REMOVEFORMULAWIDGETCOMMAND_H
-#define PARSER_REMOVEFORMULAWIDGETCOMMAND_H
+#ifndef APP_CMD_REMOVEFORMULAWIDGETCOMMAND_H
+#define APP_CMD_REMOVEFORMULAWIDGETCOMMAND_H
 
 #include <QUndoCommand>
 
@@ -25,4 +25,4 @@ namespace app::cmd {
         size_t               m_indexOfRemovedFormulaWidget;
     };
 } // namespace app::cmd
-#endif // PARSER_REMOVEFORMULAWIDGETCOMMAND_H
+#endif // APP_CMD_REMOVEFORMULAWIDGETCOMMAND_H

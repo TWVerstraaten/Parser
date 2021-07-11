@@ -2,24 +2,25 @@
 // Created by pc on 29-05-21.
 //
 
-#ifndef PARSER_OPENGLWIDGET_H
-#define PARSER_OPENGLWIDGET_H
-
-#include "CameraManager.h"
-#include "SurfaceManager.h"
+#ifndef APP_OPENGLWIDGET_H
+#define APP_OPENGLWIDGET_H
 
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLWidget>
 #include <QVector2D>
+#include <memory>
 
 namespace app {
+    class CameraManager;
+    class SurfaceManager;
+
     class OpenGlWidget : public QOpenGLWidget, protected QOpenGLFunctions {
         Q_OBJECT
 
       public:
         explicit OpenGlWidget(QWidget* parent = nullptr);
-        ~OpenGlWidget() override = default;
+        ~OpenGlWidget() override;
 
         [[nodiscard]] CameraManager&  cameraWidget();
         [[nodiscard]] SurfaceManager* surfaceManager() const;
@@ -45,4 +46,4 @@ namespace app {
     };
 } // namespace app
 
-#endif // PARSER_OPENGLWIDGET_H
+#endif // APP_OPENGLWIDGET_H

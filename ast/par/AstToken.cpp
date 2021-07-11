@@ -182,10 +182,7 @@ namespace ast::par {
     }
 
     std::set<std::string> AstToken::variablesUsed() const {
-        if (std::holds_alternative<OPERATOR_TYPE>(m_token) && std::get<OPERATOR_TYPE>(m_token) == OPERATOR_TYPE::EQUALS) {
-            assert(m_children.size() == 2);
-            return m_children.at(1).variablesUsed();
-        }
+        assert(not(std::holds_alternative<OPERATOR_TYPE>(m_token) && std::get<OPERATOR_TYPE>(m_token) == OPERATOR_TYPE::EQUALS));
         std::set<std::string> variables;
         if (std::holds_alternative<std::string>(m_token)) {
             variables.insert(std::get<std::string>(m_token));

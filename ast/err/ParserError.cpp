@@ -41,6 +41,8 @@ namespace ast::err {
                 return "Constant should have no argument brackets: at " + m_range.toString();
             case TYPE::REPEATED_ARGUMENT:
                 return "Repeated argument: " + m_message + " at " + m_range.toString();
+            case TYPE::HEADER_ERROR:
+                return "Could not parse header: " + m_message + " at " + m_range.toString();
         }
         assert(false);
     }

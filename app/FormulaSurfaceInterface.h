@@ -2,8 +2,8 @@
 // Created by pc on 01-06-21.
 //
 
-#ifndef PARSER_FORMULASURFACEINTERFACE_H
-#define PARSER_FORMULASURFACEINTERFACE_H
+#ifndef APP_FORMULASURFACEINTERFACE_H
+#define APP_FORMULASURFACEINTERFACE_H
 
 #include <QObject>
 
@@ -26,4 +26,4 @@ namespace app {
     };
 } // namespace app
 
-#endif // PARSER_FORMULASURFACEINTERFACE_H
+#endif // APP_FORMULASURFACEINTERFACE_H

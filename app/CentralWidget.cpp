@@ -4,6 +4,7 @@
 
 #include "CentralWidget.h"
 
+#include "CameraManager.h"
 #include "FormulaSideBar.h"
 #include "OpenGlWidget.h"
 

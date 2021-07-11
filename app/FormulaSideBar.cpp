@@ -39,7 +39,7 @@ namespace app {
         connect(newFormulaWidget, &FormulaWidget::deleteClicked, this, &FormulaSideBar::removeFormulaWidget);
 
         m_formulaWidgets.push_back(newFormulaWidget);
-        //        UndoRedoHandler::S_PUSH(new cmd::NewFormulaWidgetCommand(this, newFormulaIndex));
+        //        UndoRedoHandler::PUSH(new cmd::NewFormulaWidgetCommand(this, newFormulaIndex));
 
         m_layout->removeWidget(m_newFormulaPushButton);
         m_layout->addWidget(m_formulaWidgets.back());
@@ -51,7 +51,7 @@ namespace app {
     }
 
     void FormulaSideBar::removeFormulaWidget(size_t indexOfWidget) {
-        //        UndoRedoHandler::S_PUSH(new cmd::RemoveFormulaWidgetCommand(this, indexOfWidget));
+        //        UndoRedoHandler::PUSH(new cmd::RemoveFormulaWidgetCommand(this, indexOfWidget));
         updateAt(indexOfWidget);
     }
 

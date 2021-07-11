@@ -4,7 +4,15 @@
 
 #include "SurfaceManager.h"
 
+#include "Surface.h"
+
 #include <QOpenGLShaderProgram>
+
+app::SurfaceManager::SurfaceManager() {
+    m_surfaces.push_back(std::make_unique<Surface>());
+    m_surfaces.push_back(std::make_unique<Surface>());
+    m_surfaces.push_back(std::make_unique<Surface>());
+}
 
 const app::Surface& app::SurfaceManager::at(size_t index) const {
     assert(index < m_surfaces.size());
@@ -36,7 +44,6 @@ void app::SurfaceManager::remove(size_t indexOfSurface) {
         m_surfaces.erase(it);
     }
 }
-
 void app::SurfaceManager::clear() {
     m_surfaces.clear();
 }

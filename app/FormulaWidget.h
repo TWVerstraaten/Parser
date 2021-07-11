@@ -5,8 +5,6 @@
 #ifndef APP_FORMULAWIDGET_H
 #define APP_FORMULAWIDGET_H
 
-#include "../gen/ErrorBase.h"
-
 #include <QWidget>
 
 class QCheckBox;
@@ -20,13 +18,11 @@ namespace ast::err {
 namespace app {
     class TextEdit;
 
-    class FormulaWidget : public QWidget, public gen::ErrorBase {
+    class FormulaWidget : public QWidget {
         Q_OBJECT
 
       public:
         explicit FormulaWidget(QWidget* parent);
-
-        void updateWidget();
 
         [[nodiscard]] size_t    index() const;
         [[nodiscard]] TextEdit* textEdit();
@@ -42,14 +38,12 @@ namespace app {
         void processFormula();
 
       private:
-        void handleCorrectFormula();
-        void handleWrongFormula();
         void initPointers();
         void initButtons();
         void initLayout();
         void connectSignals();
 
-        static inline size_t S_MAX_INDEX = 0;
+        static inline size_t M_MAX_INDEX = 0;
 
         const size_t m_index;
         bool         m_formulaWasUpdated = false;

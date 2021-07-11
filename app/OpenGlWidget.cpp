@@ -4,6 +4,10 @@
 
 #include "OpenGlWidget.h"
 
+#include "CameraManager.h"
+#include "Surface.h"
+#include "SurfaceManager.h"
+
 #include <QMouseEvent>
 #include <memory>
 
@@ -11,6 +15,8 @@ namespace app {
     OpenGlWidget::OpenGlWidget(QWidget* parent) : QOpenGLWidget(parent) {
         m_cameraManager = std::make_unique<CameraManager>(this);
     }
+
+    OpenGlWidget::~OpenGlWidget() = default;
 
     void OpenGlWidget::mousePressEvent(QMouseEvent* e) {
         setFocus();

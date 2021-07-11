@@ -2,8 +2,8 @@
 // Created by pc on 31-05-21.
 //
 
-#ifndef PARSER_AXES_H
-#define PARSER_AXES_H
+#ifndef APP_AXES_H
+#define APP_AXES_H
 
 #include <QOpenGLBuffer>
 #include <QOpenGLFunctions>
@@ -31,4 +31,4 @@ namespace app {
     };
 } // namespace app
 
-#endif // PARSER_AXES_H
+#endif // APP_AXES_H

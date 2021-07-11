@@ -2,8 +2,8 @@
 // Created by pc on 28-05-21.
 //
 
-#ifndef PARSER_SKIPFIRSTREDOCOMMAND_H
-#define PARSER_SKIPFIRSTREDOCOMMAND_H
+#ifndef APP_CMD_SKIPFIRSTREDOCOMMAND_H
+#define APP_CMD_SKIPFIRSTREDOCOMMAND_H
 
 #include <QUndoCommand>
 #include <memory>
@@ -33,4 +33,4 @@ namespace app::cmd {
         std::unique_ptr<T> m_base;
     };
 } // namespace app::cmd
-#endif // PARSER_SKIPFIRSTREDOCOMMAND_H
+#endif // APP_CMD_SKIPFIRSTREDOCOMMAND_H

@@ -192,9 +192,9 @@ namespace ast::par {
         if (m_tokenList.size() < 2) {
             return;
         }
-        using T = Token::TYPE;
-        static const std::set<T> S_OPERATOR_TYPES{T::POWER, T::PLUS, T::MINUS, T::TIMES, T::DIVIDE, T::UNARY_MINUS};
-        static const std::set<T> S_REQUIRED_AFTER_OPERATORS{T::IDENTIFIER, T::NUMBER, Token::TYPE::LEFT_BR};
+        static const std::set<Token::TYPE> S_OPERATOR_TYPES{
+            Token::TYPE::POWER, Token::TYPE::PLUS, Token::TYPE::MINUS, Token::TYPE::TIMES, Token::TYPE::DIVIDE, Token::TYPE::UNARY_MINUS};
+        static const std::set<Token::TYPE> S_REQUIRED_AFTER_OPERATORS{Token::TYPE::IDENTIFIER, Token::TYPE::NUMBER, Token::TYPE::LEFT_BR};
 
         for (auto it = m_tokenList.begin(); std::next(it) != m_tokenList.end(); ++it) {
             if (S_OPERATOR_TYPES.find(it->type()) != S_OPERATOR_TYPES.end()) {

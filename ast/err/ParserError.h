@@ -27,6 +27,7 @@ namespace ast::err {
             EMPTY_ARGUMENT,
             NO_ARGUMENTS,
             REPEATED_ARGUMENT,
+            HEADER_ERROR,
             GENERIC
         };
 

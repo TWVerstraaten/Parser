@@ -13,13 +13,11 @@
 #include <QDebug>
 #include <QGridLayout>
 #include <QPushButton>
-#include <QToolTip>
 
 namespace app {
 
-    FormulaWidget::FormulaWidget(QWidget* parent) : QWidget(parent), m_index(S_MAX_INDEX) {
-        ++S_MAX_INDEX;
-        m_success = false;
+    FormulaWidget::FormulaWidget(QWidget* parent) : QWidget(parent), m_index(M_MAX_INDEX) {
+        ++M_MAX_INDEX;
 
         initPointers();
         initButtons();
@@ -43,33 +41,10 @@ namespace app {
 
         const auto str = string.toStdString();
         ast::Ast   ast(str);
-        auto       info = ast.info();
-        m_textEdit->setInfo(std::move(info));
-
-        // TODO
-        //        m_textEdit           = std::make_unique<fml::Formula>(string.toStdString());
+        m_textEdit->setInfo(ast.info());
         m_formulaWasUpdated = true;
 
         emit updated(m_index);
-    }
-
-    void FormulaWidget::handleCorrectFormula() {
-        QToolTip::hideText();
-
-        // TODO
-
-        //        if (const auto hint = m_textEdit->getHints(); not hint.empty()) {
-        //            //            showToolTipAtLineEdit(251, QString::fromStdString(hint));
-        //            m_errorMessageLabel->setText(QString::fromStdString(hint));
-        //            m_errorMessageLabel->setStyleSheet("QLabel { color : rgb(0,0,251); }");
-        //        } else {
-        //            m_errorMessageLabel->setText("");
-        //        }
-        update();
-    }
-
-    void FormulaWidget::handleWrongFormula() {
-        update();
     }
 
     size_t FormulaWidget::index() const {
@@ -107,15 +82,6 @@ namespace app {
 
     TextEdit* FormulaWidget::textEdit() {
         return m_textEdit;
-    }
-
-    void FormulaWidget::updateWidget() {
-        if (m_success) {
-            handleCorrectFormula();
-        } else {
-            handleWrongFormula();
-        }
-        update();
     }
 
     bool FormulaWidget::isActive() const {

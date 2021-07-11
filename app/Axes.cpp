@@ -36,10 +36,8 @@ namespace app {
 
         vertices.push_back({{0.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}});
         vertices.push_back({{5.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}});
-
         vertices.push_back({{0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}});
         vertices.push_back({{0.0f, 5.0f, 0.0f}, {0.0f, 1.0f, 0.0f}});
-
         vertices.push_back({{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}});
         vertices.push_back({{0.0f, 0.0f, 5.0f}, {0.0f, 0.0f, 1.0f}});
 

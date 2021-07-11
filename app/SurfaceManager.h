@@ -2,11 +2,10 @@
 // Created by pc on 31-05-21.
 //
 
-#ifndef PARSER_SURFACEMANAGER_H
-#define PARSER_SURFACEMANAGER_H
+#ifndef APP_SURFACEMANAGER_H
+#define APP_SURFACEMANAGER_H
 
 #include "Axes.h"
-#include "Surface.h"
 
 #include <memory>
 #include <vector>
@@ -15,14 +14,12 @@ class QOpenGLShaderProgram;
 
 namespace app {
 
+    class Surface;
+
     class SurfaceManager {
 
       public:
-        SurfaceManager() {
-            m_surfaces.push_back(std::make_unique<Surface>());
-            m_surfaces.push_back(std::make_unique<Surface>());
-            m_surfaces.push_back(std::make_unique<Surface>());
-        };
+        SurfaceManager();
 
         void clear();
         void add(std::unique_ptr<Surface>&& surface);
@@ -39,4 +36,4 @@ namespace app {
 
 } // namespace app
 
-#endif // PARSER_SURFACEMANAGER_H
+#endif // APP_SURFACEMANAGER_H

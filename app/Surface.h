@@ -2,8 +2,8 @@
 // Created by pc on 29-05-21.
 //
 
-#ifndef PARSER_SURFACE_H
-#define PARSER_SURFACE_H
+#ifndef APP_SURFACE_H
+#define APP_SURFACE_H
 
 #include <QOpenGLBuffer>
 #include <QOpenGLFunctions>
@@ -29,9 +29,9 @@ namespace app {
         [[nodiscard]] bool   isHidden() const;
 
       private:
-        void fillBuffers_testSurface();
+        void fillBuffersTestSurface();
 
-        inline static size_t m_maxIndex = 0;
+        inline static size_t M_MAX_INDEX = 0;
         const size_t         m_index;
 
         bool          m_isHidden = false;
@@ -40,4 +40,4 @@ namespace app {
     };
 } // namespace app
 
-#endif // PARSER_SURFACE_H
+#endif // APP_SURFACE_H

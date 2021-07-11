@@ -8,8 +8,7 @@
 #include "../FormulaWidget.h"
 
 namespace app::cmd {
-    NewFormulaWidgetCommand::NewFormulaWidgetCommand(app::FormulaSideBar* formulaSideBar, size_t index)
-        : m_formulaSideBar(formulaSideBar), m_indexOfNewFormulaWidget(index) {
+    NewFormulaWidgetCommand::NewFormulaWidgetCommand(app::FormulaSideBar* formulaSideBar, size_t index) : m_formulaSideBar(formulaSideBar), m_indexOfNewFormulaWidget(index) {
     }
 
     void NewFormulaWidgetCommand::undo() {

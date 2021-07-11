@@ -2,8 +2,8 @@
 // Created by pc on 31-05-21.
 //
 
-#ifndef PARSER_CAMERAMANAGER_H
-#define PARSER_CAMERAMANAGER_H
+#ifndef APP_CAMERAMANAGER_H
+#define APP_CAMERAMANAGER_H
 
 #include <QMatrix4x4>
 #include <QVector3D>
@@ -47,4 +47,4 @@ namespace app {
 
 } // namespace app
 
-#endif // PARSER_CAMERAMANAGER_H
+#endif // APP_CAMERAMANAGER_H

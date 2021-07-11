@@ -2,10 +2,9 @@
 // Created by pc on 28-05-21.
 //
 
-#ifndef PARSER_FORMULASIDEBAR_H
-#define PARSER_FORMULASIDEBAR_H
+#ifndef APP_FORMULASIDEBAR_H
+#define APP_FORMULASIDEBAR_H
 
-#include <QUndoStack>
 #include <QWidget>
 #include <vector>
 
@@ -55,4 +54,4 @@ namespace app {
     };
 } // namespace app
 
-#endif // PARSER_FORMULASIDEBAR_H
+#endif // APP_FORMULASIDEBAR_H
