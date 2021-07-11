@@ -12,81 +12,42 @@
 
 #include <algorithm>
 #include <cassert>
-#include <sstream>
 
 namespace ast::par {
 
-    [[nodiscard]] static AstToken::TempTokenList::iterator
-    S_TOKEN_IT(AstToken::TempTokenList& tempTokens, AstToken::TempTokenList::iterator it, const std::set<Token::TYPE>& types) {
-        return std::find_if(it, tempTokens.end(), [&](const auto& a) { return std::holds_alternative<Token>(a) && (types.find(std::get<Token>(a).type()) != types.end()); });
-    }
-
     static void S_REPLACE_UNARY_MINUSES(AstToken::TempTokenList& tempTokens, err::ParserInfo& info) {
-        if (tempTokens.size() <= 1) {
-            return;
-        }
-        static const std::set<Token::TYPE> S_TYPES{Token::TYPE::UNARY_MINUS};
-        for (auto it = S_TOKEN_IT(tempTokens, tempTokens.begin(), S_TYPES); it != tempTokens.end(); it = S_TOKEN_IT(tempTokens, std::next(it), S_TYPES)) {
-            assert(std::holds_alternative<Token>(*it));
-            const auto& token = std::get<Token>(*it);
-            assert(token.type() == Token::TYPE::UNARY_MINUS);
+        const auto needsReplacing = [&](const AstToken::TempToken& tempToken) { return TokenTemplates::S_IS_TOKEN_OF_TYPE<Token>(tempToken, Token::TYPE::UNARY_MINUS); };
+
+        for (auto it = std::find_if(tempTokens.begin(), tempTokens.end(), needsReplacing); it != tempTokens.end() && std::next(it) != tempTokens.end();
+             it      = std::find_if(it, tempTokens.end(), needsReplacing)) {
             assert(std::holds_alternative<AstToken>(*std::next(it)));
-            const size_t start = token.range().startIndex();
+            const size_t start = std::get<Token>(*it).range().startIndex();
             it                 = tempTokens.erase(it);
             const size_t end   = std::get<AstToken>(*it).range().endIndex();
             *it                = AstToken{AstToken::OPERATOR_TYPE::UNARY_MINUS, std::get<AstToken>(*it), Range{start, end}, info};
+            if (tempTokens.size() <= 1) {
+                return;
+            }
         }
     }
 
-    static void S_REPLACE_POWERS(AstToken::TempTokenList& tempTokens, err::ParserInfo& info) {
-        if (tempTokens.size() <= 2) {
-            return;
-        }
-        static const std::set<Token::TYPE> S_TYPES{Token::TYPE::POWER};
-        for (auto it = S_TOKEN_IT(tempTokens, tempTokens.begin(), S_TYPES); it != tempTokens.end(); it = S_TOKEN_IT(tempTokens, it, S_TYPES)) {
-            assert(std::holds_alternative<Token>(*it));
-            assert(std::get<Token>(*it).type() == Token::TYPE::POWER);
-            assert(std::holds_alternative<AstToken>(*std::next(it)));
-            assert(std::holds_alternative<AstToken>(*std::prev(it)));
-            const size_t start = std::get<AstToken>(*std::prev(it)).range().startIndex();
-            const size_t end   = std::get<AstToken>(*std::next(it)).range().endIndex();
-            *std::prev(it) =
-                AstToken{AstToken::OPERATOR_TYPE::POWER, std::move(std::get<AstToken>(*std::prev(it))), std::move(std::get<AstToken>(*std::next(it))), {start, end}, info};
-            it = tempTokens.erase(it, std::next(it, 2));
-        }
-    }
+    static void S_REPLACE_TOKEN_OPERATORS(AstToken::TempTokenList& tempTokens, err::ParserInfo& info, const std::map<Token::TYPE, AstToken::OPERATOR_TYPE>& replacements) {
+        const auto needsReplacing = [&](const AstToken::TempToken& tempToken) {
+            return std::holds_alternative<Token>(tempToken) &&
+                   std::find_if(TT_IT(replacements), [&](const auto& a) { return a.first == std::get<Token>(tempToken).type(); }) != replacements.end();
+        };
 
-    static void S_REPLACE_TIMES_DIVIDE(AstToken::TempTokenList& tempTokens, err::ParserInfo& info) {
-        if (tempTokens.size() <= 2) {
-            return;
-        }
-        static const std::set<Token::TYPE> S_TYPES{Token::TYPE::TIMES, Token::TYPE::DIVIDE};
-        for (auto it = S_TOKEN_IT(tempTokens, tempTokens.begin(), S_TYPES); it != tempTokens.end(); it = S_TOKEN_IT(tempTokens, it, S_TYPES)) {
-            assert(std::holds_alternative<Token>(*it));
-            const auto type = std::get<Token>(*it).type();
+        for (auto it = std::find_if(tempTokens.begin(), tempTokens.end(), needsReplacing); it != tempTokens.end() && std::next(it) != tempTokens.end();
+             it      = std::find_if(it, tempTokens.end(), needsReplacing)) {
+            if (it == tempTokens.begin()) {
+                it = std::next(it);
+                continue;
+            }
             assert(std::holds_alternative<AstToken>(*std::next(it)));
             assert(std::holds_alternative<AstToken>(*std::prev(it)));
             const size_t start        = std::get<AstToken>(*std::prev(it)).range().startIndex();
             const size_t end          = std::get<AstToken>(*std::next(it)).range().endIndex();
-            const auto   astTokenType = type == Token::TYPE::TIMES ? AstToken::OPERATOR_TYPE::TIMES : AstToken::OPERATOR_TYPE::DIVIDE;
-            *std::prev(it)            = AstToken{astTokenType, std::move(std::get<AstToken>(*std::prev(it))), std::move(std::get<AstToken>(*std::next(it))), {start, end}, info};
-            it                        = tempTokens.erase(it, std::next(it, 2));
-        }
-    }
-
-    static void S_REPLACE_PLUS_MINUS(AstToken::TempTokenList& tempTokens, err::ParserInfo& info) {
-        if (tempTokens.size() <= 2) {
-            return;
-        }
-        static const std::set<Token::TYPE> S_TYPES{Token::TYPE::PLUS, Token::TYPE::MINUS};
-        for (auto it = S_TOKEN_IT(tempTokens, tempTokens.begin(), S_TYPES); it != tempTokens.end(); it = S_TOKEN_IT(tempTokens, it, S_TYPES)) {
-            assert(std::holds_alternative<Token>(*it));
-            const auto type = std::get<Token>(*it).type();
-            assert(std::holds_alternative<AstToken>(*std::next(it)));
-            assert(std::holds_alternative<AstToken>(*std::prev(it)));
-            const size_t start        = std::get<AstToken>(*std::prev(it)).range().startIndex();
-            const size_t end          = std::get<AstToken>(*std::next(it)).range().endIndex();
-            const auto   astTokenType = type == Token::TYPE::PLUS ? AstToken::OPERATOR_TYPE::PLUS : AstToken::OPERATOR_TYPE::MINUS;
+            const auto   astTokenType = replacements.at(std::get<Token>(*it).type());
             *std::prev(it)            = AstToken{astTokenType, std::move(std::get<AstToken>(*std::prev(it))), std::move(std::get<AstToken>(*std::next(it))), {start, end}, info};
             it                        = tempTokens.erase(it, std::next(it, 2));
         }
@@ -134,15 +95,18 @@ namespace ast::par {
         for (const auto& el : structuralTokens) {
             std::visit(Overloaded{[&](const Token& a) { tempTokens.emplace_back(a); }, [&](const auto& a) { tempTokens.emplace_back(AstToken{a, el.range(), info}); }}, el.token());
         }
-        S_REPLACE_POWERS(tempTokens, info);
-        S_REPLACE_TIMES_DIVIDE(tempTokens, info);
+        S_REPLACE_TOKEN_OPERATORS(tempTokens, info, {{Token::TYPE::POWER, AstToken::OPERATOR_TYPE::POWER}});
+        S_REPLACE_TOKEN_OPERATORS(tempTokens, info, {{Token::TYPE::TIMES, AstToken::OPERATOR_TYPE::TIMES}, {Token::TYPE::DIVIDE, AstToken::OPERATOR_TYPE::DIVIDE}});
         S_REPLACE_UNARY_MINUSES(tempTokens, info);
-        S_REPLACE_PLUS_MINUS(tempTokens, info);
+        S_REPLACE_TOKEN_OPERATORS(tempTokens, info, {{Token::TYPE::PLUS, AstToken::OPERATOR_TYPE::PLUS}, {Token::TYPE::MINUS, AstToken::OPERATOR_TYPE::MINUS}});
+
         if (tempTokens.size() > 1) {
             info.addError(err::ParserError{err::ParserError::TYPE::GENERIC, std::string("More than one token left at AstToken? ") + TT_WHERE_STRING, m_range});
+            return;
         }
         if (not std::holds_alternative<AstToken>(tempTokens.front())) {
             info.addError(err::ParserError{err::ParserError::TYPE::GENERIC, std::string("Cannot parse "), m_range});
+            return;
         }
         assert(not tempTokens.empty());
         m_children = std::move(std::get<AstToken>(tempTokens.front()).m_children);

@@ -11,15 +11,13 @@
 namespace ast::par {
 
     std::optional<AstToken> Parser::S_PARSE(const std::string& string, ast::err::ParserInfo& info) {
-        try {
-            Tokenizer tokenizer(string, info);
+        Tokenizer tokenizer(string, info);
+        if (info.success()) {
+            StructuralTokenizer structuralTokenizer(tokenizer.tokenList(), info);
             if (info.success()) {
-                StructuralTokenizer structuralTokenizer(tokenizer.tokenList(), info);
-                if (info.success()) {
-                    return AstToken{structuralTokenizer.tokenList(), info};
-                }
+                return AstToken{structuralTokenizer.tokenList(), info};
             }
-            return {};
-        } catch (...) { return {}; }
+        }
+        return {};
     }
 } // namespace ast::par

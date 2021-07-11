@@ -173,7 +173,7 @@ namespace ast::par {
         static const std::set<T> S_OPERATOR_TYPES{T::POWER, T::PLUS, T::MINUS, T::TIMES, T::DIVIDE, T::UNARY_MINUS};
         static const std::set<T> S_REQUIRED_AFTER_OPERATORS{T::IDENTIFIER, T::NUMBER, Token::TYPE::LEFT_BR};
 
-        for (auto it = m_tokenList.begin(); it != m_tokenList.end(); ++it) {
+        for (auto it = m_tokenList.begin(); std::next(it) != m_tokenList.end(); ++it) {
             if (S_OPERATOR_TYPES.find(it->type()) != S_OPERATOR_TYPES.end()) {
                 if (std::next(it) == m_tokenList.end()) {
                     m_info.addError({err::ParserError::TYPE::UNFINISHED, it->string(), it->range()});
