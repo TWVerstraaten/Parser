@@ -20,7 +20,7 @@ namespace app::cmd {
         UndoRedoHandler::SET_PUSH_BLOCKED(false);
     }
 
-    TextEditChangedCommand::TextEditChangedCommand(app::TextEdit* textEdit, QString oldString, const OldCursor& oldCursor)
+    TextEditChangedCommandImpl::TextEditChangedCommandImpl(app::TextEdit* textEdit, QString oldString, const OldCursor& oldCursor)
         : m_textEdit(textEdit),
           m_oldString(std::move(oldString)),
           m_newString(textEdit->toPlainText()),
@@ -30,11 +30,11 @@ namespace app::cmd {
           m_newAnchorPosition(textEdit->textCursor().anchor()) {
     }
 
-    void TextEditChangedCommand::undo() {
+    void TextEditChangedCommandImpl::undo() {
         S_UPDATE_TEXT_EDIT(m_textEdit, m_oldString, m_oldCursorPosition, m_oldAnchorPosition);
     }
 
-    void TextEditChangedCommand::redo() {
+    void TextEditChangedCommandImpl::redo() {
         S_UPDATE_TEXT_EDIT(m_textEdit, m_newString, m_newCursorPosition, m_newAnchorPosition);
     }
 } // namespace app::cmd

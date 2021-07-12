@@ -8,7 +8,6 @@
 #include "FormulaSideBar.h"
 #include "OpenGlWidget.h"
 
-#include <QAction>
 #include <QHBoxLayout>
 #include <QKeyEvent>
 #include <QSplitter>

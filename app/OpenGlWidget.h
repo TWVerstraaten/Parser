@@ -38,6 +38,7 @@ namespace app {
         void initShaders();
         void openGlPaintRoutine();
         void qtPaintRoutine(QPainter& painter);
+        void drawAxesLabels(QPainter& painter);
 
       private:
         enum class CLICK_STATE { NONE, RIGHT, LEFT, MIDDLE };

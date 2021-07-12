@@ -64,7 +64,6 @@ namespace app {
         initShaders();
 
         glEnable(GL_DEPTH_TEST);
-        //        glEnable(GL_CULL_FACE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -92,7 +91,6 @@ namespace app {
     }
 
     void OpenGlWidget::paintGL() {
-
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         QPainter painter(this);
@@ -117,16 +115,20 @@ namespace app {
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);
 
+        if (not m_surfaceManager->axes().isHidden()) {
+            drawAxesLabels(painter);
+        }
+        painter.end();
+    }
+
+    void OpenGlWidget::drawAxesLabels(QPainter& painter) {
         painter.setPen(QPen{Qt::black});
         QFont font = painter.font();
         font.setPointSize(16);
         painter.setFont(font);
-
         painter.drawText(m_cameraManager->fromWorldToScreen(1.04 * m_surfaceManager->axes().xTip()), "x");
         painter.drawText(m_cameraManager->fromWorldToScreen(1.04 * m_surfaceManager->axes().yTip()), "y");
         painter.drawText(m_cameraManager->fromWorldToScreen(1.04 * m_surfaceManager->axes().zTip()), "z");
-
-        painter.end();
     }
 
     void OpenGlWidget::wheelEvent(QWheelEvent* event) {
@@ -135,7 +137,6 @@ namespace app {
         m_cameraManager->setProjectionMatrix(width(), height());
         update();
     }
-
     CameraManager& OpenGlWidget::cameraWidget() {
         return *m_cameraManager;
     }

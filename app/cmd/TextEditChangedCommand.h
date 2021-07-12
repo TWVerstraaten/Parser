@@ -5,6 +5,8 @@
 #ifndef APP_CMD_TEXTEDITCHANGEDCOMMAND_H
 #define APP_CMD_TEXTEDITCHANGEDCOMMAND_H
 
+#include "SkipFirstRedoWrapper.h"
+
 #include <QString>
 #include <QUndoCommand>
 
@@ -14,9 +16,9 @@ namespace app {
 } // namespace app
 
 namespace app::cmd {
-    class TextEditChangedCommand : public QUndoCommand {
+    class TextEditChangedCommandImpl : public QUndoCommand {
       public:
-        TextEditChangedCommand(app::TextEdit* textEdit, QString oldString, const OldCursor& oldCursor);
+        TextEditChangedCommandImpl(app::TextEdit* textEdit, QString oldString, const OldCursor& oldCursor);
 
         void undo() override;
         void redo() override;
@@ -30,5 +32,9 @@ namespace app::cmd {
         int            m_oldAnchorPosition;
         int            m_newAnchorPosition;
     };
+
+    typedef SkipFirstRedoWrapper<TextEditChangedCommandImpl> TextEditChangedCommand;
+
 } // namespace app::cmd
+
 #endif // APP_CMD_TEXTEDITCHANGEDCOMMAND_H

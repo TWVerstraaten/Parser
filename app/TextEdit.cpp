@@ -7,7 +7,7 @@
 #include "../gen/defines.h"
 #include "UndoRedoConsumer.h"
 #include "UndoRedoHandler.h"
-#include "cmd/SkipFirstRedoCommand.h"
+#include "cmd/SkipFirstRedoWrapper.h"
 #include "cmd/TextEditChangedCommand.h"
 
 #include <QAction>
@@ -115,7 +115,7 @@ namespace app {
 
     void TextEdit::sendToUndoRedoHandler() {
         blockSignals(true);
-        UndoRedoHandler::PUSH(new cmd::SkipFirstRedoCommand{new cmd::TextEditChangedCommand{this, m_oldString, m_oldCursor}});
+        UndoRedoHandler::PUSH(new cmd::TextEditChangedCommand{this, m_oldString, m_oldCursor});
         m_oldString = toPlainText();
     }
 
