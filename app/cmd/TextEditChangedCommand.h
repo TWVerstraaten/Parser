@@ -17,13 +17,13 @@ namespace app {
 
 namespace app::cmd {
     class TextEditChangedCommandImpl : public QUndoCommand {
-      public:
+        friend class SkipFirstRedoWrapper<TextEditChangedCommandImpl>;
+
         TextEditChangedCommandImpl(app::TextEdit* textEdit, QString oldString, const OldCursor& oldCursor);
 
         void undo() override;
         void redo() override;
 
-      private:
         app::TextEdit* m_textEdit;
         QString        m_oldString;
         QString        m_newString;
