@@ -47,3 +47,7 @@ void app::SurfaceManager::remove(size_t indexOfSurface) {
 void app::SurfaceManager::clear() {
     m_surfaces.clear();
 }
+
+const app::Axes& app::SurfaceManager::axes() const {
+    return m_axes;
+}

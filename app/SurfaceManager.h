@@ -28,6 +28,7 @@ namespace app {
 
         [[nodiscard]] size_t         size() const;
         [[nodiscard]] const Surface& at(size_t index) const;
+        [[nodiscard]] const Axes&    axes() const;
 
       private:
         std::vector<std::unique_ptr<Surface>> m_surfaces;

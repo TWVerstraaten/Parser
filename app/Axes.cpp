@@ -34,12 +34,12 @@ namespace app {
         QVector<VertexData> vertices;
         QVector<GLuint>     indices;
 
-        vertices.push_back({{0.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}});
-        vertices.push_back({{5.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}});
-        vertices.push_back({{0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}});
-        vertices.push_back({{0.0f, 5.0f, 0.0f}, {0.0f, 1.0f, 0.0f}});
-        vertices.push_back({{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}});
-        vertices.push_back({{0.0f, 0.0f, 5.0f}, {0.0f, 0.0f, 1.0f}});
+        vertices.push_back({m_origin, {1.0f, 0.0f, 0.0f}});
+        vertices.push_back({m_xTip, {1.0f, 0.0f, 0.0f}});
+        vertices.push_back({m_origin, {0.0f, 1.0f, 0.0f}});
+        vertices.push_back({m_yTip, {0.0f, 1.0f, 0.0f}});
+        vertices.push_back({m_origin, {0.0f, 0.0f, 1.0f}});
+        vertices.push_back({m_zTip, {0.0f, 0.0f, 1.0f}});
 
         indices.push_back(0);
         indices.push_back(1);
@@ -53,6 +53,9 @@ namespace app {
 
         m_indexBuffer.bind();
         m_indexBuffer.allocate(indices.data(), indices.size() * sizeof(GLuint));
+
+        m_vertexBuffer.release();
+        m_indexBuffer.release();
     }
 
     void Axes::draw(QOpenGLShaderProgram* program) {
@@ -70,6 +73,9 @@ namespace app {
         program->setAttributeBuffer(colorLocation, GL_FLOAT, offset, 3, sizeof(VertexData));
         glLineWidth(4.0f);
         glDrawElements(GL_LINES, m_indexBuffer.size(), GL_UNSIGNED_INT, nullptr);
+
+        m_indexBuffer.release();
+        m_vertexBuffer.release();
     }
 
     bool Axes::isHidden() const {
@@ -82,6 +88,22 @@ namespace app {
 
     void Axes::show() {
         m_isHidden = false;
+    }
+
+    const QVector3D& Axes::origin() const {
+        return m_origin;
+    }
+
+    const QVector3D& Axes::xTip() const {
+        return m_xTip;
+    }
+
+    const QVector3D& Axes::yTip() const {
+        return m_yTip;
+    }
+
+    const QVector3D& Axes::zTip() const {
+        return m_zTip;
     }
 
 } // namespace app

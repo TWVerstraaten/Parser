@@ -6,6 +6,7 @@
 #define APP_CAMERAMANAGER_H
 
 #include <QMatrix4x4>
+#include <QPoint>
 #include <QVector3D>
 
 namespace app {
@@ -17,13 +18,16 @@ namespace app {
 
         [[nodiscard]] const QMatrix4x4& projectionMatrix() const;
         [[nodiscard]] QMatrix4x4        lookAtMatrix() const;
+        [[nodiscard]] const QMatrix4x4& modelViewProjectionMatrix() const;
 
-        void rotateViewDirection(float dX, float dY);
-        void translateCameraPosition(float dX, float dY);
-        void rotateUpDirection(float dX, float dY);
-        void setProjectionMatrix(int w, int h);
-        void zoom(float degrees);
-        void toggleCameraMode();
+        void   rotateViewDirection(float dX, float dY);
+        void   translateCameraPosition(float dX, float dY);
+        void   rotateUpDirection(float dX, float dY);
+        void   setProjectionMatrix(int w, int h);
+        void   zoom(float degrees);
+        void   toggleCameraMode();
+        void   updateLookAtAndModelViewProjectionMatrix();
+        QPoint fromWorldToScreen(const QVector3D& world);
 
       private:
         enum class MODE { PROJECTION, ORTHOGRAPHIC };
@@ -42,6 +46,8 @@ namespace app {
         QVector3D           m_cameraPosition    = {0.0f, 0.0f, 5.0f};
         QVector3D           m_cameraUpDirection = {0.0f, 1.0f, 0.0f};
         QMatrix4x4          m_projectionMatrix;
+        QMatrix4x4          m_lookAtMatrix;
+        QMatrix4x4          m_modelViewProjectionMatrix;
         const OpenGlWidget* m_openGlWidget;
     };
 

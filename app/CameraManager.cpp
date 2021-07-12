@@ -26,6 +26,7 @@ namespace app {
         newViewDirection      = newViewDirection * rotation;
         m_cameraUpDirection   = m_cameraUpDirection * rotation;
         m_cameraPosition      = m_lookAt + newViewDirection;
+        updateLookAtAndModelViewProjectionMatrix();
     }
 
     void CameraManager::translateCameraPosition(float dX, float dY) {
@@ -34,6 +35,7 @@ namespace app {
                                         dY * m_cameraUpDirection * zoomParameterToTop(m_openGlWidget->height()) / m_openGlWidget->height());
         m_cameraPosition += 0.02 * translation;
         m_lookAt += 0.02 * translation;
+        updateLookAtAndModelViewProjectionMatrix();
     }
 
     void CameraManager::rotateUpDirection(float dX, float dY) {
@@ -62,6 +64,7 @@ namespace app {
                 m_projectionMatrix.ortho(-right, right, -top, top, m_nearClippingPlane, m_farClippingPlane);
             } break;
         }
+        updateLookAtAndModelViewProjectionMatrix();
     }
 
     float CameraManager::zoomParameterToRight(int w) const {
@@ -81,16 +84,32 @@ namespace app {
             m_cameraPosition -= m_zoomSensitivity * degrees * lookAtToCamera();
             m_zoomParameter -= m_zoomSensitivity * degrees;
         }
+        updateLookAtAndModelViewProjectionMatrix();
     }
 
     QMatrix4x4 CameraManager::lookAtMatrix() const {
-        QMatrix4x4 lookAtMatrix;
-        lookAtMatrix.lookAt(m_cameraPosition, m_lookAt, m_cameraUpDirection);
-        return lookAtMatrix;
+        return m_lookAtMatrix;
     }
 
     void CameraManager::toggleCameraMode() {
         m_mode = m_mode == MODE::PROJECTION ? MODE::ORTHOGRAPHIC : MODE::PROJECTION;
+    }
+
+    QPoint CameraManager::fromWorldToScreen(const QVector3D& world) {
+        QVector4D clipSpace = m_modelViewProjectionMatrix * QVector4D{world, 1};
+
+        return {static_cast<int>((1 + clipSpace.x() / clipSpace.w()) * m_openGlWidget->width() / 2),
+                static_cast<int>((1 - clipSpace.y() / clipSpace.w()) * m_openGlWidget->height() / 2)};
+    }
+
+    const QMatrix4x4& CameraManager::modelViewProjectionMatrix() const {
+        return m_modelViewProjectionMatrix;
+    }
+
+    void CameraManager::updateLookAtAndModelViewProjectionMatrix() {
+        m_lookAtMatrix = QMatrix4x4{};
+        m_lookAtMatrix.lookAt(m_cameraPosition, m_lookAt, m_cameraUpDirection);
+        m_modelViewProjectionMatrix = m_projectionMatrix * m_lookAtMatrix;
     }
 
 } // namespace app

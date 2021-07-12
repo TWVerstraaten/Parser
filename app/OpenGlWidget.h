@@ -11,6 +11,8 @@
 #include <QVector2D>
 #include <memory>
 
+class QPainter;
+
 namespace app {
     class CameraManager;
     class SurfaceManager;
@@ -34,6 +36,8 @@ namespace app {
         void resizeGL(int w, int h) override;
         void paintGL() override;
         void initShaders();
+        void openGlPaintRoutine();
+        void qtPaintRoutine(QPainter& painter);
 
       private:
         enum class CLICK_STATE { NONE, RIGHT, LEFT, MIDDLE };

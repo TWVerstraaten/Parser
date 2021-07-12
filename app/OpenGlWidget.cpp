@@ -9,11 +9,13 @@
 #include "SurfaceManager.h"
 
 #include <QMouseEvent>
+#include <QPainter>
 #include <memory>
 
 namespace app {
     OpenGlWidget::OpenGlWidget(QWidget* parent) : QOpenGLWidget(parent) {
         m_cameraManager = std::make_unique<CameraManager>(this);
+        m_cameraManager->setProjectionMatrix(width(), height());
     }
 
     OpenGlWidget::~OpenGlWidget() = default;
@@ -90,23 +92,53 @@ namespace app {
     }
 
     void OpenGlWidget::paintGL() {
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        m_cameraManager->setProjectionMatrix(width(), height());
-        m_shaderProgram.setUniformValue("mvp_matrix", m_cameraManager->projectionMatrix() * m_cameraManager->lookAtMatrix());
+        QPainter painter(this);
+        painter.beginNativePainting();
+        openGlPaintRoutine();
+        painter.endNativePainting();
+        qtPaintRoutine(painter);
+    }
+
+    void OpenGlWidget::openGlPaintRoutine() {
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        m_shaderProgram.bind();
+        m_shaderProgram.setUniformValue("mvp_matrix", m_cameraManager->modelViewProjectionMatrix());
         m_surfaceManager->draw(&m_shaderProgram);
+        m_shaderProgram.release();
+    }
+
+    void OpenGlWidget::qtPaintRoutine(QPainter& painter) {
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_BLEND);
+
+        painter.setPen(QPen{Qt::black});
+        QFont font = painter.font();
+        font.setPointSize(16);
+        painter.setFont(font);
+
+        painter.drawText(m_cameraManager->fromWorldToScreen(1.04 * m_surfaceManager->axes().xTip()), "x");
+        painter.drawText(m_cameraManager->fromWorldToScreen(1.04 * m_surfaceManager->axes().yTip()), "y");
+        painter.drawText(m_cameraManager->fromWorldToScreen(1.04 * m_surfaceManager->axes().zTip()), "z");
+
+        painter.end();
     }
 
     void OpenGlWidget::wheelEvent(QWheelEvent* event) {
         const float degrees = event->angleDelta().y() / 8.0f;
         m_cameraManager->zoom(degrees);
+        m_cameraManager->setProjectionMatrix(width(), height());
         update();
     }
 
     CameraManager& OpenGlWidget::cameraWidget() {
         return *m_cameraManager;
     }
-
     SurfaceManager* OpenGlWidget::surfaceManager() const {
         return m_surfaceManager.get();
     }

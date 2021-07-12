@@ -45,8 +45,8 @@ namespace app {
         QVector<VertexData> vertices;
         QVector<GLuint>     indices;
 
-        const size_t iLim  = 70;
-        const size_t jLim  = 70;
+        const size_t iLim = 70;
+        const size_t jLim = 70;
 
         for (size_t i = 0; i != iLim; ++i) {
             for (size_t j = 0; j != jLim; ++j) {
@@ -87,8 +87,8 @@ namespace app {
         QVector<VertexData> vertices;
         QVector<GLuint>     indices;
 
-        const size_t iLim  = 15;
-        const size_t jLim  = 23;
+        const size_t iLim = 15;
+        const size_t jLim = 23;
 
         static float o = 0.0f;
 
@@ -162,6 +162,9 @@ namespace app {
 
         m_indexBuffer.bind();
         m_indexBuffer.allocate(indices.data(), indices.size() * sizeof(GLuint));
+
+        m_vertexBuffer.release();
+        m_indexBuffer.release();
     }
 
     void Surface::draw(QOpenGLShaderProgram* program) {
@@ -180,6 +183,9 @@ namespace app {
         program->setAttributeBuffer(colorLocation, GL_FLOAT, offset, 3, sizeof(VertexData));
 
         glDrawElements(GL_TRIANGLES, m_indexBuffer.size(), GL_UNSIGNED_INT, nullptr);
+
+        m_vertexBuffer.release();
+        m_indexBuffer.release();
     }
 
     bool Surface::isHidden() const {

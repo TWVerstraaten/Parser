@@ -7,6 +7,7 @@
 
 #include <QOpenGLBuffer>
 #include <QOpenGLFunctions>
+#include <QVector3D>
 
 class QOpenGLShaderProgram;
 
@@ -20,7 +21,11 @@ namespace app {
         void hide();
         void show();
 
-        [[nodiscard]] bool isHidden() const;
+        [[nodiscard]] const QVector3D& origin() const;
+        [[nodiscard]] const QVector3D& xTip() const;
+        [[nodiscard]] const QVector3D& yTip() const;
+        [[nodiscard]] const QVector3D& zTip() const;
+        [[nodiscard]] bool             isHidden() const;
 
       private:
         void fillBuffers();
@@ -28,6 +33,11 @@ namespace app {
         bool          m_isHidden = false;
         QOpenGLBuffer m_vertexBuffer;
         QOpenGLBuffer m_indexBuffer;
+
+        QVector3D m_origin = {0, 0, 0};
+        QVector3D m_xTip   = {2, 0, 0};
+        QVector3D m_yTip   = {0, 2, 0};
+        QVector3D m_zTip   = {0, 0, 2};
     };
 } // namespace app
 
