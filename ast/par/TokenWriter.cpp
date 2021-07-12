@@ -108,11 +108,10 @@ namespace ast::par {
                 [&](const UnrolledAstToken::Power& p) { return "(" + unrolledAstToken.children().front().toString() + "^" + unrolledAstToken.children().back().toString() + ")"; },
                 [&](const UnrolledAstToken::UnaryMinus& p) { return "(-" + unrolledAstToken.children().front().toString() + ")"; },
                 [&](const ReservedToken& p) {
-                    return S_GET_NAME(p) + "(" + alg::StringAlg::S_CONCATENATE_STRINGS<UnrolledAstToken>(unrolledAstToken.children(), [](const auto& a) { return a.toString(); }) +
-                           ")";
+                    return S_GET_NAME(p) + "(" + alg::str::CONCATENATE_STRINGS<UnrolledAstToken>(unrolledAstToken.children(), [](const auto& a) { return a.toString(); }) + ")";
                 },
                 [&](const VectorToken& p) {
-                    return "(" + alg::StringAlg::S_CONCATENATE_STRINGS<UnrolledAstToken>(unrolledAstToken.children(), [](const auto& a) { return a.toString(); }) + ")";
+                    return "(" + alg::str::CONCATENATE_STRINGS<UnrolledAstToken>(unrolledAstToken.children(), [](const auto& a) { return a.toString(); }) + ")";
                 },
                 [](const auto& a) {
                     std::stringstream ss;

@@ -7,17 +7,18 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
-namespace alg {
-    std::vector<std::string> StringAlg::S_TRIM_AND_SPLIT(std::string string, const std::string& splitCharacters) {
+namespace alg::str {
+
+    std::vector<std::string> TRIM_AND_SPLIT(std::string string, const std::string& splitCharacters) {
         boost::trim(string);
         std::vector<std::string> parts;
         boost::split(parts, string, boost::is_any_of(splitCharacters));
         return parts;
     }
 
-    std::string StringAlg::S_TRIM(std::string string) {
+    std::string TRIM(std::string string) {
         boost::trim(string);
         return string;
     }
 
-} // namespace alg
+} // namespace alg::str

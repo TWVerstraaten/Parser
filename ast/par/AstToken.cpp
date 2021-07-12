@@ -101,11 +101,11 @@ namespace ast::par {
         S_REPLACE_TOKEN_OPERATORS(tempTokens, info, {{Token::TYPE::PLUS, AstToken::OPERATOR_TYPE::PLUS}, {Token::TYPE::MINUS, AstToken::OPERATOR_TYPE::MINUS}});
 
         if (tempTokens.size() > 1) {
-            info.addError(err::ParserError{err::ParserError::TYPE::GENERIC, std::string("More than one token left at AstToken? "), m_range});
+            info.add({err::ParserError::TYPE::GENERIC, std::string("More than one token left at AstToken? "), m_range});
             return;
         }
         if (not std::holds_alternative<AstToken>(tempTokens.front())) {
-            info.addError(err::ParserError{err::ParserError::TYPE::GENERIC, std::string("Cannot parse "), m_range});
+            info.add({err::ParserError::TYPE::GENERIC, std::string("Cannot parse "), m_range});
             return;
         }
         assert(not tempTokens.empty());
@@ -158,9 +158,9 @@ namespace ast::par {
             const auto argumentCount         = std::get<CustomFunctionToken>(m_token).argumentCount();
             const auto requiredArgumentCount = S_GET_ARGUMENT_COUNT(val);
             if (requiredArgumentCount != argumentCount) {
-                info.addError({err::ParserError::TYPE::WRONG_ARGUMENT_COUNT_RESERVED,
-                               S_GET_NAME(val) + " takes " + std::to_string(requiredArgumentCount) + " arguments, not " + std::to_string(argumentCount),
-                               m_range});
+                info.add({err::ParserError::TYPE::WRONG_ARGUMENT_COUNT_RESERVED,
+                          S_GET_NAME(val) + " takes " + std::to_string(requiredArgumentCount) + " arguments, not " + std::to_string(argumentCount),
+                          m_range});
             }
             m_token = val;
         }
@@ -266,7 +266,7 @@ namespace ast::par {
     }
 
     std::string AstToken::toStringFlat() const {
-        const auto writeChildren = [this]() { return alg::StringAlg::S_CONCATENATE_STRINGS<AstToken>(m_children, [&](const auto& a) { return a.toStringFlat(); }); };
+        const auto writeChildren = [this]() { return alg::str::CONCATENATE_STRINGS<AstToken>(m_children, [&](const auto& a) { return a.toStringFlat(); }); };
         return std::visit(Overloaded{[](AstToken::Error) { return std::string("_error_"); },
                                      [](AstToken::Empty) { return std::string("_empty_"); },
                                      [&](OPERATOR_TYPE type) {

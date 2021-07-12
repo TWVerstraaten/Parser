@@ -32,6 +32,10 @@ namespace ast {
         return m_info;
     }
 
+    err::ParserInfo& Ast::info() {
+        return m_info;
+    }
+
     std::set<par::CustomFunctionToken> Ast::functionDependencies() const {
         return m_rootNode.getCustomFunctionDependencies();
     }
@@ -71,7 +75,7 @@ namespace ast {
                               },
                               [&](const par::VectorToken& vectorToken) { m_header = Header(vectorToken, headerAst); },
                               [&](const auto& a) {
-                                  m_info.addError(err::ParserError{err::ParserError::TYPE::HEADER_ERROR, headerAst.toStringFlat(), headerAst.range()});
+                                  m_info.add({err::ParserError::TYPE::HEADER_ERROR, headerAst.toStringFlat(), headerAst.range()});
                               }},
                    headerAst.token());
     }
@@ -153,7 +157,7 @@ namespace ast {
         assert(std::holds_alternative<ast::par::CustomFunctionToken>(m_rootNode.children().front().token()));
         const auto& arguments = m_rootNode.children().front().children();
         if (arguments.empty()) {
-            m_info.addError(err::ParserError{err::ParserError::TYPE::NO_ARGUMENTS, "", m_rootNode.children().front().range()});
+            m_info.add({err::ParserError::TYPE::NO_ARGUMENTS, "", m_rootNode.children().front().range()});
         }
         checkIfArgumentsAreStrings();
         if (m_info.success()) {
@@ -170,9 +174,9 @@ namespace ast {
         for (const auto& argument : arguments) {
             if (not std::holds_alternative<std::string>(argument.token())) {
                 if (std::holds_alternative<ast::par::AstToken::Empty>(argument.token())) {
-                    m_info.addError(err::ParserError{err::ParserError::TYPE::EMPTY_ARGUMENT, "", m_rootNode.children().front().range()});
+                    m_info.add({err::ParserError::TYPE::EMPTY_ARGUMENT, "", m_rootNode.children().front().range()});
                 } else {
-                    m_info.addError(err::ParserError{err::ParserError::TYPE::NOT_AN_ARGUMENT, argument.toStringFlat(), argument.range()});
+                    m_info.add({err::ParserError::TYPE::NOT_AN_ARGUMENT, argument.toStringFlat(), argument.range()});
                 }
             }
         }
@@ -185,8 +189,8 @@ namespace ast {
             for (auto it1 = arguments.begin(); std::next(it1) != arguments.end(); ++it1) {
                 const auto& argument = std::get<std::string>(it1->token());
                 if (auto it2 = std::find_if(std::next(it1), arguments.end(), [&](const auto& a) { return std::get<std::string>(a.token()) == argument; }); it2 != arguments.end()) {
-                    m_info.addError(err::ParserError{err::ParserError::TYPE::REPEATED_ARGUMENT, argument, it2->range()});
-                    m_info.addError(err::ParserError{err::ParserError::TYPE::REPEATED_ARGUMENT, argument, it1->range()});
+                    m_info.add({err::ParserError::TYPE::REPEATED_ARGUMENT, argument, it2->range()});
+                    m_info.add({err::ParserError::TYPE::REPEATED_ARGUMENT, argument, it1->range()});
                 }
             }
         }
@@ -199,8 +203,27 @@ namespace ast {
         for (const auto& el : arguments) {
             const auto& argument = std::get<std::string>(el.token());
             if (usedVariables.find(argument) == usedVariables.end()) {
-                m_info.addMessage(err::ParserMessage{err::ParserMessage::UNUSED_ARGUMENT, argument, el.range()});
+                m_info.add({err::ParserMessage::UNUSED_ARGUMENT, argument, el.range()});
             }
         }
+    }
+
+    Header::HEADER_TYPE Ast::headerType() const {
+        return m_header.type();
+    }
+
+    bool Ast::isEmpty() const {
+        return std::holds_alternative<ast::par::AstToken::Empty>(m_rootNode.token());
+    }
+
+    std::string Ast::getDeclaredName() const {
+        assert(m_header.type() == Header::HEADER_TYPE::FULL_HEADER || m_header.type() == Header::HEADER_TYPE::CONSTANT);
+        if (m_header.type() == ast::Header::HEADER_TYPE::FULL_HEADER) {
+            return getCustomFunctionToken().name();
+        } else if (m_header.type() == ast::Header::HEADER_TYPE::CONSTANT) {
+            return std::get<ast::Header::ConstantHeader>(m_header.headerVariant()).m_name;
+        }
+        assert(false);
+        return "";
     }
 } // namespace ast

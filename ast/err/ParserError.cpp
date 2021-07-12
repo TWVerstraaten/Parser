@@ -14,7 +14,7 @@ namespace ast::err {
     std::string ParserError::toString() const {
         switch (m_type) {
             case TYPE::ILLEGAL_CHARACTER:
-                return "Illegal Character (" + m_message + ") at " + std::to_string(m_range.startIndex());
+                return "Illegal Character '" + m_message + "' at " + std::to_string(m_range.startIndex());
             case TYPE::UNMATCHED_CLOSING_BR:
                 return "Unmatched closing bracket at " + std::to_string(m_range.startIndex());
             case TYPE::UNMATCHED_OPEN_BR:

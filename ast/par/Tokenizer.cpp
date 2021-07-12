@@ -44,7 +44,7 @@ namespace ast::par {
                                                                                                       {Token::TYPE::NUMBER, Token::TYPE::LEFT_BR}};
         for (auto it = m_tokenList.begin(); std::next(it) != m_tokenList.end(); ++it) {
             if (S_INSERT_MULTIPLICATION_PATTERN.find({it->type(), std::next(it)->type()}) != S_INSERT_MULTIPLICATION_PATTERN.end()) {
-                m_info.addMessage({err::ParserMessage::TYPE::INSERT_MULTIPLICATION, "", {it->range().startIndex(), std::next(it)->range().endIndex()}});
+                m_info.add({err::ParserMessage::TYPE::INSERT_MULTIPLICATION, "", {it->range().startIndex(), std::next(it)->range().endIndex()}});
                 it = m_tokenList.insert(std::next(it), Token{Token::TYPE::TIMES, "", {}});
             }
         }
@@ -59,7 +59,7 @@ namespace ast::par {
         for (size_t i = 0; i != m_string.size(); ++i) {
             const char c = m_string.at(i);
             if (not isalnum(c) && S_ALLOWED_SPECIAL_CHARACTERS.find_first_of(c) == std::string::npos) {
-                m_info.addError({err::ParserError::TYPE::ILLEGAL_CHARACTER, std::string(1, c), {i, i}});
+                m_info.add({err::ParserError::TYPE::ILLEGAL_CHARACTER, std::string(1, c), {i, i}});
             }
         }
     }
@@ -115,7 +115,7 @@ namespace ast::par {
                         i = j - 1;
                     } else {
                         if (not isspace(c)) {
-                            m_info.addError({err::ParserError::TYPE::GENERIC, std::string(1, c), {i, i}});
+                            m_info.add({err::ParserError::TYPE::GENERIC, std::string(1, c), {i, i}});
                         }
                     }
                     break;
@@ -158,7 +158,7 @@ namespace ast::par {
                 ++bracketDepth;
             } else if (it->type() == Token::TYPE::RIGHT_BR) {
                 if (bracketDepth <= 0) {
-                    m_info.addError({err::ParserError::TYPE::UNMATCHED_CLOSING_BR, "", it->range()});
+                    m_info.add({err::ParserError::TYPE::UNMATCHED_CLOSING_BR, "", it->range()});
                 } else {
                     --bracketDepth;
                 }
@@ -170,7 +170,7 @@ namespace ast::par {
                 ++bracketDepth;
             } else if (it->type() == Token::TYPE::LEFT_BR) {
                 if (bracketDepth <= 0) {
-                    m_info.addError({err::ParserError::TYPE::UNMATCHED_OPEN_BR, "", it->range()});
+                    m_info.add({err::ParserError::TYPE::UNMATCHED_OPEN_BR, "", it->range()});
                 } else {
                     --bracketDepth;
                 }
@@ -183,7 +183,7 @@ namespace ast::par {
         if (equalCount >= 2) {
             for (auto it = std::find_if(TT_IT(m_tokenList), TT_LAMBDA(a, return a.type() == Token::TYPE::EQUALS;)); it != m_tokenList.end();
                  it      = std::find_if(std::next(it), m_tokenList.end(), TT_LAMBDA(a, return a.type() == Token::TYPE::EQUALS;))) {
-                m_info.addError({err::ParserError::TYPE::TOO_MANY_EQUALS, "", it->range()});
+                m_info.add({err::ParserError::TYPE::TOO_MANY_EQUALS, "", it->range()});
             }
         }
     }
@@ -199,11 +199,11 @@ namespace ast::par {
         for (auto it = m_tokenList.begin(); std::next(it) != m_tokenList.end(); ++it) {
             if (S_OPERATOR_TYPES.find(it->type()) != S_OPERATOR_TYPES.end()) {
                 if (std::next(it) == m_tokenList.end()) {
-                    m_info.addError({err::ParserError::TYPE::UNFINISHED, it->string(), it->range()});
+                    m_info.add({err::ParserError::TYPE::UNFINISHED, it->string(), it->range()});
                 }
                 auto next = std::next(it);
                 if (S_REQUIRED_AFTER_OPERATORS.find(next->type()) == S_REQUIRED_AFTER_OPERATORS.end()) {
-                    m_info.addError({err::ParserError::TYPE::ILLEGAL_SEQUENCE, it->string() + " " + next->string(), {it->range().startIndex(), next->range().endIndex()}});
+                    m_info.add({err::ParserError::TYPE::ILLEGAL_SEQUENCE, it->string() + " " + next->string(), {it->range().startIndex(), next->range().endIndex()}});
                 }
             }
         }
@@ -215,7 +215,7 @@ namespace ast::par {
         }
         for (auto it = m_tokenList.begin(); std::next(it) != m_tokenList.end(); ++it) {
             if (it->type() == Token::TYPE::COMMA && std::next(it)->type() == Token::TYPE::COMMA) {
-                m_info.addError({err::ParserError::TYPE::ILLEGAL_SEQUENCE, ", ,", {it->range().startIndex(), std::next(it)->range().endIndex()}});
+                m_info.add({err::ParserError::TYPE::ILLEGAL_SEQUENCE, ", ,", {it->range().startIndex(), std::next(it)->range().endIndex()}});
             }
         }
     }
@@ -227,7 +227,7 @@ namespace ast::par {
         for (auto it = m_tokenList.begin(); std::next(it) != m_tokenList.end(); ++it) {
             auto next = std::next(it);
             if (it->type() == Token::TYPE::IDENTIFIER && next->type() == Token::TYPE::NUMBER) {
-                m_info.addWarning(
+                m_info.add(
                     {err::ParserWarning::TYPE::SUSPICIOUS_IDENTIFIER_NUM_PATTERN, it->string() + "*" + next->string(), {it->range().startIndex(), next->range().endIndex()}});
             }
         }
@@ -239,7 +239,7 @@ namespace ast::par {
                 const auto&  string   = token.string();
                 const size_t dotCount = std::count_if(TT_IT(string), TT_LAMBDA(a, return a == '.';));
                 if (dotCount == 1 && string.at(0) == '.') {
-                    m_info.addWarning({err::ParserWarning::TYPE::SUSPICIOUS_MISSING_LEADING_ZERO, "0" + string, token.range()});
+                    m_info.add({err::ParserWarning::TYPE::SUSPICIOUS_MISSING_LEADING_ZERO, "0" + string, token.range()});
                 }
             }
         }

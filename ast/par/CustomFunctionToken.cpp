@@ -21,6 +21,10 @@ namespace ast::par {
         m_argumentCount = argumentCount;
     }
 
+    std::string CustomFunctionToken::toString() const {
+        return m_name + "(" + std::to_string(m_argumentCount) + ")";
+    }
+
     bool operator<(const CustomFunctionToken& left, const CustomFunctionToken& right) {
         if (left.m_name != right.m_name) {
             return left.m_name < right.m_name;

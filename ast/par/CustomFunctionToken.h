@@ -17,6 +17,7 @@ namespace ast::par {
         void                             setArgumentCount(size_t argumentCount);
         [[nodiscard]] const std::string& name() const;
         [[nodiscard]] size_t             argumentCount() const;
+        [[nodiscard]] std::string        toString() const;
 
         friend bool operator==(const CustomFunctionToken& r, const CustomFunctionToken& l);
 

@@ -6,14 +6,18 @@
 #define APP_FORMULAWIDGET_H
 
 #include <QWidget>
+#include <memory>
 
 class QCheckBox;
 class QGridLayout;
 class QPushButton;
 
-namespace ast::err {
-    class ParserInfo;
-}
+namespace ast {
+    namespace err {
+        class ParserInfo;
+    }
+    class Ast;
+} // namespace ast
 
 namespace app {
     class TextEdit;
@@ -23,12 +27,18 @@ namespace app {
 
       public:
         explicit FormulaWidget(QWidget* parent);
+        ~FormulaWidget() override;
 
-        [[nodiscard]] size_t    index() const;
-        [[nodiscard]] TextEdit* textEdit();
-        [[nodiscard]] bool      isActive() const;
-        [[nodiscard]] bool      formulaWasUpdated() const;
-        void                    setFormulaWasUpdated(bool formulaWasUpdated);
+        void setFormulaWasUpdated(bool formulaWasUpdated);
+        void updateTextEdit();
+
+        [[nodiscard]] size_t                index() const;
+        [[nodiscard]] TextEdit*             textEdit();
+        [[nodiscard]] bool                  isActive() const;
+        [[nodiscard]] bool                  hasAst() const;
+        [[nodiscard]] bool                  formulaWasUpdated() const;
+        [[nodiscard]] const ast::Ast&       ast() const;
+        [[nodiscard]] ast::err::ParserInfo& info();
 
       signals:
         void deleteClicked(size_t index);
@@ -45,12 +55,13 @@ namespace app {
 
         static inline size_t M_MAX_INDEX = 0;
 
-        const size_t m_index;
-        bool         m_formulaWasUpdated = false;
-        QGridLayout* m_layout            = nullptr;
-        QCheckBox*   m_activeCheckBox    = nullptr;
-        TextEdit*    m_textEdit          = nullptr;
-        QPushButton* m_deleteButton      = nullptr;
+        const size_t              m_index;
+        bool                      m_formulaWasUpdated = false;
+        QGridLayout*              m_layout            = nullptr;
+        QCheckBox*                m_activeCheckBox    = nullptr;
+        TextEdit*                 m_textEdit          = nullptr;
+        QPushButton*              m_deleteButton      = nullptr;
+        std::unique_ptr<ast::Ast> m_ast;
     };
 } // namespace app
 

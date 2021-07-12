@@ -44,7 +44,7 @@ namespace ast::par {
         if (parsedIdentifier.has_value()) {
             m_tokenList.emplace_back(StructuralToken{parsedIdentifier.value(), token.range()});
         } else {
-            m_info.addError(err::ParserError{err::ParserError::TYPE::IDENTIFIER_ERROR, token.string(), token.range()});
+            m_info.add({err::ParserError::TYPE::IDENTIFIER_ERROR, token.string(), token.range()});
         }
     }
 
@@ -70,7 +70,7 @@ namespace ast::par {
         if (parsedNumber.has_value()) {
             std::visit([&](auto a) { m_tokenList.emplace_back(StructuralToken{a, token.range()}); }, parsedNumber.value());
         } else {
-            m_info.addError(err::ParserError{err::ParserError::TYPE::NUMBER_ERROR, token.string(), token.range()});
+            m_info.add({err::ParserError::TYPE::NUMBER_ERROR, token.string(), token.range()});
         }
     }
 

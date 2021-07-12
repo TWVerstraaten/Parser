@@ -9,7 +9,7 @@
 
 namespace app::cmd {
 
-    static void S_UPDATE_TEXT_EDIT(app::TextEdit* textEdit, const QString& string, int cursorPosition, int anchorPosition) {
+    static void UPDATE_TEXT_EDIT(app::TextEdit* textEdit, const QString& string, int cursorPosition, int anchorPosition) {
         UndoRedoHandler::SET_PUSH_BLOCKED(true);
         textEdit->setText(string);
         QTextCursor cursor = textEdit->textCursor();
@@ -31,10 +31,10 @@ namespace app::cmd {
     }
 
     void TextEditChangedCommandImpl::undo() {
-        S_UPDATE_TEXT_EDIT(m_textEdit, m_oldString, m_oldCursorPosition, m_oldAnchorPosition);
+        UPDATE_TEXT_EDIT(m_textEdit, m_oldString, m_oldCursorPosition, m_oldAnchorPosition);
     }
 
     void TextEditChangedCommandImpl::redo() {
-        S_UPDATE_TEXT_EDIT(m_textEdit, m_newString, m_newCursorPosition, m_newAnchorPosition);
+        UPDATE_TEXT_EDIT(m_textEdit, m_newString, m_newCursorPosition, m_newAnchorPosition);
     }
 } // namespace app::cmd

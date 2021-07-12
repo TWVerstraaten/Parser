@@ -20,10 +20,13 @@ namespace ast {
         void replaceVariableInPlace(const std::string& variable, const par::AstToken& token);
         void replaceFunctionInPlace(const Ast& functionToken);
 
+        [[nodiscard]] Header::HEADER_TYPE                headerType() const;
         [[nodiscard]] par::CustomFunctionToken           getCustomFunctionToken() const;
         [[nodiscard]] bool                               success() const;
+        [[nodiscard]] bool                               isEmpty() const;
         [[nodiscard]] bool                               hasCustomDependencies() const;
         [[nodiscard]] const err::ParserInfo&             info() const;
+        [[nodiscard]] err::ParserInfo&                   info();
         [[nodiscard]] const Header&                      header() const;
         [[nodiscard]] std::set<par::CustomFunctionToken> functionDependencies() const;
         [[nodiscard]] std::set<std::string>              constantDependencies() const;
@@ -34,6 +37,7 @@ namespace ast {
         [[nodiscard]] Ast                                replaceFunction(const Ast& functionToken) const;
         [[nodiscard]] std::string                        toStringAsTree() const;
         [[nodiscard]] std::string                        toStringFlat() const;
+        [[nodiscard]] std::string                        getDeclaredName() const;
 
       private:
         void checkAndSetHeader();

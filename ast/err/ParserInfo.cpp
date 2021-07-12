@@ -8,24 +8,28 @@
 
 namespace ast::err {
 
-    void ParserInfo::addError(ParserError&& error) {
-        m_errors.emplace_back(std::move(error));
+    void ParserInfo::add(ParserError&& error) {
+        m_parserErrors.emplace_back(std::move(error));
     }
 
-    void ParserInfo::addWarning(ParserWarning&& warning) {
+    void ParserInfo::add(ParserWarning&& warning) {
         m_warnings.emplace_back(std::move(warning));
     }
 
-    void ParserInfo::addMessage(ParserMessage&& warning) {
+    void ParserInfo::add(ParserMessage&& warning) {
         m_messages.emplace_back(std::move(warning));
     }
 
+    void ParserInfo::add(DefinitionError&& error) {
+        m_definitionErrors.emplace_back(std::move(error));
+    }
+
     bool ParserInfo::success() const {
-        return m_errors.empty();
+        return not hasErrors();
     }
 
     bool ParserInfo::hasErrors() const {
-        return not m_errors.empty();
+        return not(m_parserErrors.empty() && m_definitionErrors.empty());
     }
 
     bool ParserInfo::hasWarnings() const {
@@ -36,8 +40,8 @@ namespace ast::err {
         return not m_messages.empty();
     }
 
-    const std::vector<ParserError>& ParserInfo::errors() const {
-        return m_errors;
+    const std::vector<ParserError>& ParserInfo::parserErrors() const {
+        return m_parserErrors;
     }
 
     const std::vector<ParserWarning>& ParserInfo::warnings() const {
@@ -49,9 +53,9 @@ namespace ast::err {
     }
 
     void ParserInfo::printAll() const {
-        std::cout << "Error count \t" << m_errors.size() << '\n';
+        std::cout << "Error count \t" << m_parserErrors.size() << '\n';
         if (hasErrors()) {
-            for (const auto& el : m_errors) {
+            for (const auto& el : m_parserErrors) {
                 std::cout << std::string(5, '-') << el.toString() << '\n';
             }
         }
@@ -70,8 +74,16 @@ namespace ast::err {
     }
 
     void ParserInfo::clear() {
-        m_errors.clear();
+        m_parserErrors.clear();
         m_warnings.clear();
         m_messages.clear();
+    }
+
+    const std::vector<DefinitionError>& ParserInfo::definitionErrors() const {
+        return m_definitionErrors;
+    }
+
+    void ParserInfo::clearDefinitionErrors() {
+        m_definitionErrors.clear();
     }
 } // namespace ast::err

@@ -56,8 +56,8 @@ namespace ast {
         return std::visit(Overloaded{[](EmptyHeader) { return std::string("Empty headerVariant"); },
                                      [](const ConstantHeader& namedHeader) { return "Named:\t" + namedHeader.m_name; },
                                      [](const SingleCoordinateHeader& single) { return "Single coord:\t" + single.m_coordinate; },
-                                     [](const CoordinateVectorHeader& vector) { return "Coord. vector:\t(" + alg::StringAlg::S_CONCATENATE_STRINGS(vector.m_coordinates) + ")"; },
-                                     [](const FullHeader& h) { return std::string("Full:\t") + h.m_name + "(" + alg::StringAlg::S_CONCATENATE_STRINGS(h.m_variables) + ")"; }},
+                                     [](const CoordinateVectorHeader& vector) { return "Coord. vector:\t(" + alg::str::CONCATENATE_STRINGS(vector.m_coordinates) + ")"; },
+                                     [](const FullHeader& h) { return std::string("Full:\t") + h.m_name + "(" + alg::str::CONCATENATE_STRINGS(h.m_variables) + ")"; }},
                           m_header);
     }
 

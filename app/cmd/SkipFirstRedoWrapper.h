@@ -5,7 +5,7 @@
 #ifndef APP_CMD_SKIPFIRSTREDOWRAPPER_H
 #define APP_CMD_SKIPFIRSTREDOWRAPPER_H
 
-#include <QUndoCommand>
+#include <utility>
 
 namespace app::cmd {
     template <class T>

@@ -78,9 +78,12 @@ namespace app {
         const auto charPosition = QTextCursor(cursorForPosition(e->pos())).position();
         const auto rangeCheck   = [charPosition](const auto& a) { return a.range().isInRange(charPosition); };
 
-        if (auto errorIt = std::find_if(TT_IT(m_info.errors()), rangeCheck); errorIt != m_info.errors().end()) {
+        if (not m_info.definitionErrors().empty()) {
             S_SET_TOOLTIP_PALETTE(QColor(16185078), Qt::red);
-            QToolTip::showText(mapToGlobal(e->pos()), QString::fromStdString(errorIt->toString()));
+            QToolTip::showText(mapToGlobal(e->pos()), QString::fromStdString(m_info.definitionErrors().front().toString()));
+        } else if (auto parserErrorIt = std::find_if(TT_IT(m_info.parserErrors()), rangeCheck); parserErrorIt != m_info.parserErrors().end()) {
+            S_SET_TOOLTIP_PALETTE(QColor(16185078), Qt::red);
+            QToolTip::showText(mapToGlobal(e->pos()), QString::fromStdString(parserErrorIt->toString()));
         } else if (auto warningIt = std::find_if(TT_IT(m_info.warnings()), rangeCheck); warningIt != m_info.warnings().end()) {
             S_SET_TOOLTIP_PALETTE(QColor(16185078), Qt::blue);
             QToolTip::showText(mapToGlobal(e->pos()), QString::fromStdString(warningIt->toString()));
@@ -102,7 +105,7 @@ namespace app {
     void TextEdit::highlightInfo() {
         S_HIGHLIGHT_FROM_CONTAINER(m_info.messages(), document(), S_CHAR_FORMAT(CHAR_FORMATS::MESSAGE));
         S_HIGHLIGHT_FROM_CONTAINER(m_info.warnings(), document(), S_CHAR_FORMAT(CHAR_FORMATS::WARNING));
-        S_HIGHLIGHT_FROM_CONTAINER(m_info.errors(), document(), S_CHAR_FORMAT(CHAR_FORMATS::ERROR));
+        S_HIGHLIGHT_FROM_CONTAINER(m_info.parserErrors(), document(), S_CHAR_FORMAT(CHAR_FORMATS::ERROR));
     }
 
     void TextEdit::determineAndSetTextColor() {

@@ -13,6 +13,7 @@
 #include <QDebug>
 #include <QGridLayout>
 #include <QPushButton>
+#include <memory>
 
 namespace app {
 
@@ -28,6 +29,8 @@ namespace app {
         m_layout->setAlignment(Qt::AlignTop);
     }
 
+    FormulaWidget::~FormulaWidget() = default;
+
     void FormulaWidget::processFormula() {
         const auto string = m_textEdit->document()->toPlainText();
 
@@ -40,11 +43,10 @@ namespace app {
         m_textEdit->blockSignals(false);
 
         const auto str = string.toStdString();
-        ast::Ast   ast(str);
-        m_textEdit->setInfo(ast.info());
-        m_formulaWasUpdated = true;
-
+        m_ast          = std::make_unique<ast::Ast>(str);
         emit updated(m_index);
+        m_textEdit->setInfo(m_ast->info());
+        m_formulaWasUpdated = true;
     }
 
     size_t FormulaWidget::index() const {
@@ -94,6 +96,23 @@ namespace app {
 
     void FormulaWidget::setFormulaWasUpdated(bool formulaWasUpdated) {
         m_formulaWasUpdated = formulaWasUpdated;
+    }
+
+    const ast::Ast& FormulaWidget::ast() const {
+        return *m_ast;
+    }
+
+    bool FormulaWidget::hasAst() const {
+        return m_ast != nullptr;
+    }
+
+    ast::err::ParserInfo& FormulaWidget::info() {
+        assert(hasAst());
+        return m_ast->info();
+    }
+
+    void FormulaWidget::updateTextEdit() {
+        m_textEdit->setInfo(m_ast->info());
     }
 
 } // namespace app

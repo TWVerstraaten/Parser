@@ -29,10 +29,9 @@ namespace app {
         if (not M_INITIALIZED) {
             INIT();
         }
-        if (M_PUSH_BLOCKED) {
-            return;
+        if (not M_PUSH_BLOCKED) {
+            M_UNDO_STACK->push(undoCommand);
         }
-        M_UNDO_STACK->push(undoCommand);
     }
 
     void UndoRedoHandler::SET_PUSH_BLOCKED(bool blocked) {
