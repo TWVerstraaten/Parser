@@ -5,7 +5,6 @@
 #ifndef AST_PAR_STRUCTURALTOKENIZER_H
 #define AST_PAR_STRUCTURALTOKENIZER_H
 
-#include "StructuralToken.h"
 #include "Token.h"
 
 #include <list>
@@ -18,6 +17,7 @@ namespace ast::err {
 }
 
 namespace ast::par {
+    class StructuralToken;
 
     class StructuralTokenizer {
 

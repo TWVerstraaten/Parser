@@ -8,6 +8,8 @@
 #include "Header.h"
 #include "par/UnrolledAstToken.h"
 
+#include <map>
+
 namespace ast {
 
     class Ast;

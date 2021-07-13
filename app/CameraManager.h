@@ -22,7 +22,6 @@ namespace app {
 
         void   rotateViewDirection(float dX, float dY);
         void   translateCameraPosition(float dX, float dY);
-        void   rotateUpDirection(float dX, float dY);
         void   setProjectionMatrix(int w, int h);
         void   zoom(float degrees);
         void   toggleCameraMode();

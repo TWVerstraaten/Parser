@@ -38,14 +38,6 @@ namespace app {
         updateLookAtAndModelViewProjectionMatrix();
     }
 
-    void CameraManager::rotateUpDirection(float dX, float dY) {
-        //        QMatrix4x4 rotation;
-        //        rotation.setToIdentity();
-        //        rotation.rotate(-0.08f * dX, m_viewDirection);
-        //        m_cameraUpDirection = m_cameraUpDirection * rotation;
-        //        assert(std::abs(QVector3D::dotProduct(m_cameraUpDirection, m_viewDirection)) < 0.01f);
-    }
-
     QVector3D CameraManager::lookAtToCamera() const {
         return m_cameraPosition - m_lookAt;
     }
@@ -93,6 +85,8 @@ namespace app {
 
     void CameraManager::toggleCameraMode() {
         m_mode = m_mode == MODE::PROJECTION ? MODE::ORTHOGRAPHIC : MODE::PROJECTION;
+        setProjectionMatrix(m_openGlWidget->width(), m_openGlWidget->height());
+        updateLookAtAndModelViewProjectionMatrix();
     }
 
     QPoint CameraManager::fromWorldToScreen(const QVector3D& world) {

@@ -5,17 +5,21 @@
 #ifndef AST_ERR_PARSERINFO_H
 #define AST_ERR_PARSERINFO_H
 
-#include "DefinitionError.h"
-#include "ParserError.h"
-#include "ParserMessage.h"
-#include "ParserWarning.h"
-
 #include <vector>
 
 namespace ast::err {
+
+    class DefinitionError;
+    class ParserError;
+    class ParserMessage;
+    class ParserWarning;
+
     class ParserInfo {
 
       public:
+        ParserInfo();
+        ~ParserInfo();
+
         void add(ParserError&& error);
         void add(ParserWarning&& warning);
         void add(ParserMessage&& warning);

@@ -4,10 +4,11 @@
 
 #include "AstToken.h"
 
-#include "../../alg/StringAlg.h"
 #include "../../gen/Overloaded.h"
 #include "../../gen/defines.h"
+#include "../err/ParserError.h"
 #include "../err/ParserInfo.h"
+#include "TokenTemplates.h"
 #include "TokenWriter.h"
 
 #include <algorithm>
@@ -51,26 +52,6 @@ namespace ast::par {
             *std::prev(it)            = AstToken{astTokenType, std::move(std::get<AstToken>(*std::prev(it))), std::move(std::get<AstToken>(*std::next(it))), {start, end}, info};
             it                        = tempTokens.erase(it, std::next(it, 2));
         }
-    }
-
-    static std::string S_OPERATOR_TYPE_TO_STRING(AstToken::OPERATOR_TYPE type) {
-        switch (type) {
-            case AstToken::OPERATOR_TYPE::PLUS:
-                return "+";
-            case AstToken::OPERATOR_TYPE::MINUS:
-                return "-";
-            case AstToken::OPERATOR_TYPE::TIMES:
-                return "*";
-            case AstToken::OPERATOR_TYPE::DIVIDE:
-                return "/";
-            case AstToken::OPERATOR_TYPE::POWER:
-                return "^";
-            case AstToken::OPERATOR_TYPE::UNARY_MINUS:
-                return "-";
-            case AstToken::OPERATOR_TYPE::EQUALS:
-                return "=";
-        }
-        assert(false);
     }
 
     AstToken::AstToken() = default;
@@ -153,13 +134,13 @@ namespace ast::par {
 
     void AstToken::maybeCastToReservedFunction(err::ParserInfo& info) {
         assert(std::holds_alternative<CustomFunctionToken>(m_token));
-        if (auto reserved = S_GET_RESERVED(std::get<CustomFunctionToken>(m_token).name()); reserved.has_value()) {
+        if (auto reserved = GET_RESERVED(std::get<CustomFunctionToken>(m_token).name()); reserved.has_value()) {
             const auto val                   = reserved.value();
             const auto argumentCount         = std::get<CustomFunctionToken>(m_token).argumentCount();
-            const auto requiredArgumentCount = S_GET_ARGUMENT_COUNT(val);
+            const auto requiredArgumentCount = GET_ARGUMENT_COUNT(val);
             if (requiredArgumentCount != argumentCount) {
                 info.add({err::ParserError::TYPE::WRONG_ARGUMENT_COUNT_RESERVED,
-                          S_GET_NAME(val) + " takes " + std::to_string(requiredArgumentCount) + " arguments, not " + std::to_string(argumentCount),
+                          GET_NAME(val) + " takes " + std::to_string(requiredArgumentCount) + " arguments, not " + std::to_string(argumentCount),
                           m_range});
             }
             m_token = val;
@@ -246,7 +227,7 @@ namespace ast::par {
     }
 
     std::string AstToken::toStringAsTree() const {
-        return TokenWriter::S_TO_STRING_AS_TREE("", *this, false);
+        return TokenWriter::S_TO_STRING_AS_TREE(*this);
     }
 
     void AstToken::replaceFunction(const Header::FullHeader& header, const AstToken& functionToken) {
@@ -266,27 +247,9 @@ namespace ast::par {
     }
 
     std::string AstToken::toStringFlat() const {
-        const auto writeChildren = [this]() { return alg::str::CONCATENATE_STRINGS<AstToken>(m_children, [&](const auto& a) { return a.toStringFlat(); }); };
-        return std::visit(Overloaded{[](AstToken::Error) { return std::string("_error_"); },
-                                     [](AstToken::Empty) { return std::string("_empty_"); },
-                                     [&](OPERATOR_TYPE type) {
-                                         if (type == OPERATOR_TYPE::UNARY_MINUS) {
-                                             return "-(" + m_children.front().toStringFlat() + ")";
-                                         } else {
-                                             return "(" + m_children.front().toStringFlat() + " " + S_OPERATOR_TYPE_TO_STRING(type) + " " + m_children.back().toStringFlat() + ")";
-                                         }
-                                     },
-                                     [&](const CustomFunctionToken& function) { return function.name() + "(" + writeChildren() + ")"; },
-                                     [&](const ReservedToken& function) { return S_GET_NAME(function) + "(" + writeChildren() + ")"; },
-                                     [&](const VectorToken& vectorToken) { return "(" + writeChildren() + ")"; },
-                                     [](const std::string& str) { return str; },
-                                     [](const auto& a) {
-                                         std::stringstream ss;
-                                         ss << a;
-                                         return ss.str();
-                                     }},
-                          m_token);
+        return TokenWriter::S_TO_STRING_FLAT(*this);
     }
+
     std::set<std::string> AstToken::getUndeclaredVariables(const std::set<std::string>& declared) const {
         std::set<std::string> result;
         for (const auto& el : m_children) {

@@ -5,8 +5,6 @@
 #ifndef APP_FORMULASIDEBAR_H
 #define APP_FORMULASIDEBAR_H
 
-#include "../ast/par/CustomFunctionToken.h"
-
 #include <QWidget>
 #include <set>
 #include <vector>
@@ -15,6 +13,10 @@ class QVBoxLayout;
 class QLabel;
 class QScrollArea;
 class QPushButton;
+
+namespace ast::par {
+    class CustomFunctionToken;
+}
 
 namespace app {
 
@@ -45,7 +47,7 @@ namespace app {
 
       private:
         void checkFormulaWidgetsParsed();
-        void checkReferenceToUndefined();
+        void checkUndefined();
         void checkCircularDependenciesAndUndefined();
         void updateAt(size_t index);
         void addNewFormulaWidgetButton();

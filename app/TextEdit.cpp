@@ -4,10 +4,13 @@
 
 #include "TextEdit.h"
 
+#include "../ast/err/DefinitionError.h"
+#include "../ast/err/ParserError.h"
+#include "../ast/err/ParserMessage.h"
+#include "../ast/err/ParserWarning.h"
 #include "../gen/defines.h"
 #include "UndoRedoConsumer.h"
 #include "UndoRedoHandler.h"
-#include "cmd/SkipFirstRedoWrapper.h"
 #include "cmd/TextEditChangedCommand.h"
 
 #include <QAction>

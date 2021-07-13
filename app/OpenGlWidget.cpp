@@ -46,7 +46,6 @@ namespace app {
                 m_cameraManager->rotateViewDirection(dX, dY);
                 break;
             case CLICK_STATE::MIDDLE:
-                m_cameraManager->rotateUpDirection(dX, dY);
                 break;
         }
 

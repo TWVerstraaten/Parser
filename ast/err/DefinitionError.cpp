@@ -15,6 +15,8 @@ namespace ast::err {
         switch (m_type) {
             case TYPE::REDECLARATION:
                 return "Redeclaration of " + m_message;
+            case TYPE::UNDEFINED_FUNCTIONS:
+                return "Undefined references: " + m_message;
         }
         assert(false);
         return "";

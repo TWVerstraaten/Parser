@@ -4,9 +4,11 @@
 
 #include "StructuralTokenizer.h"
 
-#include "../../gen/Overloaded.h"
 #include "../../gen/defines.h"
+#include "../err/ParserError.h"
 #include "../err/ParserInfo.h"
+#include "StructuralToken.h"
+#include "TokenTemplates.h"
 
 #include <algorithm>
 #include <cassert>

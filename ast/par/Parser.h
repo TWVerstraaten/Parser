@@ -5,8 +5,7 @@
 #ifndef AST_PAR_PARSER_H
 #define AST_PAR_PARSER_H
 
-#include "AstToken.h"
-
+#include <optional>
 #include <string>
 
 namespace ast::err {
@@ -14,6 +13,7 @@ namespace ast::err {
 }
 
 namespace ast::par {
+    class AstToken;
     class Parser {
 
       public:

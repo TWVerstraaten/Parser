@@ -5,6 +5,7 @@
 #include "StructuralToken.h"
 
 #include "../../gen/defines.h"
+#include "TokenTemplates.h"
 #include "TokenWriter.h"
 
 #include <algorithm>
@@ -31,7 +32,7 @@ namespace ast::par {
     }
 
     std::string StructuralToken::toString() const {
-        return std::visit([this](const auto& a) { return TokenWriter::S_TO_STRING(a, m_range); }, m_token);
+        return TokenWriter::S_TO_STRING(*this, m_range);
     }
 
     bool StructuralToken::holdsString() const {

@@ -5,7 +5,10 @@
 #include "Tokenizer.h"
 
 #include "../../gen/defines.h"
+#include "../err/ParserError.h"
 #include "../err/ParserInfo.h"
+#include "../err/ParserMessage.h"
+#include "../err/ParserWarning.h"
 
 #include <algorithm>
 #include <map>

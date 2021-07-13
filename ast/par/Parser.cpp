@@ -5,6 +5,7 @@
 #include "Parser.h"
 
 #include "../err/ParserInfo.h"
+#include "AstToken.h"
 #include "StructuralTokenizer.h"
 #include "Tokenizer.h"
 

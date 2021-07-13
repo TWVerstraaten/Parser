@@ -4,6 +4,11 @@
 
 #include "UnrollCompanion.h"
 
+#include "../ast/err/DefinitionError.h"
+#include "../ast/err/ParserError.h"
+#include "../ast/err/ParserMessage.h"
+#include "../ast/err/ParserWarning.h"
+
 #include <sstream>
 
 namespace ast {

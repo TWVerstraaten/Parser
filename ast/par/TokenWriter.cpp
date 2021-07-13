@@ -7,6 +7,8 @@
 #include "../../alg/StringAlg.h"
 #include "../../gen/Overloaded.h"
 #include "../../gen/defines.h"
+#include "AstToken.h"
+#include "Token.h"
 #include "UnrolledAstToken.h"
 
 #include <algorithm>
@@ -14,11 +16,7 @@
 
 namespace ast::par {
 
-    std::string TokenWriter::S_TO_STRING(const Token& token, const Range& range) {
-        return "t" + range.toString() + "(" + token.toString() + ")";
-    }
-
-    std::string TokenWriter::S_TO_STRING(const StructuralToken::Bracketed& token, const Range& range) {
+    static std::string TO_STRING(const StructuralToken::Bracketed& token, const Range& range) {
         std::stringstream ss;
         ss << "Br" << range.toString() << "(";
         bool writeComma = false;
@@ -33,27 +31,27 @@ namespace ast::par {
         return ss.str();
     }
 
-    std::string TokenWriter::S_TO_STRING(const StructuralToken::Function& token, const Range& range) {
+    static std::string TO_STRING(const StructuralToken::Function& token, const Range& range) {
         std::stringstream ss;
         ss << "F" << range.toString() << token.m_name << "(";
-        ss << S_TO_STRING(token.m_arguments, range);
+        ss << TO_STRING(token.m_arguments, range);
         ss << ")";
         return ss.str();
     }
 
-    std::string TokenWriter::S_TO_STRING(const std::string& string, const Range& range) {
+    static std::string TO_STRING(const std::string& string, const Range& range) {
         return "x" + range.toString() + "(" + string + ")";
     }
 
-    std::string TokenWriter::S_TO_STRING(double val, const Range& range) {
+    static std::string TO_STRING(double val, const Range& range) {
         return "d" + range.toString() + "(" + std::to_string(val) + ")";
     }
 
-    std::string TokenWriter::S_TO_STRING(long long int val, const Range& range) {
+    static std::string TO_STRING(long long int val, const Range& range) {
         return "d" + range.toString() + "(" + std::to_string(val) + ")";
     }
 
-    std::string TokenWriter::S_TO_STRING(AstToken::OPERATOR_TYPE type) {
+    static std::string TO_STRING(AstToken::OPERATOR_TYPE type) {
         switch (type) {
             case AstToken::OPERATOR_TYPE::PLUS:
                 return "+";
@@ -74,15 +72,15 @@ namespace ast::par {
         return "";
     }
 
-    std::string TokenWriter::S_TO_STRING_AS_TREE(const std::string& prefix, const AstToken& node, bool isLeft) {
+    static std::string TO_STRING_AS_TREE_IMPL(const std::string& prefix, const AstToken& node, bool isLeft) {
         std::stringstream ss;
         ss << prefix;
         ss << (isLeft ? "├── " : "└── ");
 
-        std::visit(Overloaded{[&](AstToken::OPERATOR_TYPE type) { ss << TokenWriter::S_TO_STRING(type); },
+        std::visit(Overloaded{[&](AstToken::OPERATOR_TYPE type) { ss << TO_STRING(type); },
                               [&](const CustomFunctionToken& function) { ss << "Fun(" << function.argumentCount() << ")@_" << function.name(); },
                               [&](const VectorToken& vector) { ss << "Vec(" << vector.m_dimension << ")"; },
-                              [&](const ReservedToken& reservedFunction) { ss << S_GET_NAME(reservedFunction); },
+                              [&](const ReservedToken& reservedFunction) { ss << GET_NAME(reservedFunction); },
                               [&](const AstToken::Empty&) { ss << "_empty_"; },
                               [&](const AstToken::Error&) { ss << "_error_"; },
                               [&](const auto& val) { ss << val; }},
@@ -93,12 +91,19 @@ namespace ast::par {
             return ss.str();
         }
         for (auto it = node.children().begin(); it != node.children().end(); ++it) {
-            ss << S_TO_STRING_AS_TREE(prefix + (isLeft ? "│    " : "     "), *it, std::next(it) != node.children().end());
+            ss << TO_STRING_AS_TREE_IMPL(prefix + (isLeft ? "│    " : "     "), *it, std::next(it) != node.children().end());
         }
         return ss.str();
     }
 
+    std::string TokenWriter::S_TO_STRING(const Token& token, const Range& range) {
+        return "t" + range.toString() + "(" + token.toString() + ")";
+    }
+
     std::string TokenWriter::S_TO_STRING(const UnrolledAstToken& unrolledAstToken) {
+        const auto childrenString = [&]() {
+            return "(" + alg::str::CONCATENATE_STRINGS<UnrolledAstToken>(unrolledAstToken.children(), [](const auto& a) { return a.toString(); }) + ")";
+        };
         return std::visit(
             Overloaded{
                 [&](const UnrolledAstToken::Plus& p) { return "(" + unrolledAstToken.children().front().toString() + "+" + unrolledAstToken.children().back().toString() + ")"; },
@@ -107,17 +112,44 @@ namespace ast::par {
                 [&](const UnrolledAstToken::Divide& p) { return "(" + unrolledAstToken.children().front().toString() + "/" + unrolledAstToken.children().back().toString() + ")"; },
                 [&](const UnrolledAstToken::Power& p) { return "(" + unrolledAstToken.children().front().toString() + "^" + unrolledAstToken.children().back().toString() + ")"; },
                 [&](const UnrolledAstToken::UnaryMinus& p) { return "(-" + unrolledAstToken.children().front().toString() + ")"; },
-                [&](const ReservedToken& p) {
-                    return S_GET_NAME(p) + "(" + alg::str::CONCATENATE_STRINGS<UnrolledAstToken>(unrolledAstToken.children(), [](const auto& a) { return a.toString(); }) + ")";
-                },
-                [&](const VectorToken& p) {
-                    return "(" + alg::str::CONCATENATE_STRINGS<UnrolledAstToken>(unrolledAstToken.children(), [](const auto& a) { return a.toString(); }) + ")";
-                },
+                [&](const ReservedToken& p) { return GET_NAME(p) + childrenString(); },
+                [&](const VectorToken& p) { return "(" + childrenString(); },
                 [](const auto& a) {
                     std::stringstream ss;
                     ss << a;
                     return ss.str();
                 }},
             unrolledAstToken.token());
+    }
+
+    std::string TokenWriter::S_TO_STRING(const StructuralToken& token, const Range& range) {
+        return std::visit(Overloaded{[&](const Token& a) { return S_TO_STRING(a, range); }, [&](const auto& a) { return TO_STRING(a, range); }}, token.token());
+    }
+
+    std::string TokenWriter::S_TO_STRING_AS_TREE(const AstToken& node) {
+        return TO_STRING_AS_TREE_IMPL("", node, false);
+    }
+
+    std::string TokenWriter::S_TO_STRING_FLAT(const AstToken& node) {
+        const auto writeChildren = [&]() { return alg::str::CONCATENATE_STRINGS<AstToken>(node.children(), [&](const auto& a) { return S_TO_STRING_FLAT(a); }); };
+        return std::visit(Overloaded{[](AstToken::Error) { return std::string("_error_"); },
+                                     [](AstToken::Empty) { return std::string("_empty_"); },
+                                     [&](AstToken::OPERATOR_TYPE type) {
+                                         if (type == AstToken::OPERATOR_TYPE::UNARY_MINUS) {
+                                             return "-(" + node.children().front().toStringFlat() + ")";
+                                         } else {
+                                             return "(" + node.children().front().toStringFlat() + " " + TO_STRING(type) + " " + node.children().back().toStringFlat() + ")";
+                                         }
+                                     },
+                                     [&](const CustomFunctionToken& function) { return function.name() + "(" + writeChildren() + ")"; },
+                                     [&](const ReservedToken& function) { return GET_NAME(function) + "(" + writeChildren() + ")"; },
+                                     [&](const VectorToken& vectorToken) { return "(" + writeChildren() + ")"; },
+                                     [](const std::string& str) { return str; },
+                                     [](const auto& a) {
+                                         std::stringstream ss;
+                                         ss << a;
+                                         return ss.str();
+                                     }},
+                          node.token());
     }
 } // namespace ast::par

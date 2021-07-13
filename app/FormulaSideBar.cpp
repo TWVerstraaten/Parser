@@ -6,6 +6,7 @@
 
 #include "../alg/StringAlg.h"
 #include "../ast/Ast.h"
+#include "../ast/err/DefinitionError.h"
 #include "../gen/DependencyGraph.h"
 #include "FormulaWidget.h"
 #include "cmd/NewFormulaWidgetCommand.h"
@@ -62,16 +63,17 @@ namespace app {
         qDebug() << "FormulaSideBar updated";
         clearDefinitionErrors();
         checkRedeclarations();
+        checkUndefined();
         writeInfoToInfoLabel();
         updateAllTextEdits();
     }
 
     void FormulaSideBar::writeInfoToInfoLabel() {
-        std::vector<ast::par::CustomFunctionToken> declaredFunctions   = getDeclaredFunctions();
-        std::vector<std::string>                   declaredConstants   = getDeclaredConstants();
-        std::set<ast::par::CustomFunctionToken>    referencedFunctions = getReferencedFunctions();
-        std::set<std::string>                      referencedConstants = getReferencedConstants();
-        QString                                    info                = "<b>Declared:</b><br>";
+        const auto declaredFunctions   = getDeclaredFunctions();
+        const auto declaredConstants   = getDeclaredConstants();
+        const auto referencedFunctions = getReferencedFunctions();
+        const auto referencedConstants = getReferencedConstants();
+        QString    info                = "<b>Declared:</b><br>";
         info.append(QString::fromStdString("Funcs: " + alg::str::CONCATENATE_STRINGS<ast::par::CustomFunctionToken>(declaredFunctions, &ast::par::CustomFunctionToken::toString)) +
                     "<br>");
         info.append(QString::fromStdString("Csts: " + alg::str::CONCATENATE_STRINGS(declaredConstants)) + "<br>");
@@ -129,8 +131,28 @@ namespace app {
     void FormulaSideBar::checkFormulaWidgetsParsed() {
     }
 
-    void FormulaSideBar::checkReferenceToUndefined() {
+    void FormulaSideBar::checkUndefined() {
+        const auto d                 = getDeclaredFunctions();
+        const auto declaredFunctions = std::set<ast::par::CustomFunctionToken>(d.begin(), d.end());
+        const auto declaredConstants = getDeclaredConstants();
+
+        for (auto& widget : m_formulaWidgets) {
+            if (widget->isHidden() || not widget->hasSuccessfulNonEmptyAst()) {
+                continue;
+            }
+            const auto                              referenced = widget->ast().functionDependencies();
+            std::set<ast::par::CustomFunctionToken> undefinedFunctions;
+            for (const auto& el : referenced) {
+                if (declaredFunctions.find(el) == declaredFunctions.end()) {
+                    undefinedFunctions.insert(el);
+                }
+            }
+            if (not undefinedFunctions.empty()) {
+                widget->info().add({ast::err::DefinitionError::TYPE::UNDEFINED_FUNCTIONS, "undefined"});
+            }
+        }
     }
+
     void FormulaSideBar::checkCircularDependenciesAndUndefined() {
     }
 
@@ -146,7 +168,7 @@ namespace app {
     std::vector<ast::par::CustomFunctionToken> FormulaSideBar::getDeclaredFunctions() const {
         std::vector<ast::par::CustomFunctionToken> declaredFunctions;
         for (const auto& widget : m_formulaWidgets) {
-            if (widget->isHidden() || not widget->hasAst() || not widget->ast().success() || widget->ast().isEmpty()) {
+            if (widget->isHidden() || not widget->hasSuccessfulNonEmptyAst()) {
                 continue;
             }
             const auto& ast = widget->ast();
@@ -160,7 +182,7 @@ namespace app {
     std::vector<std::string> FormulaSideBar::getDeclaredConstants() const {
         std::vector<std::string> declaredConstants;
         for (const auto& widget : m_formulaWidgets) {
-            if (widget->isHidden() || not widget->hasAst() || not widget->ast().success() || widget->ast().isEmpty()) {
+            if (widget->isHidden() || not widget->hasSuccessfulNonEmptyAst()) {
                 continue;
             }
             const auto& ast = widget->ast();

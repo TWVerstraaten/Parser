@@ -7,6 +7,7 @@
 #include "../../gen/Overloaded.h"
 #include "../../gen/defines.h"
 #include "AstToken.h"
+#include "TokenTemplates.h"
 #include "TokenWriter.h"
 
 #include <algorithm>
@@ -129,7 +130,7 @@ namespace ast::par {
         }
         assert(std::holds_alternative<ReservedToken>(m_token));
         const auto& p = std::get<ReservedToken>(m_token);
-        switch (S_GET_ARGUMENT_COUNT(p)) {
+        switch (GET_ARGUMENT_COUNT(p)) {
             case 1:
                 m_token = S_EVAL(p, m_children.at(0).toDouble());
                 break;

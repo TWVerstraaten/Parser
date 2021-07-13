@@ -36,6 +36,7 @@ namespace app {
         [[nodiscard]] TextEdit*             textEdit();
         [[nodiscard]] bool                  isActive() const;
         [[nodiscard]] bool                  hasAst() const;
+        [[nodiscard]] bool                  hasSuccessfulNonEmptyAst() const;
         [[nodiscard]] bool                  formulaWasUpdated() const;
         [[nodiscard]] const ast::Ast&       ast() const;
         [[nodiscard]] ast::err::ParserInfo& info();

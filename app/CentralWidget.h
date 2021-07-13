@@ -5,14 +5,13 @@
 #ifndef APP_CENTRALWIDGET_H
 #define APP_CENTRALWIDGET_H
 
-#include "FormulaSurfaceInterface.h"
-
 #include <QWidget>
 #include <memory>
 
 class QHBoxLayout;
 
 namespace app {
+    class FormulaSurfaceInterface;
     class FormulaSideBar;
     class OpenGlWidget;
 
@@ -20,6 +19,7 @@ namespace app {
         Q_OBJECT
       public:
         explicit CentralWidget(QWidget* parent = nullptr);
+        ~CentralWidget() override;
 
       protected:
         void keyPressEvent(QKeyEvent* event) override;

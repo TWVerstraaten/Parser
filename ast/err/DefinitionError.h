@@ -12,7 +12,7 @@ namespace ast::err {
     class DefinitionError {
 
       public:
-        enum class TYPE { REDECLARATION };
+        enum class TYPE { REDECLARATION, UNDEFINED_FUNCTIONS };
 
         DefinitionError(TYPE type, std::string message = "");
 

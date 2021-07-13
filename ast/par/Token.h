@@ -6,7 +6,6 @@
 #define AST_PAR_TOKEN_H
 
 #include "Range.h"
-#include "TokenTemplates.h"
 
 #include <string>
 #include <variant>

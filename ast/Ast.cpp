@@ -5,7 +5,12 @@
 #include "Ast.h"
 
 #include "../gen/Overloaded.h"
+#include "err/DefinitionError.h"
+#include "err/ParserError.h"
+#include "err/ParserMessage.h"
+#include "err/ParserWarning.h"
 #include "par/Parser.h"
+#include "par/TokenTemplates.h"
 
 #include <QDebug>
 #include <cassert>

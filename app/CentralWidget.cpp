@@ -6,6 +6,7 @@
 
 #include "CameraManager.h"
 #include "FormulaSideBar.h"
+#include "FormulaSurfaceInterface.h"
 #include "OpenGlWidget.h"
 
 #include <QHBoxLayout>
@@ -32,6 +33,8 @@ app::CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent) {
     setLayout(m_layout);
     resize(800, 600);
 }
+
+app::CentralWidget::~CentralWidget() = default;
 
 void app::CentralWidget::keyPressEvent(QKeyEvent* event) {
     switch (event->key()) {

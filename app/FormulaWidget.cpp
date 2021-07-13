@@ -115,4 +115,8 @@ namespace app {
         m_textEdit->setInfo(m_ast->info());
     }
 
+    bool FormulaWidget::hasSuccessfulNonEmptyAst() const {
+        return m_ast != nullptr && m_ast->success() && (not m_ast->isEmpty());
+    }
+
 } // namespace app

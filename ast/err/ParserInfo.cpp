@@ -4,9 +4,18 @@
 
 #include "ParserInfo.h"
 
+#include "DefinitionError.h"
+#include "ParserError.h"
+#include "ParserMessage.h"
+#include "ParserWarning.h"
+
 #include <iostream>
 
 namespace ast::err {
+
+    ParserInfo::ParserInfo() = default;
+
+    ParserInfo::~ParserInfo() = default;
 
     void ParserInfo::add(ParserError&& error) {
         m_parserErrors.emplace_back(std::move(error));
@@ -82,8 +91,8 @@ namespace ast::err {
     const std::vector<DefinitionError>& ParserInfo::definitionErrors() const {
         return m_definitionErrors;
     }
-
     void ParserInfo::clearDefinitionErrors() {
         m_definitionErrors.clear();
     }
+
 } // namespace ast::err

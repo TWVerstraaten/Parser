@@ -13,21 +13,22 @@
 
 namespace ast::par {
 
-    std::optional<ReservedToken> S_GET_RESERVED(const std::string& string) {
-        static const std::vector<ReservedToken> S_ALL_RESERVED = {Sin(), Cos(), Tan(), ASin(), ACos(), ATan(), ATan2()};
-        const auto                              trimmed        = alg::str::TRIM(string);
-        if (auto it = std::find_if(TT_IT(S_ALL_RESERVED), TT_LAMBDA_REF(a, return S_GET_NAME(a) == trimmed;)); it != S_ALL_RESERVED.end()) {
+    static const std::vector<ReservedToken> ALL_RESERVED = {Sin(), Cos(), Tan(), ASin(), ACos(), ATan(), ATan2()};
+
+    size_t GET_ARGUMENT_COUNT(const ReservedToken& reserved) {
+        return std::visit([](const auto& a) { return std::remove_reference_t<decltype(a)>::S_ARGUMENT_COUNT; }, reserved);
+    }
+
+    std::optional<ReservedToken> GET_RESERVED(const std::string& string) {
+        const auto trimmed = alg::str::TRIM(string);
+        if (auto it = std::find_if(TT_IT(ALL_RESERVED), TT_LAMBDA_REF(a, return GET_NAME(a) == trimmed;)); it != ALL_RESERVED.end()) {
             return *it;
         } else {
             return {};
         }
     }
 
-    size_t S_GET_ARGUMENT_COUNT(const ReservedToken& reserved) {
-        return std::visit([](const auto& a) { return std::remove_reference_t<decltype(a)>::S_ARGUMENT_COUNT; }, reserved);
-    }
-
-    std::string S_GET_NAME(const ReservedToken& reserved) {
+    std::string GET_NAME(const ReservedToken& reserved) {
         return std::visit([](const auto& a) { return std::string(std::remove_reference_t<decltype(a)>::S_NAME); }, reserved);
     }
 

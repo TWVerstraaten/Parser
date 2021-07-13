@@ -4,6 +4,11 @@
 
 #include "AstManager.h"
 
+#include "err/DefinitionError.h"
+#include "err/ParserError.h"
+#include "err/ParserMessage.h"
+#include "err/ParserWarning.h"
+
 #include <sstream>
 
 namespace ast {
