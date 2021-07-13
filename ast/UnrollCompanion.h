@@ -6,11 +6,12 @@
 #define AST_UNROLLCOMPANION_H
 
 #include "Ast.h"
-#include "UnrolledAst.h"
 
 #include <memory>
 
 namespace ast {
+
+    class UnrolledAst;
 
     class UnrollCompanion {
         enum class STATUS { UN_CHECKED, READY_TO_UNROLL, CANNOT_BE_UNROLLED };

@@ -8,7 +8,6 @@
 #include "../gen/DependencyGraph.h"
 #include "Ast.h"
 #include "UnrollCompanion.h"
-#include "UnrolledAst.h"
 
 #include <functional>
 #include <map>
@@ -28,7 +27,6 @@ namespace ast {
       private:
         void setUnrollStatuses();
 
-        [[nodiscard]] UnrolledAst                     unroll(const Ast& ast) const;
         [[nodiscard]] std::vector<UnrollCompanion>&   fromHeaderType(Header::HEADER_TYPE type);
         [[nodiscard]] std::optional<UnrollCompanion*> fromIndex(size_t index);
         [[nodiscard]] std::optional<UnrollCompanion*> fromFunctionName(const std::string& functionName);

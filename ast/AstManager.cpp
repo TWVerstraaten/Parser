@@ -4,6 +4,8 @@
 
 #include "AstManager.h"
 
+#include "Ast.h"
+#include "UnrolledAst.h"
 #include "err/DefinitionError.h"
 #include "err/ParserError.h"
 #include "err/ParserMessage.h"
@@ -43,44 +45,13 @@ namespace ast {
             for (const auto& unrollCompanion : m_astTokens.at(el.first)) {
                 ss << unrollCompanion.originalAst().toStringFlat() << "\n";
                 ss << unrollCompanion.statusString() << "\n\n";
-                //            ss << "Depends on:\t ";
-                //            const auto dependencies = unrollCompanion.functionDependencies();
-                //            for (const auto& dep : dependencies) {
-                //                ss << dep.name() << "(" << dep.argumentCount() << ")"
-                //                   << "\t";
-                //            }
-                //            ss << "\nUnrolls to:\n";
-                //            ss << unroll(unrollCompanion).toString() << "\n\n";
             }
             ss << std::string(80, '=') << '\n';
         }
         return ss.str();
     }
 
-    UnrolledAst AstManager::unroll(const Ast& ast) const {
-        auto unrolled = ast;
-        //    const auto& fullFunctions = m_astTokens.at(Header::HEADER_TYPE::FULL_HEADER);
-        //    bool        wasUpdated    = true;
-        //
-        //    while (wasUpdated) {
-        //        wasUpdated = false;
-        //        for (const auto& full : fullFunctions) {
-        //            auto dependencies = unrolled.functionDependencies();
-        //            if (dependencies.find(full.originalAst().getCustomFunctionToken()) != dependencies.end()) {
-        //                wasUpdated = true;
-        //                unrolled.replaceFunctionInPlace(full);
-        //            }
-        //        }
-        //    }
-        return UnrolledAst{unrolled};
-    }
-
     void AstManager::setUnrollStatuses() {
-        //    for (auto& el : m_astTokens){
-        //        for (auto& companion : el.second){
-        //
-        //        }
-        //    }
     }
 
     std::vector<UnrollCompanion>& AstManager::fromHeaderType(Header::HEADER_TYPE type) {

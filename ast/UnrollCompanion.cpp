@@ -8,6 +8,7 @@
 #include "../ast/err/ParserError.h"
 #include "../ast/err/ParserMessage.h"
 #include "../ast/err/ParserWarning.h"
+#include "UnrolledAst.h"
 
 #include <sstream>
 
