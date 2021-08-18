@@ -28,10 +28,11 @@ namespace ast::err {
             NO_ARGUMENTS,
             REPEATED_ARGUMENT,
             HEADER_ERROR,
-            GENERIC
+            GENERIC,
+            EMPTY_BODY
         };
 
-        ParserError(TYPE type, std::string message, par::Range range = {});
+        ParserError(TYPE type, std::string message = "", par::Range range = {});
 
         [[nodiscard]] std::string       toString() const;
         [[nodiscard]] const par::Range& range() const;

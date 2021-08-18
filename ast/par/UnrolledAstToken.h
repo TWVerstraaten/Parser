@@ -29,9 +29,7 @@ namespace ast::par {
         typedef std::variant<Plus, Minus, Times, Divide, Power, UnaryMinus, ReservedToken, VectorToken, std::string, double, long long> UnrolledToken;
 
         explicit UnrolledAstToken(const AstToken& astToken);
-
         void simplify();
-
         void setVariableInPlace(const std::string& variable, const gen::Number& number);
 
         [[nodiscard]] bool                                 isNumeric() const;
@@ -42,7 +40,7 @@ namespace ast::par {
         [[nodiscard]] const std::vector<UnrolledAstToken>& children() const;
 
       private:
-        void simplifyFunction();
+        void simplifyReservedFunction();
         void unWrap1DVectors();
         void setVariableInternal(const std::string& variable, const gen::Number& number);
 

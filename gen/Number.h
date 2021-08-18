@@ -14,9 +14,8 @@ namespace gen {
         Number(const Number& other);
         explicit Number(std::variant<long long, double> value);
         explicit Number(const std::string& value);
-        Number(long long value);
-        Number(int value);
-        Number(double value);
+        explicit Number(long long value);
+        explicit Number(double value);
 
         [[nodiscard]] double                                     toDouble() const;
         [[nodiscard]] Number                                     negate() const;

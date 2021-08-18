@@ -8,6 +8,7 @@
 #include "FormulaSideBar.h"
 #include "FormulaSurfaceInterface.h"
 #include "OpenGlWidget.h"
+#include "UndoRedoConsumer.h"
 
 #include <QHBoxLayout>
 #include <QKeyEvent>
@@ -32,6 +33,7 @@ app::CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent) {
     m_layout->addWidget(splitter);
     setLayout(m_layout);
     resize(800, 600);
+    installEventFilter(UndoRedoConsumer::UNDO_REDO_CONSUMER());
 }
 
 app::CentralWidget::~CentralWidget() = default;

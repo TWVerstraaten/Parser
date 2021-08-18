@@ -4,11 +4,22 @@
 
 #include "Number.h"
 
+#include "defines.h"
+
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <sstream>
 
 namespace gen {
+    template <typename T>
+    T READ_FROM_STRING(const std::string& string) {
+        std::istringstream stringStream(string);
+        T                  val;
+        stringStream >> val;
+        return val;
+    }
+
     Number::Number(const Number& other) : m_number(other.m_number) {
     }
 
@@ -17,24 +28,15 @@ namespace gen {
 
     Number::Number(const std::string& value) {
         if (value.find('.') == std::string::npos) {
-            std::istringstream stringStream(value);
-            long long          val;
-            stringStream >> val;
-            m_number = val;
+            m_number = READ_FROM_STRING<long long>(value);
         } else {
-            std::istringstream stringStream(value);
-            double             val;
-            stringStream >> val;
-            m_number = val;
+            assert(std::count_if(TT_IT(value), [](char c) { return c == '.'; }) == 1);
+            m_number = READ_FROM_STRING<double>(value);
         }
     }
 
     Number::Number(long long int value) {
         m_number = value;
-    }
-
-    Number::Number(int value) {
-        m_number = static_cast<long long>(value);
     }
 
     Number::Number(double value) {
@@ -85,7 +87,7 @@ namespace gen {
         return std::visit([](const auto& a, const auto& b) { return Number(a / static_cast<double>(b)); }, a.m_number, b.m_number);
     }
 
-    long long power(long long base, long long exponent) {
+    [[nodiscard]] long long POWER(long long base, long long exponent) {
         long long result = 1;
         while (exponent) {
             if (exponent & 1) {
@@ -102,7 +104,7 @@ namespace gen {
             long long base     = std::get<long long>(a.number());
             long long exponent = std::get<long long>(b.number());
             if ((exponent < std::numeric_limits<long long>::digits) && (exponent * std::log2(base) - 1 < std::numeric_limits<long long>::digits)) {
-                return Number{power(base, exponent)};
+                return Number{POWER(base, exponent)};
             }
         }
         return std::visit([](const auto& a, const auto& b) { return Number(std::pow(static_cast<double>(a), static_cast<double>(b))); }, a.m_number, b.m_number);

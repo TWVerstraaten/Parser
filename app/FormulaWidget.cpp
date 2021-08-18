@@ -13,7 +13,6 @@
 #include <QDebug>
 #include <QGridLayout>
 #include <QPushButton>
-#include <memory>
 
 namespace app {
 
@@ -104,11 +103,6 @@ namespace app {
 
     bool FormulaWidget::hasAst() const {
         return m_ast != nullptr;
-    }
-
-    ast::err::ParserInfo& FormulaWidget::info() {
-        assert(hasAst());
-        return m_ast->info();
     }
 
     void FormulaWidget::updateTextEdit() {

@@ -8,7 +8,6 @@
 #include "../../gen/Overloaded.h"
 #include "../../gen/defines.h"
 #include "AstToken.h"
-#include "Token.h"
 #include "UnrolledAstToken.h"
 
 #include <algorithm>
@@ -78,7 +77,7 @@ namespace ast::par {
         ss << (isLeft ? "├── " : "└── ");
 
         std::visit(Overloaded{[&](AstToken::OPERATOR_TYPE type) { ss << TO_STRING(type); },
-                              [&](const CustomFunctionToken& function) { ss << "Fun(" << function.argumentCount() << ")@_" << function.name(); },
+                              [&](const FunctionToken& function) { ss << "Fun(" << function.argumentCount() << ")@_" << function.name(); },
                               [&](const VectorToken& vector) { ss << "Vec(" << vector.m_dimension << ")"; },
                               [&](const ReservedToken& reservedFunction) { ss << GET_NAME(reservedFunction); },
                               [&](const AstToken::Empty&) { ss << "_empty_"; },
@@ -141,7 +140,7 @@ namespace ast::par {
                                              return "(" + node.children().front().toStringFlat() + " " + TO_STRING(type) + " " + node.children().back().toStringFlat() + ")";
                                          }
                                      },
-                                     [&](const CustomFunctionToken& function) { return function.name() + "(" + writeChildren() + ")"; },
+                                     [&](const FunctionToken& function) { return function.name() + "(" + writeChildren() + ")"; },
                                      [&](const ReservedToken& function) { return GET_NAME(function) + "(" + writeChildren() + ")"; },
                                      [&](const VectorToken& vectorToken) { return "(" + writeChildren() + ")"; },
                                      [](const std::string& str) { return str; },

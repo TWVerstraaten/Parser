@@ -4,16 +4,11 @@
 
 #include "TextEdit.h"
 
-#include "../ast/err/DefinitionError.h"
-#include "../ast/err/ParserError.h"
-#include "../ast/err/ParserMessage.h"
-#include "../ast/err/ParserWarning.h"
 #include "../gen/defines.h"
 #include "UndoRedoConsumer.h"
 #include "UndoRedoHandler.h"
 #include "cmd/TextEditChangedCommand.h"
 
-#include <QAction>
 #include <QDebug>
 #include <QMouseEvent>
 #include <QToolTip>
@@ -68,7 +63,7 @@ namespace app {
         setFixedHeight(metrics.lineSpacing() + 8);
         setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+        setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
         //    QFont font("Monospace");
         //    font.setStyleHint(QFont::TypeWriter);
         //    setFont(font);
@@ -81,10 +76,7 @@ namespace app {
         const auto charPosition = QTextCursor(cursorForPosition(e->pos())).position();
         const auto rangeCheck   = [charPosition](const auto& a) { return a.range().isInRange(charPosition); };
 
-        if (not m_info.definitionErrors().empty()) {
-            S_SET_TOOLTIP_PALETTE(QColor(16185078), Qt::red);
-            QToolTip::showText(mapToGlobal(e->pos()), QString::fromStdString(m_info.definitionErrors().front().toString()));
-        } else if (auto parserErrorIt = std::find_if(TT_IT(m_info.parserErrors()), rangeCheck); parserErrorIt != m_info.parserErrors().end()) {
+        if (auto parserErrorIt = std::find_if(TT_IT(m_info.parserErrors()), rangeCheck); parserErrorIt != m_info.parserErrors().end()) {
             S_SET_TOOLTIP_PALETTE(QColor(16185078), Qt::red);
             QToolTip::showText(mapToGlobal(e->pos()), QString::fromStdString(parserErrorIt->toString()));
         } else if (auto warningIt = std::find_if(TT_IT(m_info.warnings()), rangeCheck); warningIt != m_info.warnings().end()) {

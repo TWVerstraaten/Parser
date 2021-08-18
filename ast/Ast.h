@@ -5,11 +5,15 @@
 #ifndef AST_AST_H
 #define AST_AST_H
 
+#include "Declaration.h"
+#include "Dependency.h"
 #include "Header.h"
 #include "err/ParserInfo.h"
 #include "par/AstToken.h"
+#include "par/ConstantToken.h"
 
 namespace ast {
+
     class Ast {
 
         Ast() = default;
@@ -18,29 +22,36 @@ namespace ast {
         explicit Ast(const std::string& string);
 
         void replaceVariableInPlace(const std::string& variable, const par::AstToken& token);
-        void replaceFunctionInPlace(const Ast& functionToken);
+        void replaceFunctionInPlace(const Ast& function);
+        void replaceConstantInPlace(const Ast& constant);
+        void replaceDependencyInPlace(const Dependency& dependency, const Ast& ast);
 
-        [[nodiscard]] Header::HEADER_TYPE                headerType() const;
-        [[nodiscard]] par::CustomFunctionToken           getCustomFunctionToken() const;
-        [[nodiscard]] bool                               success() const;
-        [[nodiscard]] bool                               isEmpty() const;
-        [[nodiscard]] bool                               hasCustomDependencies() const;
-        [[nodiscard]] const err::ParserInfo&             info() const;
-        [[nodiscard]] err::ParserInfo&                   info();
-        [[nodiscard]] const Header&                      header() const;
-        [[nodiscard]] std::set<par::CustomFunctionToken> functionDependencies() const;
-        [[nodiscard]] std::set<std::string>              constantDependencies() const;
-        [[nodiscard]] std::set<std::string>              variablesUsed() const;
-        [[nodiscard]] std::vector<std::string>           declaredVariables() const;
-        [[nodiscard]] const par::AstToken&               body() const;
-        [[nodiscard]] Ast                                replaceVariable(const std::string& variable, const ast::par::AstToken& token) const;
-        [[nodiscard]] Ast                                replaceFunction(const Ast& functionToken) const;
-        [[nodiscard]] std::string                        toStringAsTree() const;
-        [[nodiscard]] std::string                        toStringFlat() const;
-        [[nodiscard]] std::string                        getDeclaredName() const;
+        [[nodiscard]] bool                         isDeclaration() const;
+        [[nodiscard]] bool                         isFunction() const;
+        [[nodiscard]] bool                         isConstant() const;
+        [[nodiscard]] bool                         success() const;
+        [[nodiscard]] bool                         isAnonymous() const;
+        [[nodiscard]] bool                         isEmpty() const;
+        [[nodiscard]] bool                         hasCustomDependencies() const;
+        [[nodiscard]] Header::HEADER_TYPE          headerType() const;
+        [[nodiscard]] par::FunctionToken           getFunctionToken() const;
+        [[nodiscard]] par::ConstantToken           getConstantToken() const;
+        [[nodiscard]] Declaration                  getDeclarationToken() const;
+        [[nodiscard]] const err::ParserInfo&       info() const;
+        [[nodiscard]] const Header&                header() const;
+        [[nodiscard]] std::set<par::FunctionToken> getFunctionDependencies() const;
+        [[nodiscard]] std::set<par::ConstantToken> getConstantDependencies() const;
+        [[nodiscard]] std::set<Dependency>         getDependencies() const;
+        [[nodiscard]] std::set<std::string>        variablesUsed() const;
+        [[nodiscard]] std::vector<std::string>     declaredVariables() const;
+        [[nodiscard]] const par::AstToken&         body() const;
+        [[nodiscard]] Ast                          replaceVariable(const std::string& variable, const ast::par::AstToken& token) const;
+        [[nodiscard]] Ast                          replaceFunction(const Ast& functionToken) const;
+        [[nodiscard]] std::string                  toStringAsTree() const;
+        [[nodiscard]] std::string                  toStringFlat() const;
+        [[nodiscard]] std::string                  getDeclaredName() const;
 
       private:
-        void checkAndSetHeader();
         void buildNonEmptyHeader();
         void checkArgumentsIfFullHeader();
         void checkIfArgumentsAreStrings();
@@ -50,7 +61,7 @@ namespace ast {
         bool            m_headerWasSet = false;
         err::ParserInfo m_info;
         Header          m_header;
-        par::AstToken   m_rootNode;
+        par::AstToken   m_body;
     };
 } // namespace ast
 

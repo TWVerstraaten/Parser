@@ -10,7 +10,6 @@
 
 #include <QMouseEvent>
 #include <QPainter>
-#include <memory>
 
 namespace app {
     OpenGlWidget::OpenGlWidget(QWidget* parent) : QOpenGLWidget(parent) {

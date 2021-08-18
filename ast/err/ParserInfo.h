@@ -5,11 +5,14 @@
 #ifndef AST_ERR_PARSERINFO_H
 #define AST_ERR_PARSERINFO_H
 
+#include "ParserError.h"
+#include "ParserMessage.h"
+#include "ParserWarning.h"
+
 #include <vector>
 
 namespace ast::err {
 
-    class DefinitionError;
     class ParserError;
     class ParserMessage;
     class ParserWarning;
@@ -23,27 +26,22 @@ namespace ast::err {
         void add(ParserError&& error);
         void add(ParserWarning&& warning);
         void add(ParserMessage&& warning);
-        void add(DefinitionError&& error);
-
-        void clearDefinitionErrors();
 
         void printAll() const;
         void clear();
 
-        [[nodiscard]] bool                                success() const;
-        [[nodiscard]] bool                                hasErrors() const;
-        [[nodiscard]] bool                                hasWarnings() const;
-        [[nodiscard]] bool                                hasMessages() const;
-        [[nodiscard]] const std::vector<ParserError>&     parserErrors() const;
-        [[nodiscard]] const std::vector<ParserWarning>&   warnings() const;
-        [[nodiscard]] const std::vector<ParserMessage>&   messages() const;
-        [[nodiscard]] const std::vector<DefinitionError>& definitionErrors() const;
+        [[nodiscard]] bool                              success() const;
+        [[nodiscard]] bool                              hasErrors() const;
+        [[nodiscard]] bool                              hasWarnings() const;
+        [[nodiscard]] bool                              hasMessages() const;
+        [[nodiscard]] const std::vector<ParserError>&   parserErrors() const;
+        [[nodiscard]] const std::vector<ParserWarning>& warnings() const;
+        [[nodiscard]] const std::vector<ParserMessage>& messages() const;
 
       private:
-        std::vector<ParserError>     m_parserErrors;
-        std::vector<ParserWarning>   m_warnings;
-        std::vector<ParserMessage>   m_messages;
-        std::vector<DefinitionError> m_definitionErrors;
+        std::vector<ParserError>   m_parserErrors;
+        std::vector<ParserWarning> m_warnings;
+        std::vector<ParserMessage> m_messages;
     };
 } // namespace ast::err
 

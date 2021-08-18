@@ -5,24 +5,11 @@
 #ifndef APP_CMD_REMOVEFORMULAWIDGETCOMMAND_H
 #define APP_CMD_REMOVEFORMULAWIDGETCOMMAND_H
 
-#include <QUndoCommand>
-
-namespace app {
-    class FormulaSideBar;
-}
+#include "InvertCommandWrapper.h"
+#include "NewFormulaWidgetCommand.h"
 
 namespace app::cmd {
-    class RemoveFormulaWidgetCommand : public QUndoCommand {
+    typedef InvertCommandWrapper<NewFormulaWidgetCommand> RemoveFormulaWidgetCommand;
+}
 
-      public:
-        RemoveFormulaWidgetCommand(app::FormulaSideBar* formulaSideBar, size_t index);
-
-        void undo() override;
-        void redo() override;
-
-      private:
-        app::FormulaSideBar* m_formulaSideBar;
-        size_t               m_indexOfRemovedFormulaWidget;
-    };
-} // namespace app::cmd
 #endif // APP_CMD_REMOVEFORMULAWIDGETCOMMAND_H

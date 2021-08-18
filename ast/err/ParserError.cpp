@@ -43,6 +43,8 @@ namespace ast::err {
                 return "Repeated argument: " + m_message + " at " + m_range.toString();
             case TYPE::HEADER_ERROR:
                 return "Could not parse header: " + m_message + " at " + m_range.toString();
+            case TYPE::EMPTY_BODY:
+                return "Empty body";
         }
         assert(false);
     }

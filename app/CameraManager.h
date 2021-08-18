@@ -16,8 +16,6 @@ namespace app {
       public:
         explicit CameraManager(OpenGlWidget* openGlWidget);
 
-        [[nodiscard]] const QMatrix4x4& projectionMatrix() const;
-        [[nodiscard]] QMatrix4x4        lookAtMatrix() const;
         [[nodiscard]] const QMatrix4x4& modelViewProjectionMatrix() const;
 
         void   rotateViewDirection(float dX, float dY);

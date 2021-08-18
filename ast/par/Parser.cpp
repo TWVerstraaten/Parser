@@ -16,7 +16,13 @@ namespace ast::par {
         if (info.success()) {
             StructuralTokenizer structuralTokenizer(tokenizer.tokenList(), info);
             if (info.success()) {
-                return AstToken{structuralTokenizer.tokenList(), info};
+                auto astToken = AstToken{structuralTokenizer.tokenList(), info};
+                if (astToken.hasEmptyBody()) {
+                    info.add({err::ParserError::TYPE::EMPTY_BODY, "", {0, string.length() - 1}});
+                    return {};
+                } else {
+                    return astToken;
+                }
             }
         }
         return {};

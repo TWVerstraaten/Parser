@@ -71,7 +71,7 @@ namespace app {
         const int colorLocation = program->attributeLocation("color");
         program->enableAttributeArray(colorLocation);
         program->setAttributeBuffer(colorLocation, GL_FLOAT, offset, 3, sizeof(VertexData));
-        glLineWidth(4.0f);
+        glLineWidth(2.0f);
         glDrawElements(GL_LINES, m_indexBuffer.size(), GL_UNSIGNED_INT, nullptr);
 
         m_indexBuffer.release();

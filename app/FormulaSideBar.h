@@ -5,7 +5,10 @@
 #ifndef APP_FORMULASIDEBAR_H
 #define APP_FORMULASIDEBAR_H
 
+#include "../ast/AstManager.h"
+
 #include <QWidget>
+#include <memory>
 #include <set>
 #include <vector>
 
@@ -15,13 +18,13 @@ class QScrollArea;
 class QPushButton;
 
 namespace ast::par {
-    class CustomFunctionToken;
+    class FunctionToken;
 }
 
 namespace app {
 
     namespace cmd {
-        class RemoveFormulaWidgetCommand;
+        class NewFormulaWidgetCommand;
     }
 
     class FormulaWidget;
@@ -29,7 +32,7 @@ namespace app {
     class FormulaSideBar : public QWidget {
         Q_OBJECT
 
-        friend class cmd::RemoveFormulaWidgetCommand;
+        friend class cmd::NewFormulaWidgetCommand;
 
       public:
         explicit FormulaSideBar(QWidget* parent);
@@ -43,29 +46,24 @@ namespace app {
       private slots:
         void removeFormulaWidget(size_t indexOfWidget);
         void addNewFormulaWidget();
-        void checkRedeclarations();
 
       private:
-        void checkFormulaWidgetsParsed();
-        void checkUndefined();
-        void checkCircularDependenciesAndUndefined();
         void updateAt(size_t index);
         void addNewFormulaWidgetButton();
         void makeScrollArea();
         void writeInfoToInfoLabel();
-        void clearDefinitionErrors();
 
-        [[nodiscard]] std::vector<ast::par::CustomFunctionToken> getDeclaredFunctions() const;
-        [[nodiscard]] std::set<ast::par::CustomFunctionToken>    getReferencedFunctions() const;
+        [[nodiscard]] std::vector<ast::par::FunctionToken> getDeclaredFunctions() const;
+        [[nodiscard]] std::set<ast::par::FunctionToken>    getReferencedFunctions() const;
         [[nodiscard]] std::vector<std::string>                   getDeclaredConstants() const;
         [[nodiscard]] std::set<std::string>                      getReferencedConstants() const;
 
         std::vector<FormulaWidget*> m_formulaWidgets;
+        ast::AstManager             m_astManager;
         QPushButton*                m_newFormulaPushButton = nullptr;
         QScrollArea*                m_scrollArea           = nullptr;
         QVBoxLayout*                m_layout               = nullptr;
         QLabel*                     m_infoLabel            = nullptr;
-        void                        updateAllTextEdits();
     };
 } // namespace app
 

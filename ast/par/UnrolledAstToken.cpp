@@ -5,6 +5,7 @@
 #include "UnrolledAstToken.h"
 
 #include "../../gen/Overloaded.h"
+#include "../../gen/VariantTemplates.h"
 #include "../../gen/defines.h"
 #include "AstToken.h"
 #include "TokenTemplates.h"
@@ -33,7 +34,7 @@ namespace ast::par {
     };
 
     UnrolledAstToken::UnrolledAstToken(const AstToken& astToken) {
-        assert(not TokenTemplates::S_TOKEN_EQUALS<AstToken::OPERATOR_TYPE>(astToken.token(), AstToken::OPERATOR_TYPE::EQUALS));
+        assert(not gen::S_VARIANT_EQUALS(astToken.token(), AstToken::OPERATOR_TYPE::EQUALS));
         static const std::map<AstToken::OPERATOR_TYPE, UnrolledToken> S_OPERATOR_TO_UNROLLED = {{AstToken::OPERATOR_TYPE::PLUS, Plus{}},
                                                                                                 {AstToken::OPERATOR_TYPE::MINUS, Minus{}},
                                                                                                 {AstToken::OPERATOR_TYPE::TIMES, Times{}},
@@ -42,7 +43,7 @@ namespace ast::par {
                                                                                                 {AstToken::OPERATOR_TYPE::UNARY_MINUS, UnaryMinus{}}};
         std::visit(Overloaded{[](const AstToken::Empty&) {},
                               [](const AstToken::Error&) { assert(false); },
-                              [](const CustomFunctionToken&) { assert(false); },
+                              [](const FunctionToken&) { assert(false); },
                               [this](const AstToken::OPERATOR_TYPE& type) {
                                   assert(type != AstToken::OPERATOR_TYPE::EQUALS);
                                   assert(S_OPERATOR_TO_UNROLLED.find(type) != S_OPERATOR_TO_UNROLLED.end());
@@ -98,7 +99,7 @@ namespace ast::par {
                                       m_children.clear();
                                   }
                               },
-                              [&](const ReservedToken& p) { simplifyFunction(); },
+                              [&](const ReservedToken& p) { simplifyReservedFunction(); },
                               [](const auto& a) {}},
                    m_token);
     }
@@ -124,7 +125,7 @@ namespace ast::par {
                           m_token);
     }
 
-    void UnrolledAstToken::simplifyFunction() {
+    void UnrolledAstToken::simplifyReservedFunction() {
         if (std::any_of(TT_IT(m_children), TT_LAMBDA(a, return not a.isNumeric();))) {
             return;
         }
@@ -132,10 +133,10 @@ namespace ast::par {
         const auto& p = std::get<ReservedToken>(m_token);
         switch (GET_ARGUMENT_COUNT(p)) {
             case 1:
-                m_token = S_EVAL(p, m_children.at(0).toDouble());
+                m_token = EVAL(p, m_children.at(0).toDouble());
                 break;
             case 2:
-                m_token = S_EVAL(p, m_children.at(0).toDouble(), m_children.at(1).toDouble());
+                m_token = EVAL(p, m_children.at(0).toDouble(), m_children.at(1).toDouble());
                 break;
             default:
                 assert(false);

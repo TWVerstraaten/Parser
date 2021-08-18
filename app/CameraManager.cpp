@@ -67,20 +67,12 @@ namespace app {
         return static_cast<float>(h) * std::exp(m_zoomParameter);
     }
 
-    const QMatrix4x4& CameraManager::projectionMatrix() const {
-        return m_projectionMatrix;
-    }
-
     void CameraManager::zoom(float degrees) {
         if (degrees != 0.0f) {
             m_cameraPosition -= m_zoomSensitivity * degrees * lookAtToCamera();
             m_zoomParameter -= m_zoomSensitivity * degrees;
         }
         updateLookAtAndModelViewProjectionMatrix();
-    }
-
-    QMatrix4x4 CameraManager::lookAtMatrix() const {
-        return m_lookAtMatrix;
     }
 
     void CameraManager::toggleCameraMode() {

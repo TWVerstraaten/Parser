@@ -6,8 +6,7 @@
 #define AST_ASTMANAGER_H
 
 #include "../gen/DependencyGraph.h"
-#include "Ast.h"
-#include "UnrollCompanion.h"
+#include "Header.h"
 
 #include <functional>
 #include <map>
@@ -15,26 +14,33 @@
 
 namespace ast {
 
+    class Ast;
+    class UnrollCompanion;
+
     class AstManager {
       public:
         AstManager();
+        ~AstManager();
 
-        void add(size_t index, Ast&& ast);
+        void update(size_t index, const Ast& ast);
+        void remove(size_t index);
 
         [[nodiscard]] std::string                 toString() const;
         [[nodiscard]] const gen::DependencyGraph& dependencyGraph() const;
 
       private:
-        void setUnrollStatuses();
+        void setAllToUnchecked();
+        void unrollAll();
+        void checkRedeclarations();
+        void checkUndefinedReferences();
+        void unroll(UnrollCompanion& current, const std::vector<size_t>& history = {});
 
-        [[nodiscard]] std::vector<UnrollCompanion>&   fromHeaderType(Header::HEADER_TYPE type);
-        [[nodiscard]] std::optional<UnrollCompanion*> fromIndex(size_t index);
-        [[nodiscard]] std::optional<UnrollCompanion*> fromFunctionName(const std::string& functionName);
-        [[nodiscard]] std::optional<UnrollCompanion*> fromFunctionToken(const par::CustomFunctionToken& functionToken);
-        [[nodiscard]] std::optional<UnrollCompanion*> fromComparator(const std::function<bool(const UnrollCompanion&)>& comparator);
+        [[nodiscard]] std::vector<std::unique_ptr<UnrollCompanion>>::iterator fromIndex(size_t index);
+        [[nodiscard]] std::vector<std::unique_ptr<UnrollCompanion>>::iterator fromFunctionToken(const par::FunctionToken& functionToken);
+        [[nodiscard]] std::vector<std::unique_ptr<UnrollCompanion>>::iterator fromConstantName(const std::string& constantName);
 
-        std::map<Header::HEADER_TYPE, std::vector<UnrollCompanion>> m_astTokens;
-        gen::DependencyGraph                                        m_dependencyGraph;
+        std::vector<std::unique_ptr<UnrollCompanion>> m_unrollCompanions;
+        gen::DependencyGraph                          m_dependencyGraph;
     };
 } // namespace ast
 

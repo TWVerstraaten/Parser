@@ -6,7 +6,8 @@
 #define AST_PAR_ASTTOKEN_H
 
 #include "../Header.h"
-#include "CustomFunctionToken.h"
+#include "ConstantToken.h"
+#include "FunctionToken.h"
 #include "ReservedToken.h"
 #include "StructuralToken.h"
 #include "VectorToken.h"
@@ -29,9 +30,9 @@ namespace ast::par {
         struct Error {};
         enum class OPERATOR_TYPE { PLUS, MINUS, TIMES, DIVIDE, POWER, UNARY_MINUS, EQUALS };
 
-        typedef std::variant<Error, OPERATOR_TYPE, Empty, CustomFunctionToken, ReservedToken, VectorToken, std::string, double, long long int> AstTokenVariant;
-        typedef std::variant<AstToken, Token>                                                                                                  TempToken;
-        typedef std::list<TempToken>                                                                                                           TempTokenList;
+        typedef std::variant<Error, OPERATOR_TYPE, Empty, FunctionToken, ReservedToken, VectorToken, ConstantToken, double, long long int> AstTokenVariant;
+        typedef std::variant<AstToken, Token>                                                                                              TempToken;
+        typedef std::list<TempToken>                                                                                                       TempTokenList;
 
         AstToken();
         explicit AstToken(const std::list<StructuralToken>& structuralTokens, err::ParserInfo& info);
@@ -46,16 +47,18 @@ namespace ast::par {
         void replaceVariable(const std::string& variable, const AstToken& token);
         void replaceVariables(const std::map<std::string, AstToken>& variableMap);
         void replaceVariables(const std::vector<std::string>& variables, const std::vector<AstToken>& tokens);
-        void replaceFunction(const Header::FullHeader& header, const AstToken& functionToken);
+        void replaceFunction(const Header::FullHeader& header, const AstToken& functionAst);
+        void replaceConstant(const Header::ConstantHeader& constant, const AstToken& constantAst);
 
-        [[nodiscard]] std::set<CustomFunctionToken> getCustomFunctionDependencies() const;
-        [[nodiscard]] std::set<std::string>         getUndeclaredVariables(const std::set<std::string>& declared) const;
-        [[nodiscard]] std::set<std::string>         variablesUsed() const;
-        [[nodiscard]] const AstTokenVariant&        token() const;
-        [[nodiscard]] const std::vector<AstToken>&  children() const;
-        [[nodiscard]] const Range&                  range() const;
-        [[nodiscard]] std::string                   toStringAsTree() const;
-        [[nodiscard]] std::string                   toStringFlat() const;
+        [[nodiscard]] std::set<FunctionToken>      getFunctionDependencies() const;
+        [[nodiscard]] std::set<std::string>        getUndeclaredVariables(const std::set<std::string>& declared) const;
+        [[nodiscard]] std::set<std::string>        variablesUsed() const;
+        [[nodiscard]] const AstTokenVariant&       token() const;
+        [[nodiscard]] const std::vector<AstToken>& children() const;
+        [[nodiscard]] const Range&                 range() const;
+        [[nodiscard]] std::string                  toStringAsTree() const;
+        [[nodiscard]] std::string                  toStringFlat() const;
+        [[nodiscard]] bool                         hasEmptyBody() const;
 
       private:
         void maybeCastToReservedFunction(err::ParserInfo& info);

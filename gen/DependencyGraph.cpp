@@ -4,32 +4,33 @@
 
 #include "DependencyGraph.h"
 
+#include "Overloaded.h"
+
 #include <boost/graph/breadth_first_search.hpp>
 #include <boost/graph/depth_first_search.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/graph/reverse_graph.hpp>
 #include <iostream>
-
 namespace gen {
 
     typedef std::vector<boost::default_color_type> ColorMap;
 
-    void DependencyGraph::addVertex(const std::string& vertexName) {
-        if (getVertexByName(vertexName) != boost::graph_traits<Graph>::null_vertex()) {
-            boost::add_vertex(vertexName, m_graph);
-        }
+    void DependencyGraph::addVertex(size_t index, const FunctionVertex::Type& type) {
+        //        if (getVertexByIndex(index) != boost::graph_traits<Graph>::null_vertex()) {
+        boost::add_vertex(FunctionVertex{index, type}, m_graph);
+        //        }
     }
 
     void DependencyGraph::addDependsOn(const std::string& function, const std::string& dependsOn) {
-        if (not edgeExists(function, dependsOn)) {
-            add_edge(getOrAddVertexByName(dependsOn), getOrAddVertexByName(function), m_graph);
-        }
+        //        if (not edgeExists(function, dependsOn)) {
+        //            add_edge(getOrAddVertexByName(dependsOn), getOrAddVertexByName(function), m_graph);
+        //        }
     }
 
-    DependencyGraph::Vertex DependencyGraph::getVertexByName(const std::string& string) {
+    DependencyGraph::Vertex DependencyGraph::getVertexByIndex(size_t index) {
         auto itPair = vertices(m_graph);
         for (auto it = itPair.first; it != itPair.second; ++it) {
-            if (get(boost::vertex_name, m_graph)[*it] == string) {
+            if (get(boost::vertex_name, m_graph)[*it].m_index == index) {
                 return *it;
             }
         }
@@ -47,13 +48,13 @@ namespace gen {
         std::set<std::string>& m_dependents;
     };
 
-    std::set<std::string> DependencyGraph::getDependents(const std::string& function) {
-        std::set<std::string> result;
-        DependentsVisitor     vis(result);
-        ColorMap              colorMap(num_vertices(m_graph), boost::white_color);
-        breadth_first_visit(m_graph, getVertexByName(function), boost::visitor(vis).color_map(&colorMap[0]));
-        return result;
-    }
+    //    std::set<std::string> DependencyGraph::getDependents(const std::string& function) {
+    //        std::set<std::string> result;
+    //        DependentsVisitor     vis(result);
+    //        ColorMap              colorMap(num_vertices(m_graph), boost::white_color);
+    //        breadth_first_visit(m_graph, getVertexByName(function), boost::visitor(vis).color_map(&colorMap[0]));
+    //        return result;
+    //    }
 
     struct CycleDetector : public boost::dfs_visitor<> {
         explicit CycleDetector(bool& hasCycle) : m_hasCycle(hasCycle) {
@@ -67,19 +68,19 @@ namespace gen {
         bool& m_hasCycle;
     };
 
-    bool DependencyGraph::hasCircularDependency(const std::string& function) {
-        const auto    reversed = boost::reverse_graph<Graph, Graph&>(m_graph);
-        bool          hasCycle = false;
-        CycleDetector vis(hasCycle);
-        ColorMap      colorMap(num_vertices(m_graph), boost::white_color);
-        depth_first_visit(reversed, getVertexByName(function), vis, &colorMap[0]);
-        return hasCycle;
-    }
-
-    DependencyGraph::Vertex DependencyGraph::getOrAddVertexByName(const std::string& string) {
-        auto vertex = getVertexByName(string);
-        return vertex != boost::graph_traits<Graph>::null_vertex() ? vertex : boost::add_vertex(string, m_graph);
-    }
+    //    bool DependencyGraph::hasCircularDependency(const std::string& function) {
+    //        const auto    reversed = boost::reverse_graph<Graph, Graph&>(m_graph);
+    //        bool          hasCircularDependency = false;
+    //        CycleDetector vis(hasCircularDependency);
+    //        ColorMap      colorMap(num_vertices(m_graph), boost::white_color);
+    //        depth_first_visit(reversed, getVertexByName(function), vis, &colorMap[0]);
+    //        return hasCircularDependency;
+    //    }
+    //
+    //    DependencyGraph::Vertex DependencyGraph::getOrAddVertexByName(const std::string& string) {
+    //        auto vertex = getVertexByName(string);
+    //        return vertex != boost::graph_traits<Graph>::null_vertex() ? vertex : boost::add_vertex(string, m_graph);
+    //    }
 
     void DependencyGraph::write() const {
         std::vector<std::string> names;
@@ -87,7 +88,11 @@ namespace gen {
         const auto itPair = boost::vertices(m_graph);
         size_t     index  = 0;
         for (auto it = itPair.first; it != itPair.second; ++it, ++index) {
-            names[index] = get(boost::vertex_name, m_graph)[*it];
+            names[index] = std::to_string(get(boost::vertex_name, m_graph)[*it].m_index) + " " +
+                           std::visit(Overloaded{[](const std::string& a) { return a; },
+                                                 [](const ast::par::FunctionToken& f) { return f.toString(); },
+                                                 [](const auto& a) { return std::string("_"); }},
+                                      get(boost::vertex_name, m_graph)[*it].m_type);
         }
         write_graphviz(std::cout, m_graph, boost::make_label_writer(&names[0]));
     }
@@ -101,12 +106,13 @@ namespace gen {
     }
 
     bool DependencyGraph::edgeExists(const std::string& u, const std::string& v) {
-        const auto uVertex = getVertexByName(u);
-        const auto vVertex = getVertexByName(v);
-        if (uVertex == boost::graph_traits<Graph>::null_vertex() || vVertex == boost::graph_traits<Graph>::null_vertex()) {
-            return false;
-        }
-        return edge(uVertex, vVertex, m_graph).second;
+        //        const auto uVertex = getVertexByName(u);
+        //        const auto vVertex = getVertexByName(v);
+        //        if (uVertex == boost::graph_traits<Graph>::null_vertex() || vVertex == boost::graph_traits<Graph>::null_vertex()) {
+        //            return false;
+        //        }
+        //        return edge(uVertex, vVertex, m_graph).second;
+        return false;
     }
 
 } // namespace gen

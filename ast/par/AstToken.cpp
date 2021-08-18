@@ -5,6 +5,7 @@
 #include "AstToken.h"
 
 #include "../../gen/Overloaded.h"
+#include "../../gen/VariantTemplates.h"
 #include "../../gen/defines.h"
 #include "../err/ParserError.h"
 #include "../err/ParserInfo.h"
@@ -105,18 +106,18 @@ namespace ast::par {
     }
 
     AstToken::AstToken(const StructuralToken::Function& function, Range range, err::ParserInfo& info)
-        : m_token(CustomFunctionToken{function.m_name, function.m_arguments.m_tokenLists.size()}), m_range(range) {
+        : m_token(FunctionToken{function.m_name, function.m_arguments.m_tokenLists.size()}), m_range(range) {
         for (const auto& el : function.m_arguments.m_tokenLists) {
             m_children.emplace_back(el, info);
         }
         if (m_children.size() == 1 && std::holds_alternative<Empty>(m_children.front().m_token)) {
             m_children.clear();
-            std::get<CustomFunctionToken>(m_token).setArgumentCount(0);
+            std::get<FunctionToken>(m_token).setArgumentCount(0);
         }
         maybeCastToReservedFunction(info);
     }
 
-    AstToken::AstToken(const std::string& string, Range range, err::ParserInfo& info) : m_token(string), m_range(range) {
+    AstToken::AstToken(const ConstantToken& string, Range range, err::ParserInfo& info) : m_token(string), m_range(range) {
     }
 
     AstToken::AstToken(long long int value, Range range, err::ParserInfo& info) : m_token(value), m_range(range) {
@@ -133,10 +134,10 @@ namespace ast::par {
     }
 
     void AstToken::maybeCastToReservedFunction(err::ParserInfo& info) {
-        assert(std::holds_alternative<CustomFunctionToken>(m_token));
-        if (auto reserved = GET_RESERVED(std::get<CustomFunctionToken>(m_token).name()); reserved.has_value()) {
+        assert(std::holds_alternative<FunctionToken>(m_token));
+        if (auto reserved = GET_RESERVED(std::get<FunctionToken>(m_token).name()); reserved.has_value()) {
             const auto val                   = reserved.value();
-            const auto argumentCount         = std::get<CustomFunctionToken>(m_token).argumentCount();
+            const auto argumentCount         = std::get<FunctionToken>(m_token).argumentCount();
             const auto requiredArgumentCount = GET_ARGUMENT_COUNT(val);
             if (requiredArgumentCount != argumentCount) {
                 info.add({err::ParserError::TYPE::WRONG_ARGUMENT_COUNT_RESERVED,
@@ -147,23 +148,18 @@ namespace ast::par {
         }
     }
 
-    std::set<CustomFunctionToken> AstToken::getCustomFunctionDependencies() const {
-        if (std::holds_alternative<OPERATOR_TYPE>(m_token) && std::get<OPERATOR_TYPE>(m_token) == OPERATOR_TYPE::EQUALS) {
-            assert(m_children.size() == 2);
-            return m_children.at(1).getCustomFunctionDependencies();
-        }
-        std::set<CustomFunctionToken> functionDependencies;
-        if (std::holds_alternative<CustomFunctionToken>(m_token)) {
-            functionDependencies.insert(std::get<CustomFunctionToken>(m_token));
+    std::set<FunctionToken> AstToken::getFunctionDependencies() const {
+        std::set<FunctionToken> functionDependencies;
+        if (std::holds_alternative<FunctionToken>(m_token)) {
+            functionDependencies.insert(std::get<FunctionToken>(m_token));
         }
         for (const auto& child : m_children) {
-            functionDependencies.merge(child.getCustomFunctionDependencies());
+            functionDependencies.merge(child.getFunctionDependencies());
         }
         return functionDependencies;
     }
 
     std::set<std::string> AstToken::variablesUsed() const {
-        assert(not(std::holds_alternative<OPERATOR_TYPE>(m_token) && std::get<OPERATOR_TYPE>(m_token) == OPERATOR_TYPE::EQUALS));
         std::set<std::string> variables;
         if (std::holds_alternative<std::string>(m_token)) {
             variables.insert(std::get<std::string>(m_token));
@@ -230,16 +226,27 @@ namespace ast::par {
         return TokenWriter::S_TO_STRING_AS_TREE(*this);
     }
 
-    void AstToken::replaceFunction(const Header::FullHeader& header, const AstToken& functionToken) {
+    void AstToken::replaceFunction(const Header::FullHeader& header, const AstToken& functionAst) {
         for (auto& child : m_children) {
-            child.replaceFunction(header, functionToken);
+            child.replaceFunction(header, functionAst);
         }
-        std::visit(Overloaded{[&](const CustomFunctionToken& function) {
-                                  if (function.name() == header.m_name) {
-                                      assert(function.argumentCount() == header.m_variables.size());
-                                      auto replaced = functionToken;
-                                      replaced.replaceVariables(header.m_variables, m_children);
-                                      *this = replaced;
+        if (std::holds_alternative<FunctionToken>(m_token)) {
+            const auto& function = std::get<FunctionToken>(m_token);
+            if (function.name() == header.m_name && function.argumentCount() == header.m_variables.size()) {
+                auto replaced = functionAst;
+                replaced.replaceVariables(header.m_variables, m_children);
+                *this = replaced;
+            }
+        }
+    }
+
+    void AstToken::replaceConstant(const Header::ConstantHeader& header, const AstToken& constantAst) {
+        for (auto& child : m_children) {
+            child.replaceConstant(header, constantAst);
+        }
+        std::visit(Overloaded{[&](const ConstantToken& constant) {
+                                  if (constant == header.m_name) {
+                                      *this = constantAst;
                                   }
                               },
                               [&](const auto& a) {}},
@@ -262,5 +269,14 @@ namespace ast::par {
             }
         }
         return result;
+    }
+
+    bool AstToken::hasEmptyBody() const {
+        if (gen::S_VARIANT_EQUALS(m_token, OPERATOR_TYPE::EQUALS)) {
+            assert(m_children.size() == 2);
+            return m_children.back().hasEmptyBody();
+        } else {
+            return std::holds_alternative<Empty>(m_token);
+        }
     }
 } // namespace ast::par

@@ -29,7 +29,7 @@ void app::FormulaSurfaceInterface::updateSurfaces() {
     //        if (formula->declaredVariables().size() == 2) {
     //            std::unique_ptr<Surface> newSurface = std::make_unique<Surface>();
     //            newSurface->fillBuffers(*formula);
-    //            surfaceManager->add(std::move(newSurface));
+    //            surfaceManager->update(std::move(newSurface));
     //        }
     //    }
     m_openGlWidget->repaint();

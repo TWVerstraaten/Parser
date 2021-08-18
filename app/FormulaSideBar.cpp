@@ -5,14 +5,12 @@
 #include "FormulaSideBar.h"
 
 #include "../alg/StringAlg.h"
-#include "../ast/Ast.h"
-#include "../ast/err/DefinitionError.h"
-#include "../gen/DependencyGraph.h"
+#include "../ast/UnrollCompanion.h"
 #include "FormulaWidget.h"
+#include "UndoRedoHandler.h"
 #include "cmd/NewFormulaWidgetCommand.h"
 #include "cmd/RemoveFormulaWidgetCommand.h"
 
-#include <QAction>
 #include <QDebug>
 #include <QLabel>
 #include <QPushButton>
@@ -25,8 +23,12 @@ namespace app {
 
         makeScrollArea();
         addNewFormulaWidgetButton();
+
+        UndoRedoHandler::SET_PUSH_BLOCKED(true);
         addNewFormulaWidget();
         addNewFormulaWidget();
+        UndoRedoHandler::SET_PUSH_BLOCKED(false);
+
         m_layout->addWidget(m_infoLabel);
 
         m_layout->setSpacing(5);
@@ -37,12 +39,11 @@ namespace app {
 
     void FormulaSideBar::addNewFormulaWidget() {
         auto* newFormulaWidget = new FormulaWidget(m_scrollArea->widget());
-        //        const auto newFormulaIndex  = newFormulaWidget->index();
         connect(newFormulaWidget, &FormulaWidget::updated, [this](size_t index) { updateAt(index); });
         connect(newFormulaWidget, &FormulaWidget::deleteClicked, this, &FormulaSideBar::removeFormulaWidget);
 
         m_formulaWidgets.push_back(newFormulaWidget);
-        //        UndoRedoHandler::PUSH(new cmd::NewFormulaWidgetCommand(this, newFormulaIndex));
+        UndoRedoHandler::PUSH(new cmd::NewFormulaWidgetCommand(this, newFormulaWidget->index()));
         m_layout->removeWidget(m_infoLabel);
         m_layout->removeWidget(m_newFormulaPushButton);
         m_layout->addWidget(m_formulaWidgets.back());
@@ -55,17 +56,24 @@ namespace app {
     }
 
     void FormulaSideBar::removeFormulaWidget(size_t indexOfWidget) {
-        //        UndoRedoHandler::PUSH(new cmd::RemoveFormulaWidgetCommand(this, indexOfWidget));
+        UndoRedoHandler::PUSH(new cmd::RemoveFormulaWidgetCommand(this, indexOfWidget));
         updateAt(indexOfWidget);
     }
 
     void FormulaSideBar::updateAt(size_t index) {
-        qDebug() << "FormulaSideBar updated";
-        clearDefinitionErrors();
-        checkRedeclarations();
-        checkUndefined();
+        auto* widget = fromIndex(index);
+        if (widget->isHidden() || not widget->hasSuccessfulNonEmptyAst()) {
+            m_astManager.remove(index);
+        } else {
+            m_astManager.update(index, widget->ast());
+        }
+        //        const auto& updatedWidget = fromIndex(index);
+        //        if ()
+
+        //        checkRedeclarations();
+        //        checkUndefined();
         writeInfoToInfoLabel();
-        updateAllTextEdits();
+        //        updateAllTextEdits();
     }
 
     void FormulaSideBar::writeInfoToInfoLabel() {
@@ -74,14 +82,12 @@ namespace app {
         const auto referencedFunctions = getReferencedFunctions();
         const auto referencedConstants = getReferencedConstants();
         QString    info                = "<b>Declared:</b><br>";
-        info.append(QString::fromStdString("Funcs: " + alg::str::CONCATENATE_STRINGS<ast::par::CustomFunctionToken>(declaredFunctions, &ast::par::CustomFunctionToken::toString)) +
-                    "<br>");
+        info.append(QString::fromStdString("Funcs: " + alg::str::CONCATENATE_STRINGS<ast::par::FunctionToken>(declaredFunctions, &ast::par::FunctionToken::toString)) + "<br>");
         info.append(QString::fromStdString("Csts: " + alg::str::CONCATENATE_STRINGS(declaredConstants)) + "<br>");
         info.append("<b>Referenced:</b><br>");
-        info.append(
-            QString::fromStdString("Funcs: " + alg::str::CONCATENATE_STRINGS<ast::par::CustomFunctionToken>(referencedFunctions, &ast::par::CustomFunctionToken::toString)) +
-            "<br>");
+        info.append(QString::fromStdString("Funcs: " + alg::str::CONCATENATE_STRINGS<ast::par::FunctionToken>(referencedFunctions, &ast::par::FunctionToken::toString)) + "<br>");
         info.append(QString::fromStdString("Csts: " + alg::str::CONCATENATE_STRINGS(referencedConstants)) + "<br>");
+        info.append(QString::fromStdString(m_astManager.toString()).replace("\n", "<br>"));
         m_infoLabel->setText(info);
     }
 
@@ -108,72 +114,15 @@ namespace app {
         setLayout(layout);
     }
 
-    void FormulaSideBar::checkRedeclarations() {
-        std::map<std::string, size_t> seenDeclarations;
-        for (const auto& widget : m_formulaWidgets) {
-            if ((not widget->isHidden()) && widget->hasAst() && widget->ast().info().parserErrors().empty() && (not widget->ast().isEmpty())) {
-                const auto& ast = widget->ast();
-                if (ast.headerType() != ast::Header::HEADER_TYPE::FULL_HEADER && ast.headerType() != ast::Header::HEADER_TYPE::CONSTANT) {
-                    continue;
-                }
-                const size_t      index = widget->index();
-                const std::string name  = ast.getDeclaredName();
-                if (seenDeclarations.find(name) != seenDeclarations.end()) {
-                    widget->info().add({ast::err::DefinitionError::TYPE::REDECLARATION, name});
-                    fromIndex(seenDeclarations[name])->info().add({ast::err::DefinitionError::TYPE::REDECLARATION, name});
-                } else {
-                    seenDeclarations.insert({name, index});
-                }
-            }
-        }
-    }
-
-    void FormulaSideBar::checkFormulaWidgetsParsed() {
-    }
-
-    void FormulaSideBar::checkUndefined() {
-        const auto d                 = getDeclaredFunctions();
-        const auto declaredFunctions = std::set<ast::par::CustomFunctionToken>(d.begin(), d.end());
-        const auto declaredConstants = getDeclaredConstants();
-
-        for (auto& widget : m_formulaWidgets) {
-            if (widget->isHidden() || not widget->hasSuccessfulNonEmptyAst()) {
-                continue;
-            }
-            const auto                              referenced = widget->ast().functionDependencies();
-            std::set<ast::par::CustomFunctionToken> undefinedFunctions;
-            for (const auto& el : referenced) {
-                if (declaredFunctions.find(el) == declaredFunctions.end()) {
-                    undefinedFunctions.insert(el);
-                }
-            }
-            if (not undefinedFunctions.empty()) {
-                widget->info().add({ast::err::DefinitionError::TYPE::UNDEFINED_FUNCTIONS, "undefined"});
-            }
-        }
-    }
-
-    void FormulaSideBar::checkCircularDependenciesAndUndefined() {
-    }
-
-    void FormulaSideBar::clearDefinitionErrors() {
-        for (auto& widget : m_formulaWidgets) {
-            if ((not widget->isHidden()) && widget->hasAst()) {
-                widget->info().clearDefinitionErrors();
-                widget->updateTextEdit();
-            }
-        }
-    }
-
-    std::vector<ast::par::CustomFunctionToken> FormulaSideBar::getDeclaredFunctions() const {
-        std::vector<ast::par::CustomFunctionToken> declaredFunctions;
+    std::vector<ast::par::FunctionToken> FormulaSideBar::getDeclaredFunctions() const {
+        std::vector<ast::par::FunctionToken> declaredFunctions;
         for (const auto& widget : m_formulaWidgets) {
             if (widget->isHidden() || not widget->hasSuccessfulNonEmptyAst()) {
                 continue;
             }
             const auto& ast = widget->ast();
-            if (ast.headerType() == ast::Header::HEADER_TYPE::FULL_HEADER) {
-                declaredFunctions.emplace_back(ast.getCustomFunctionToken());
+            if (ast.isFunction()) {
+                declaredFunctions.emplace_back(ast.getFunctionToken());
             }
         }
         return declaredFunctions;
@@ -186,20 +135,21 @@ namespace app {
                 continue;
             }
             const auto& ast = widget->ast();
-            if (ast.headerType() == ast::Header::HEADER_TYPE::CONSTANT) {
+            if (ast.isConstant()) {
                 declaredConstants.emplace_back(std::get<ast::Header::ConstantHeader>(ast.header().headerVariant()).m_name);
             }
         }
         return declaredConstants;
     }
-    std::set<ast::par::CustomFunctionToken> FormulaSideBar::getReferencedFunctions() const {
-        std::set<ast::par::CustomFunctionToken> result;
+
+    std::set<ast::par::FunctionToken> FormulaSideBar::getReferencedFunctions() const {
+        std::set<ast::par::FunctionToken> result;
         for (const auto& widget : m_formulaWidgets) {
             if (widget->isHidden() || not widget->hasAst() || not widget->ast().success() || widget->ast().isEmpty()) {
                 continue;
             }
             const auto& ast = widget->ast();
-            result.merge(ast.functionDependencies());
+            result.merge(ast.getFunctionDependencies());
         }
         return result;
     }
@@ -211,17 +161,9 @@ namespace app {
                 continue;
             }
             const auto& ast = widget->ast();
-            result.merge(ast.constantDependencies());
+            result.merge(ast.getConstantDependencies());
         }
         return result;
-    }
-
-    void FormulaSideBar::updateAllTextEdits() {
-        for (auto& widget : m_formulaWidgets) {
-            if ((not widget->isHidden()) && widget->hasAst()) {
-                widget->updateTextEdit();
-            }
-        }
     }
 
 } // namespace app

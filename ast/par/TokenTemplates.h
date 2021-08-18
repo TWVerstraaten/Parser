@@ -11,10 +11,6 @@ namespace ast::par {
     class TokenTemplates {
 
       public:
-        template <class T, class... Ts, class Type>
-        [[nodiscard]] static bool S_TOKEN_EQUALS(const std::variant<Ts...>& variant, Type type) {
-            return std::holds_alternative<T>(variant) && std::get<T>(variant) == type;
-        }
 
         template <class T, class... Ts, class Type>
         [[nodiscard]] static bool S_IS_TOKEN_OF_TYPE(const std::variant<Ts...>& variant, Type type) {

@@ -16,7 +16,7 @@ namespace ast::par {
     static const std::vector<ReservedToken> ALL_RESERVED = {Sin(), Cos(), Tan(), ASin(), ACos(), ATan(), ATan2()};
 
     size_t GET_ARGUMENT_COUNT(const ReservedToken& reserved) {
-        return std::visit([](const auto& a) { return std::remove_reference_t<decltype(a)>::S_ARGUMENT_COUNT; }, reserved);
+        return std::visit([](const auto& a) { return std::remove_reference_t<decltype(a)>::ARGUMENT_COUNT; }, reserved);
     }
 
     std::optional<ReservedToken> GET_RESERVED(const std::string& string) {
@@ -29,10 +29,10 @@ namespace ast::par {
     }
 
     std::string GET_NAME(const ReservedToken& reserved) {
-        return std::visit([](const auto& a) { return std::string(std::remove_reference_t<decltype(a)>::S_NAME); }, reserved);
+        return std::visit([](const auto& a) { return std::string(std::remove_reference_t<decltype(a)>::NAME); }, reserved);
     }
 
-    double S_EVAL(const ReservedToken& reserved, double argument) {
+    double EVAL(const ReservedToken& reserved, double argument) {
         return std::visit(Overloaded{
                               [argument](const Sin&) { return std::sin(argument); },
                               [argument](const Cos&) { return std::cos(argument); },
@@ -48,7 +48,7 @@ namespace ast::par {
                           reserved);
     }
 
-    double S_EVAL(const ReservedToken& reserved, double first, double second) {
+    double EVAL(const ReservedToken& reserved, double first, double second) {
         return std::visit(Overloaded{
                               [first, second](const ATan2&) { return std::atan2(first, second); },
                               [](const auto&) {
