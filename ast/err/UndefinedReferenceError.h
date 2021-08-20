@@ -14,12 +14,12 @@ namespace ast::err {
     class UndefinedReferenceError {
 
       public:
-        UndefinedReferenceError(Declaration&& declaration, std::set<Declaration>&& undefinedDeclarations);
+        UndefinedReferenceError(size_t index, std::set<Declaration>&& undefinedDeclarations);
 
         [[nodiscard]] std::string toString() const;
 
       private:
-        Declaration           m_declaration;
+        size_t                m_index;
         std::set<Declaration> m_undefinedDeclarations;
     };
 } // namespace ast::err

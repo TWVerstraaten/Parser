@@ -10,7 +10,6 @@
 #include "par/Parser.h"
 #include "par/TokenTemplates.h"
 
-#include <QDebug>
 #include <cassert>
 
 namespace ast {
@@ -27,7 +26,7 @@ namespace ast {
             }
             m_headerWasSet = true;
         } else {
-            m_info.printAll();
+            //            m_info.printAll();
         }
     }
 
@@ -252,10 +251,10 @@ namespace ast {
         const auto           constantDependencies = getConstantDependencies();
         std::set<Dependency> dependencies;
         for (const auto& function : functionDependencies) {
-            dependencies.insert({function});
+            dependencies.insert(Declaration{function});
         }
         for (const auto& constant : constantDependencies) {
-            dependencies.insert({constant});
+            dependencies.insert(Declaration{constant});
         }
         return dependencies;
     }
@@ -263,9 +262,9 @@ namespace ast {
     Declaration Ast::getDeclarationToken() const {
         assert(isDeclaration());
         if (isFunction()) {
-            return getFunctionToken();
+            return Declaration{getFunctionToken()};
         } else {
-            return getConstantToken();
+            return Declaration{getConstantToken()};
         }
     }
 
@@ -273,5 +272,4 @@ namespace ast {
         std::visit(Overloaded{[&](const par::FunctionToken& f) { replaceFunctionInPlace(ast); }, [&](const par::ConstantToken& c) { replaceConstantInPlace(ast); }},
                    dependency.get());
     }
-
 } // namespace ast

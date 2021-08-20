@@ -5,9 +5,9 @@
 #ifndef AST_DEPENDENCYMANAGER_H
 #define AST_DEPENDENCYMANAGER_H
 
+#include "Ast.h"
 #include "Dependency.h"
 
-#include <algorithm>
 #include <map>
 #include <set>
 #include <string>
@@ -15,8 +15,6 @@
 #include <vector>
 
 namespace ast {
-
-    class Ast;
 
     class DependencyManager {
 

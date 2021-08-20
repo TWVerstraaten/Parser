@@ -7,6 +7,7 @@
 #include "../gen/defines.h"
 #include "Ast.h"
 
+#include <algorithm>
 #include <cassert>
 #include <iostream>
 
@@ -39,7 +40,6 @@ namespace ast {
             unroll(index);
         }
         m_dependencyManager.clearUpdated();
-        assert(m_filledDependencies.size() == m_unrolledAsts.size());
     }
 
     void UnrollManager::removeUpdatedFromUnrolled() {
@@ -93,21 +93,19 @@ namespace ast {
     }
 
     std::optional<err::RedeclarationError> UnrollManager::checkForReDeclarationError(size_t index) const {
-        const auto& ast    = m_asts.at(index);
         const auto& vertex = m_dependencyManager.vertexAt(index);
         if (const auto& redeclarations = vertex.m_redeclarations; not redeclarations.empty()) {
             std::map<size_t, Declaration> r;
             std::transform(TT_IT(redeclarations), std::inserter(r, r.end()), [this](const size_t i) {
                 return std::pair<size_t, Declaration>{i, m_asts.at(i).getDeclarationToken()};
             });
-            return err::RedeclarationError{ast.getDeclarationToken(), std::move(r)};
+            return err::RedeclarationError{index, std::move(r)};
         } else {
             return {};
         }
     }
 
     std::optional<err::UndefinedReferenceError> UnrollManager::checkForUndefinedReferenceError(size_t index) const {
-        const auto& ast    = m_asts.at(index);
         const auto& vertex = m_dependencyManager.vertexAt(index);
         if (const auto& outEdges = vertex.m_outEdges; vertex.m_outEdges.size() != vertex.m_dependencies.size()) {
             assert(outEdges.size() < vertex.m_dependencies.size());
@@ -117,20 +115,19 @@ namespace ast {
                 assert(undefinedReferences.find(m_asts.at(outEdge).getDeclarationToken()) != undefinedReferences.end());
                 undefinedReferences.erase(m_asts.at(outEdge).getDeclarationToken());
             }
-            return err::UndefinedReferenceError{ast.getDeclarationToken(), std::move(undefinedReferences)};
+            return err::UndefinedReferenceError{index, std::move(undefinedReferences)};
         } else {
             return {};
         }
     }
 
     std::optional<err::CircularDependencyError> UnrollManager::checkForCircularDependencyError(size_t index) const {
-        const auto& ast = m_asts.at(index);
         if (std::vector<size_t> circularDependencies = {index}; m_dependencyManager.hasCircularDependency(circularDependencies)) {
             std::vector<std::pair<size_t, Declaration>> pathToCycle;
             std::transform(TT_IT(circularDependencies), std::inserter(pathToCycle, pathToCycle.end()), [this](const size_t i) {
                 return std::make_pair(i, m_asts.at(i).getDeclarationToken());
             });
-            return err::CircularDependencyError{ast.getDeclarationToken(), std::move(pathToCycle)};
+            return err::CircularDependencyError{index, std::move(pathToCycle)};
         } else {
             return {};
         }

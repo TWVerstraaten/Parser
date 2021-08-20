@@ -13,6 +13,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <iostream>
 
 namespace ast::par {
 
@@ -41,7 +42,7 @@ namespace ast::par {
                                                                                                 {AstToken::OPERATOR_TYPE::DIVIDE, Divide{}},
                                                                                                 {AstToken::OPERATOR_TYPE::POWER, Power{}},
                                                                                                 {AstToken::OPERATOR_TYPE::UNARY_MINUS, UnaryMinus{}}};
-        std::visit(Overloaded{[](const AstToken::Empty&) {},
+        std::visit(Overloaded{[](const AstToken::Empty&) { assert(false); },
                               [](const AstToken::Error&) { assert(false); },
                               [](const FunctionToken&) { assert(false); },
                               [this](const AstToken::OPERATOR_TYPE& type) {
@@ -56,8 +57,8 @@ namespace ast::par {
         for (const auto& child : astToken.children()) {
             m_children.emplace_back(child);
         }
-        unWrap1DVectors();
         simplify();
+        unWrap1DVectors();
     }
 
     std::string UnrolledAstToken::toString() const {
@@ -145,12 +146,13 @@ namespace ast::par {
     }
 
     void UnrolledAstToken::unWrap1DVectors() {
-        for (auto& el : m_children) {
-            el.unWrap1DVectors();
-        }
         if (std::holds_alternative<VectorToken>(m_token) && m_children.size() == 1) {
             m_token    = std::move(m_children.front().m_token);
             m_children = std::move(m_children.front().m_children);
+        } else {
+            for (auto& el : m_children) {
+                el.unWrap1DVectors();
+            }
         }
     }
 

@@ -115,7 +115,7 @@ namespace gen {
     }
 
     double Number::toDouble() const {
-        return std::visit([](const auto& a) { return static_cast<float>(a); }, m_number);
+        return std::visit([](const auto& a) { return static_cast<double>(a); }, m_number);
     }
 
     bool Number::holdsLongLong() const {

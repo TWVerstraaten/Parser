@@ -8,9 +8,10 @@
 #include "../err/ParserError.h"
 #include "../err/ParserInfo.h"
 
+#include <algorithm>
+#include <boost/range/adaptor/reversed.hpp>
 #include <set>
 #include <sstream>
-#include <algorithm>
 
 namespace ast::par {
 
@@ -28,6 +29,7 @@ namespace ast::par {
         checkIdentifierNumberPatternWithNoSpace();
         checkLeadingDotsInNumbers();
         insertMultiplications();
+        checkEmptyComponent();
     }
 
     void Tokenizer::insertMultiplications() {
@@ -43,9 +45,10 @@ namespace ast::par {
                                                                                                       {Token::TYPE::RIGHT_BR, Token::TYPE::IDENTIFIER},
                                                                                                       {Token::TYPE::NUMBER, Token::TYPE::LEFT_BR}};
         for (auto it = m_tokenList.begin(); std::next(it) != m_tokenList.end(); ++it) {
-            if (S_INSERT_MULTIPLICATION_PATTERN.find({it->type(), std::next(it)->type()}) != S_INSERT_MULTIPLICATION_PATTERN.end()) {
-                m_info.add({err::ParserMessage::TYPE::INSERT_MULTIPLICATION, "", {it->range().startIndex(), std::next(it)->range().endIndex()}});
-                it = m_tokenList.insert(std::next(it), Token{Token::TYPE::TIMES, "", {}});
+            const auto next = std::next(it);
+            if (S_INSERT_MULTIPLICATION_PATTERN.find({it->type(), next->type()}) != S_INSERT_MULTIPLICATION_PATTERN.end()) {
+                m_info.add({err::ParserMessage::TYPE::INSERT_MULTIPLICATION, "", {it->range().startIndex(), next->range().endIndex()}});
+                it = m_tokenList.insert(next, Token{Token::TYPE::TIMES, "", {}});
             }
         }
     }
@@ -126,19 +129,21 @@ namespace ast::par {
     void Tokenizer::replaceUnaryMinuses() {
         bool nextMinusIsUnary = true;
         for (auto& token : m_tokenList) {
-            if (token.type() == Token::TYPE::MINUS && nextMinusIsUnary) {
-                token.setType(Token::TYPE::UNARY_MINUS);
-            } else
-                switch (token.type()) {
-                    case Token::TYPE::LEFT_BR:
-                    case Token::TYPE::COMMA:
-                    case Token::TYPE::EQUALS:
-                        nextMinusIsUnary = true;
-                        break;
-                    default:
-                        nextMinusIsUnary = false;
-                        break;
-                }
+            switch (token.type()) {
+                case Token::TYPE::MINUS:
+                    if (nextMinusIsUnary) {
+                        token.setType(Token::TYPE::UNARY_MINUS);
+                    }
+                    break;
+                case Token::TYPE::LEFT_BR:
+                case Token::TYPE::COMMA:
+                case Token::TYPE::EQUALS:
+                    nextMinusIsUnary = true;
+                    break;
+                default:
+                    nextMinusIsUnary = false;
+                    break;
+            }
         }
     }
 
@@ -153,24 +158,24 @@ namespace ast::par {
 
     void Tokenizer::checkBrackets() {
         int bracketDepth = 0;
-        for (auto it = m_tokenList.begin(); it != m_tokenList.end(); ++it) {
-            if (it->type() == Token::TYPE::LEFT_BR) {
+        for (auto& token : m_tokenList) {
+            if (token.type() == Token::TYPE::LEFT_BR) {
                 ++bracketDepth;
-            } else if (it->type() == Token::TYPE::RIGHT_BR) {
+            } else if (token.type() == Token::TYPE::RIGHT_BR) {
                 if (bracketDepth <= 0) {
-                    m_info.add({err::ParserError::TYPE::UNMATCHED_CLOSING_BR, "", it->range()});
+                    m_info.add({err::ParserError::TYPE::UNMATCHED_CLOSING_BR, "", token.range()});
                 } else {
                     --bracketDepth;
                 }
             }
         }
         bracketDepth = 0;
-        for (auto it = m_tokenList.rbegin(); it != m_tokenList.rend(); ++it) {
-            if (it->type() == Token::TYPE::RIGHT_BR) {
+        for (auto& it : boost::adaptors::reverse(m_tokenList)) {
+            if (it.type() == Token::TYPE::RIGHT_BR) {
                 ++bracketDepth;
-            } else if (it->type() == Token::TYPE::LEFT_BR) {
+            } else if (it.type() == Token::TYPE::LEFT_BR) {
                 if (bracketDepth <= 0) {
-                    m_info.add({err::ParserError::TYPE::UNMATCHED_OPEN_BR, "", it->range()});
+                    m_info.add({err::ParserError::TYPE::UNMATCHED_OPEN_BR, "", it.range()});
                 } else {
                     --bracketDepth;
                 }
@@ -195,7 +200,6 @@ namespace ast::par {
         static const std::set<Token::TYPE> S_OPERATOR_TYPES{
             Token::TYPE::POWER, Token::TYPE::PLUS, Token::TYPE::MINUS, Token::TYPE::TIMES, Token::TYPE::DIVIDE, Token::TYPE::UNARY_MINUS};
         static const std::set<Token::TYPE> S_REQUIRED_AFTER_OPERATORS{Token::TYPE::IDENTIFIER, Token::TYPE::NUMBER, Token::TYPE::LEFT_BR};
-
         for (auto it = m_tokenList.begin(); std::next(it) != m_tokenList.end(); ++it) {
             if (S_OPERATOR_TYPES.find(it->type()) != S_OPERATOR_TYPES.end()) {
                 if (std::next(it) == m_tokenList.end()) {
@@ -241,6 +245,19 @@ namespace ast::par {
                 if (dotCount == 1 && string.at(0) == '.') {
                     m_info.add({err::ParserWarning::TYPE::SUSPICIOUS_MISSING_LEADING_ZERO, "0" + string, token.range()});
                 }
+            }
+        }
+    }
+
+    void Tokenizer::checkEmptyComponent() {
+        if (m_tokenList.size() < 2) {
+            return;
+        }
+        static const std::set<std::pair<Token::TYPE, Token::TYPE>> FORBIDDEN_PATTERNS = {{Token::TYPE::LEFT_BR, Token::TYPE::COMMA}, {Token::TYPE::COMMA, Token::TYPE::RIGHT_BR}};
+        for (auto it = m_tokenList.begin(); it != std::prev(m_tokenList.end()); ++it) {
+            const auto next = std::next(it);
+            if (FORBIDDEN_PATTERNS.find({it->type(), next->type()}) != FORBIDDEN_PATTERNS.end()) {
+                m_info.add({err::ParserError::TYPE::EMPTY_COMPONENT, "", {it->range().startIndex(), next->range().endIndex()}});
             }
         }
     }

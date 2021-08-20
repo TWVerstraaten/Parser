@@ -8,12 +8,11 @@
 
 namespace ast::err {
 
-    CircularDependencyError::CircularDependencyError(Declaration&& declaration, std::vector<std::pair<size_t, Declaration>>&& pathToCycle)
-        : m_declaration(declaration), m_pathToCycle(pathToCycle) {
+    CircularDependencyError::CircularDependencyError(size_t index, std::vector<std::pair<size_t, Declaration>>&& pathToCycle) : m_index(index), m_pathToCycle(pathToCycle) {
     }
 
     std::string CircularDependencyError::toString() const {
-        return "Circular dependency for " + m_declaration.toString() + ": " + alg::str::CONCATENATE_STRINGS<std::pair<size_t, Declaration>>(m_pathToCycle, [](const auto& pair) {
+        return "Circular dependency for " + std::to_string(m_index) + ": " + alg::str::CONCATENATE_STRINGS<std::pair<size_t, Declaration>>(m_pathToCycle, [](const auto& pair) {
                    return "(" + std::to_string(pair.first) + ", " + pair.second.toString() + ")";
                });
     }

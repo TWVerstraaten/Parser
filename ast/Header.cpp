@@ -43,8 +43,6 @@ namespace ast {
         m_header = CoordinateVectorHeader{std::move(variableNames)};
     }
 
-    Header::~Header() = default;
-
     Header::HEADER_TYPE Header::type() const {
         return std::visit(Overloaded{[](const EmptyHeader) { return HEADER_TYPE::EMPTY; },
                                      [](const ConstantHeader&) { return HEADER_TYPE::CONSTANT; },
@@ -55,7 +53,7 @@ namespace ast {
     }
 
     std::string Header::toString() const {
-        return std::visit(Overloaded{[](EmptyHeader) { return std::string("Empty headerVariant"); },
+        return std::visit(Overloaded{[](EmptyHeader) { return std::string("Empty:"); },
                                      [](const ConstantHeader& namedHeader) { return "Constant:\t" + namedHeader.m_name; },
                                      [](const SingleCoordinateHeader& single) { return "Single coord:\t" + single.m_coordinate; },
                                      [](const CoordinateVectorHeader& vector) { return "Coord. vector:\t(" + alg::str::CONCATENATE_STRINGS(vector.m_coordinates) + ")"; },

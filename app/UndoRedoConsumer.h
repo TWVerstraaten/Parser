@@ -2,8 +2,8 @@
 // Created by pc on 28-05-21.
 //
 
-#ifndef PARSER_UNDOREDOCONSUMER_H
-#define PARSER_UNDOREDOCONSUMER_H
+#ifndef APP_UNDOREDOCONSUMER_H
+#define APP_UNDOREDOCONSUMER_H
 
 #include <QObject>
 #include <memory>
@@ -24,4 +24,4 @@ namespace app {
     };
 } // namespace app
 
-#endif // PARSER_UNDOREDOCONSUMER_H
+#endif // APP_UNDOREDOCONSUMER_H

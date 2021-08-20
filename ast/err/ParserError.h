@@ -29,7 +29,8 @@ namespace ast::err {
             REPEATED_ARGUMENT,
             HEADER_ERROR,
             GENERIC,
-            EMPTY_BODY
+            EMPTY_BODY,
+            EMPTY_COMPONENT,
         };
 
         ParserError(TYPE type, std::string message = "", par::Range range = {});

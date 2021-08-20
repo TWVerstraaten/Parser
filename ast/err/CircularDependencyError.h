@@ -14,11 +14,11 @@ namespace ast::err {
     class CircularDependencyError {
 
       public:
-        CircularDependencyError(Declaration&& declaration, std::vector<std::pair<size_t, Declaration>>&& pathToCycle);
+        CircularDependencyError(size_t index, std::vector<std::pair<size_t, Declaration>>&& pathToCycle);
         [[nodiscard]] std::string toString() const;
 
       private:
-        Declaration                                 m_declaration;
+        size_t                                      m_index;
         std::vector<std::pair<size_t, Declaration>> m_pathToCycle;
     };
 

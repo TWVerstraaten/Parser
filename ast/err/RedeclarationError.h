@@ -13,12 +13,12 @@
 namespace ast::err {
     class RedeclarationError {
       public:
-        RedeclarationError(Declaration&& declaration, std::map<size_t, Declaration>&& otherDeclarations);
+        RedeclarationError(size_t index, std::map<size_t, Declaration>&& otherDeclarations);
 
         [[nodiscard]] std::string toString() const;
 
       private:
-        Declaration                   m_declaration;
+        size_t                        m_index;
         std::map<size_t, Declaration> m_otherDeclarations;
     };
 } // namespace ast::err

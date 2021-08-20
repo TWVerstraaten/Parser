@@ -14,7 +14,7 @@ namespace ast {
     }
 
     std::string UnrolledAst::toString() const {
-        return "Header:\t" + m_header.toString() + "\nBody:\t" + m_token.toString() + "\n";
+        return m_header.toString() + "\nBody:\t" + m_token.toString() + "\n";
     }
 
     par::UnrolledAstToken UnrolledAst::setVariable(const std::string& variable, const gen::Number& number) const {
@@ -42,5 +42,13 @@ namespace ast {
         for (const auto& [v, n] : variableMap) {
             result.setVariableInPlace(v, n);
         }
+    }
+
+    std::vector<par::ConstantToken> UnrolledAst::declaredVariables() const {
+        if (m_header.type() == Header::HEADER_TYPE::FULL_HEADER) {
+            assert(std::holds_alternative<Header::FullHeader>(m_header.headerVariant()));
+            return std::get<Header::FullHeader>(m_header.headerVariant()).m_variables;
+        }
+        return {};
     }
 } // namespace ast

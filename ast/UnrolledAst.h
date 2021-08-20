@@ -6,6 +6,7 @@
 #define AST_UNROLLEDAST_H
 
 #include "Header.h"
+#include "par/ConstantToken.h"
 #include "par/UnrolledAstToken.h"
 
 #include <map>
@@ -22,8 +23,9 @@ namespace ast {
         void setVariableInPlace(const std::string& variable, const gen::Number& number);
         void setVariablesInPlace(const std::map<std::string, gen::Number>& variableMap);
 
-        [[nodiscard]] par::UnrolledAstToken setVariable(const std::string& variable, const gen::Number& number) const;
-        [[nodiscard]] par::UnrolledAstToken setVariables(const std::map<std::string, gen::Number>& variableMap) const;
+        [[nodiscard]] par::UnrolledAstToken           setVariable(const std::string& variable, const gen::Number& number) const;
+        [[nodiscard]] par::UnrolledAstToken           setVariables(const std::map<std::string, gen::Number>& variableMap) const;
+        [[nodiscard]] std::vector<par::ConstantToken> declaredVariables() const;
 
         [[nodiscard]] std::string toString() const;
 

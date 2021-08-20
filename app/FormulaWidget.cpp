@@ -10,7 +10,6 @@
 #include "cmd/TextEditChangedCommand.h"
 
 #include <QCheckBox>
-#include <QDebug>
 #include <QGridLayout>
 #include <QPushButton>
 
@@ -41,8 +40,9 @@ namespace app {
         cursor.setCharFormat(fmt);
         m_textEdit->blockSignals(false);
 
-        const auto str = string.toStdString();
-        m_ast          = std::make_unique<ast::Ast>(str);
+        auto cString = string.toStdString();
+        m_ast        = std::make_unique<ast::Ast>(cString);
+
         emit updated(m_index);
         m_textEdit->setInfo(m_ast->info());
         m_formulaWasUpdated = true;
@@ -87,14 +87,6 @@ namespace app {
 
     bool FormulaWidget::isActive() const {
         return m_activeCheckBox->isChecked();
-    }
-
-    bool FormulaWidget::formulaWasUpdated() const {
-        return m_formulaWasUpdated;
-    }
-
-    void FormulaWidget::setFormulaWasUpdated(bool formulaWasUpdated) {
-        m_formulaWasUpdated = formulaWasUpdated;
     }
 
     const ast::Ast& FormulaWidget::ast() const {

@@ -29,7 +29,6 @@ namespace app {
         explicit FormulaWidget(QWidget* parent);
         ~FormulaWidget() override;
 
-        void setFormulaWasUpdated(bool formulaWasUpdated);
         void updateTextEdit();
 
         [[nodiscard]] size_t          index() const;
@@ -37,7 +36,6 @@ namespace app {
         [[nodiscard]] bool            isActive() const;
         [[nodiscard]] bool            hasAst() const;
         [[nodiscard]] bool            hasSuccessfulNonEmptyAst() const;
-        [[nodiscard]] bool            formulaWasUpdated() const;
         [[nodiscard]] const ast::Ast& ast() const;
 
       signals:

@@ -45,6 +45,8 @@ namespace ast::err {
                 return "Could not parse header: " + m_message + " at " + m_range.toString();
             case TYPE::EMPTY_BODY:
                 return "Empty body";
+            case TYPE::EMPTY_COMPONENT:
+                return "Empty component: at " + m_range.toString();
         }
         assert(false);
     }

@@ -12,7 +12,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <iostream>
 #include <sstream>
 
 namespace ast::par {
@@ -97,7 +96,10 @@ namespace ast::par {
             if (dotCount == 0) {
                 return std::variant<double, long long>(std::stoll(string));
             } else {
-                return std::variant<double, long long>(std::stod(string.at(0) == '.' ? "0" + string : string));
+                double            d;
+                std::stringstream ss{string.at(0) == '.' ? "0" + string : string};
+                ss >> d;
+                return d;
             }
         } catch (...) { return {}; }
     }

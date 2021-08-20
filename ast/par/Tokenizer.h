@@ -33,6 +33,7 @@ namespace ast::par {
         void checkIdentifierNumberPatternWithNoSpace();
         void checkLeadingDotsInNumbers();
         void insertMultiplications();
+        void checkEmptyComponent();
 
         const std::string     m_string;
         std::list<Token>      m_tokenList;

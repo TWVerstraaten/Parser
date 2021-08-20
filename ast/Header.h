@@ -42,7 +42,6 @@ namespace ast {
         explicit Header(const std::string& name);
         Header(const par::FunctionToken& customFunction, const ast::par::AstToken& headerToken);
         Header(const par::VectorToken& vectorToken, const ast::par::AstToken& headerToken);
-        ~Header();
 
         [[nodiscard]] const HeaderVariant& headerVariant() const;
         [[nodiscard]] HEADER_TYPE          type() const;

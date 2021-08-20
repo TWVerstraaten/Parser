@@ -5,7 +5,7 @@
 #ifndef APP_FORMULASIDEBAR_H
 #define APP_FORMULASIDEBAR_H
 
-#include "../ast/AstManager.h"
+#include "../ast/UnrollManager.h"
 
 #include <QWidget>
 #include <memory>
@@ -53,13 +53,8 @@ namespace app {
         void makeScrollArea();
         void writeInfoToInfoLabel();
 
-        [[nodiscard]] std::vector<ast::par::FunctionToken> getDeclaredFunctions() const;
-        [[nodiscard]] std::set<ast::par::FunctionToken>    getReferencedFunctions() const;
-        [[nodiscard]] std::vector<std::string>                   getDeclaredConstants() const;
-        [[nodiscard]] std::set<std::string>                      getReferencedConstants() const;
-
         std::vector<FormulaWidget*> m_formulaWidgets;
-        ast::AstManager             m_astManager;
+        ast::UnrollManager          m_unrollManager;
         QPushButton*                m_newFormulaPushButton = nullptr;
         QScrollArea*                m_scrollArea           = nullptr;
         QVBoxLayout*                m_layout               = nullptr;

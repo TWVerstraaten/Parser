@@ -2,8 +2,8 @@
 // Created by pc on 17-03-21.
 //
 
-#ifndef PARSER_NUMBER_H
-#define PARSER_NUMBER_H
+#ifndef GEN_NUMBER_H
+#define GEN_NUMBER_H
 
 #include <string>
 #include <variant>
@@ -38,4 +38,4 @@ namespace gen {
     };
 } // namespace gen
 
-#endif // PARSER_NUMBER_H
+#endif // GEN_NUMBER_H
