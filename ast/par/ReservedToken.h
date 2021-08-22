@@ -13,36 +13,44 @@ namespace ast::par {
 
     struct Sin {
         static const size_t       ARGUMENT_COUNT = 1;
+        static const size_t       DIMENSION      = 1;
         inline static const char* NAME           = "sin";
     };
     struct Cos {
         static const size_t       ARGUMENT_COUNT = 1;
+        static const size_t       DIMENSION      = 1;
         inline static const char* NAME           = "cos";
     };
     struct Tan {
         static const size_t       ARGUMENT_COUNT = 1;
+        static const size_t       DIMENSION      = 1;
         inline static const char* NAME           = "tan";
     };
     struct ASin {
         static const size_t       ARGUMENT_COUNT = 1;
+        static const size_t       DIMENSION      = 1;
         inline static const char* NAME           = "asin";
     };
     struct ACos {
         static const size_t       ARGUMENT_COUNT = 1;
+        static const size_t       DIMENSION      = 1;
         inline static const char* NAME           = "acos";
     };
     struct ATan {
         static const size_t       ARGUMENT_COUNT = 1;
+        static const size_t       DIMENSION      = 1;
         inline static const char* NAME           = "atan";
     };
     struct ATan2 {
         static const size_t       ARGUMENT_COUNT = 2;
+        static const size_t       DIMENSION      = 1;
         inline static const char* NAME           = "atan2";
     };
 
     typedef std::variant<Sin, Cos, Tan, ASin, ACos, ATan, ATan2> ReservedToken;
 
     [[nodiscard]] size_t                       GET_ARGUMENT_COUNT(const ReservedToken& reserved);
+    [[nodiscard]] size_t                       GET_DIMENSION(const ReservedToken& reserved);
     [[nodiscard]] std::string                  GET_NAME(const ReservedToken& reserved);
     [[nodiscard]] std::optional<ReservedToken> GET_RESERVED(const std::string& string);
 

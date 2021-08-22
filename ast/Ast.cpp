@@ -7,6 +7,7 @@
 #include "../alg/StringAlg.h"
 #include "../gen/Overloaded.h"
 #include "../gen/VariantTemplates.h"
+#include "Dimension.h"
 #include "par/Parser.h"
 #include "par/TokenTemplates.h"
 
@@ -38,7 +39,7 @@ namespace ast {
         return m_info;
     }
 
-    std::set<par::FunctionToken> Ast::getFunctionDependencies() const {
+    std::set<FunctionToken> Ast::getFunctionDependencies() const {
         return m_body.getFunctionDependencies();
     }
 
@@ -50,7 +51,7 @@ namespace ast {
         assert(m_headerWasSet);
         switch (m_header.type()) {
             case Header::HEADER_TYPE::FULL_HEADER:
-                return std::get<Header::FullHeader>(m_header.headerVariant()).m_variables;
+                return std::get<FullHeader>(m_header).m_variables;
             default:
                 return {};
         }
@@ -60,7 +61,7 @@ namespace ast {
         assert(m_body.children().size() == 2);
         const auto& headerAst = m_body.children().front();
         std::visit(Overloaded{[this](const std::string& str) { m_header = Header{str}; },
-                              [&](const par::FunctionToken& function) {
+                              [&](const FunctionToken& function) {
                                   checkArgumentsIfFullHeader();
                                   if (m_info.success()) {
                                       m_header = Header(function, headerAst);
@@ -104,18 +105,14 @@ namespace ast {
 
     void Ast::replaceFunctionInPlace(const Ast& function) {
         assert(function.m_header.type() == Header::HEADER_TYPE::FULL_HEADER);
-        assert(std::holds_alternative<Header::FullHeader>(function.m_header.headerVariant()));
-        m_body.replaceFunction(std::get<Header::FullHeader>(function.m_header.headerVariant()), function.body());
+        assert(std::holds_alternative<FullHeader>(function.m_header));
+        m_body.replaceFunction(std::get<FullHeader>(function.m_header), function.body());
     }
 
     void Ast::replaceConstantInPlace(const Ast& constant) {
         assert(constant.m_header.type() == Header::HEADER_TYPE::CONSTANT);
-        assert(std::holds_alternative<Header::ConstantHeader>(constant.m_header.headerVariant()));
-        m_body.replaceConstant(std::get<Header::ConstantHeader>(constant.m_header.headerVariant()), constant.body());
-    }
-
-    bool Ast::hasCustomDependencies() const {
-        return not m_body.getFunctionDependencies().empty();
+        assert(std::holds_alternative<ConstantHeader>(constant.m_header));
+        m_body.replaceConstant(std::get<ConstantHeader>(constant.m_header), constant.body());
     }
 
     std::string Ast::toStringFlat() const {
@@ -126,24 +123,24 @@ namespace ast {
         }
     }
 
-    par::FunctionToken Ast::getFunctionToken() const {
+    FunctionToken Ast::getFunctionToken() const {
         assert(m_header.type() == Header::HEADER_TYPE::FULL_HEADER);
-        const auto& fullHeader = std::get<Header::FullHeader>(m_header.headerVariant());
-        return par::FunctionToken{fullHeader.m_name, fullHeader.m_variables.size()};
+        const auto& fullHeader = std::get<FullHeader>(m_header);
+        return FunctionToken{fullHeader.m_name, fullHeader.m_variables.size()};
     }
 
-    par::ConstantToken Ast::getConstantToken() const {
+    ConstantToken Ast::getConstantToken() const {
         assert(m_header.type() == Header::HEADER_TYPE::CONSTANT);
-        const auto& constantHeader = std::get<Header::ConstantHeader>(m_header.headerVariant());
-        assert(constantHeader.m_name == alg::str::TRIM(constantHeader.m_name));
-        return constantHeader.m_name;
+        const auto& constantHeader = std::get<ConstantHeader>(m_header);
+        assert(constantHeader == alg::str::TRIM(constantHeader));
+        return constantHeader;
     }
 
     std::set<std::string> Ast::getConstantDependencies() const {
         return std::visit(Overloaded{
-                              [this](const Header::ConstantHeader&) { return body().getUndeclaredVariables({}); },
-                              [this](const Header::FullHeader&) {
-                                  const auto declared = std::get<Header::FullHeader>(m_header.headerVariant()).m_variables;
+                              [this](const ConstantHeader&) { return body().getUndeclaredVariables({}); },
+                              [this](const FullHeader&) {
+                                  const auto declared = std::get<FullHeader>(m_header).m_variables;
                                   return m_body.getUndeclaredVariables(std::set<std::string>(declared.begin(), declared.end()));
                               },
                               [this](const auto&) {
@@ -151,11 +148,11 @@ namespace ast {
                               },
 
                           },
-                          m_header.headerVariant());
+                          static_cast<const HeaderVariant&>(m_header));
     }
 
     void Ast::checkArgumentsIfFullHeader() {
-        assert(std::holds_alternative<ast::par::FunctionToken>(m_body.children().front().token()));
+        assert(std::holds_alternative<ast::FunctionToken>(m_body.children().front().token()));
         const auto& arguments = m_body.children().front().children();
         if (arguments.empty()) {
             m_info.add({err::ParserError::TYPE::NO_ARGUMENTS, "", m_body.children().front().range()});
@@ -170,7 +167,7 @@ namespace ast {
     }
 
     void Ast::checkIfArgumentsAreStrings() {
-        assert(std::holds_alternative<ast::par::FunctionToken>(m_body.children().front().token()));
+        assert(std::holds_alternative<ast::FunctionToken>(m_body.children().front().token()));
         const auto& arguments = m_body.children().front().children();
         for (const auto& argument : arguments) {
             if (not std::holds_alternative<std::string>(argument.token())) {
@@ -184,7 +181,7 @@ namespace ast {
     }
 
     void Ast::checkRepeatedArguments() {
-        assert(std::holds_alternative<ast::par::FunctionToken>(m_body.children().front().token()));
+        assert(std::holds_alternative<ast::FunctionToken>(m_body.children().front().token()));
         const auto& arguments = m_body.children().front().children();
         if (arguments.size() > 1) {
             for (auto it1 = arguments.begin(); std::next(it1) != arguments.end(); ++it1) {
@@ -198,7 +195,7 @@ namespace ast {
     }
 
     void Ast::checkUnusedArguments() {
-        assert(std::holds_alternative<ast::par::FunctionToken>(m_body.children().front().token()));
+        assert(std::holds_alternative<ast::FunctionToken>(m_body.children().front().token()));
         const auto& arguments     = m_body.children().front().children();
         const auto  usedVariables = m_body.children().back().variablesUsed();
         for (const auto& el : arguments) {
@@ -222,7 +219,7 @@ namespace ast {
         if (m_header.type() == ast::Header::HEADER_TYPE::FULL_HEADER) {
             return getFunctionToken().name();
         } else if (m_header.type() == ast::Header::HEADER_TYPE::CONSTANT) {
-            return std::get<ast::Header::ConstantHeader>(m_header.headerVariant()).m_name;
+            return std::get<ConstantHeader>(m_header);
         }
         assert(false);
         return "";
@@ -269,7 +266,19 @@ namespace ast {
     }
 
     void Ast::replaceDependencyInPlace(const Dependency& dependency, const Ast& ast) {
-        std::visit(Overloaded{[&](const par::FunctionToken& f) { replaceFunctionInPlace(ast); }, [&](const par::ConstantToken& c) { replaceConstantInPlace(ast); }},
-                   dependency.get());
+        std::visit(Overloaded{[&](const FunctionToken& f) { replaceFunctionInPlace(ast); }, [&](const ConstantToken& c) { replaceConstantInPlace(ast); }}, dependency.get());
+    }
+
+    bool Ast::canUnroll() const {
+        return getDependencies().empty();
+    }
+
+    bool Ast::dimensionsMatch() const {
+        assert(canUnroll());
+        return m_body.dimension() != DIMENSION_MISMATCH;
+    }
+
+    size_t Ast::dimension() const {
+        return m_body.dimension();
     }
 } // namespace ast

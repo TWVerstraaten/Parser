@@ -22,7 +22,7 @@ namespace ast {
 
         struct Vertex {
             struct Anonymous {};
-            typedef std::variant<Anonymous, par::ConstantToken, par::FunctionToken> Type;
+            typedef std::variant<Anonymous, ConstantToken, FunctionToken> Type;
 
             Type                 m_type;
             std::set<Dependency> m_dependencies;
@@ -52,8 +52,8 @@ namespace ast {
         [[nodiscard]] bool          hasCircularDependency(std::vector<size_t>& currentPath) const;
         [[nodiscard]] bool          hasCircularDependency(size_t index) const;
         [[nodiscard]] size_t        get(const Dependency& dependency);
-        [[nodiscard]] size_t        get(const par::FunctionToken& functionToken);
-        [[nodiscard]] size_t        get(const par::ConstantToken& constantToken);
+        [[nodiscard]] size_t        get(const FunctionToken& functionToken);
+        [[nodiscard]] size_t        get(const ConstantToken& constantToken);
         [[nodiscard]] const Vertex& vertexAt(size_t index) const;
 
         std::set<size_t>         m_updated;

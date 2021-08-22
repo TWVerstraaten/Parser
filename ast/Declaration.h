@@ -5,23 +5,23 @@
 #ifndef AST_DECLARATION_H
 #define AST_DECLARATION_H
 
-#include "par/ConstantToken.h"
-#include "par/FunctionToken.h"
+#include "ConstantToken.h"
+#include "FunctionToken.h"
 
 #include <variant>
 
 namespace ast {
-    
-    class Declaration : public std::variant<par::ConstantToken, par::FunctionToken> {
+
+    class Declaration : public std::variant<ConstantToken, FunctionToken> {
 
       public:
-        explicit Declaration(std::variant<par::ConstantToken, par::FunctionToken>&& variant);
-        explicit Declaration(par::ConstantToken&& constantToken);
-        explicit Declaration(par::FunctionToken&& functionToken);
+        explicit Declaration(std::variant<ConstantToken, FunctionToken>&& variant);
+        explicit Declaration(ConstantToken&& constantToken);
+        explicit Declaration(FunctionToken&& functionToken);
 
-        [[nodiscard]] std::string                                                 toString() const;
-        [[nodiscard]] std::variant<par::ConstantToken, par::FunctionToken>&       get();
-        [[nodiscard]] const std::variant<par::ConstantToken, par::FunctionToken>& get() const;
+        [[nodiscard]] std::string                                       toString() const;
+        [[nodiscard]] std::variant<ConstantToken, FunctionToken>&       get();
+        [[nodiscard]] const std::variant<ConstantToken, FunctionToken>& get() const;
     };
 
 } // namespace ast

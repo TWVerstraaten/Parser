@@ -8,23 +8,25 @@
 
 namespace ast {
 
-    Declaration::Declaration(std::variant<par::ConstantToken, par::FunctionToken>&& variant) : std::variant<par::ConstantToken, par::FunctionToken>(variant) {
+    Declaration::Declaration(std::variant<ConstantToken, FunctionToken>&& variant) : std::variant<ConstantToken, FunctionToken>(variant) {
     }
 
-    Declaration::Declaration(par::ConstantToken&& constantToken) : std::variant<par::ConstantToken, par::FunctionToken>(constantToken) {
+    Declaration::Declaration(ConstantToken&& constantToken) : std::variant<ConstantToken, FunctionToken>(constantToken) {
     }
 
-    Declaration::Declaration(par::FunctionToken&& functionToken) : std::variant<par::ConstantToken, par::FunctionToken>(functionToken) {
+    Declaration::Declaration(FunctionToken&& functionToken) : std::variant<ConstantToken, FunctionToken>(functionToken) {
     }
 
     std::string Declaration::toString() const {
-        return std::visit(Overloaded{[](const par::FunctionToken& function) { return function.toString(); }, [](const par::ConstantToken& constant) { return constant; }}, get());
+        return std::visit(
+            Overloaded{[](const FunctionToken& function) { return function.toString(); }, [](const ConstantToken& constant) { return static_cast<std::string>(constant); }},
+            get());
     }
-    std::variant<par::ConstantToken, par::FunctionToken>& Declaration::get() {
-        return static_cast<std::variant<par::ConstantToken, par::FunctionToken>&>(*this);
+    std::variant<ConstantToken, FunctionToken>& Declaration::get() {
+        return static_cast<std::variant<ConstantToken, FunctionToken>&>(*this);
     }
-    const std::variant<par::ConstantToken, par::FunctionToken>& Declaration::get() const {
-        return static_cast<const std::variant<par::ConstantToken, par::FunctionToken>&>(*this);
+    const std::variant<ConstantToken, FunctionToken>& Declaration::get() const {
+        return static_cast<const std::variant<ConstantToken, FunctionToken>&>(*this);
     }
 
 } // namespace ast

@@ -5,9 +5,9 @@
 #ifndef AST_PAR_ASTTOKEN_H
 #define AST_PAR_ASTTOKEN_H
 
+#include "../ConstantToken.h"
+#include "../FunctionToken.h"
 #include "../Header.h"
-#include "ConstantToken.h"
-#include "FunctionToken.h"
 #include "ReservedToken.h"
 #include "StructuralToken.h"
 #include "VectorToken.h"
@@ -47,9 +47,11 @@ namespace ast::par {
         void replaceVariable(const std::string& variable, const AstToken& token);
         void replaceVariables(const std::map<std::string, AstToken>& variableMap);
         void replaceVariables(const std::vector<std::string>& variables, const std::vector<AstToken>& tokens);
-        void replaceFunction(const Header::FullHeader& header, const AstToken& functionAst);
-        void replaceConstant(const Header::ConstantHeader& constant, const AstToken& constantAst);
+        void replaceFunction(const FullHeader& header, const AstToken& functionAst);
+        void replaceConstant(const ConstantHeader& constant, const AstToken& constantAst);
 
+        [[nodiscard]] bool                         hasEmptyBody() const;
+        [[nodiscard]] size_t                       dimension() const;
         [[nodiscard]] std::set<FunctionToken>      getFunctionDependencies() const;
         [[nodiscard]] std::set<std::string>        getUndeclaredVariables(const std::set<std::string>& declared) const;
         [[nodiscard]] std::set<std::string>        variablesUsed() const;
@@ -58,10 +60,10 @@ namespace ast::par {
         [[nodiscard]] const Range&                 range() const;
         [[nodiscard]] std::string                  toStringAsTree() const;
         [[nodiscard]] std::string                  toStringFlat() const;
-        [[nodiscard]] bool                         hasEmptyBody() const;
 
       private:
-        void maybeCastToReservedFunction(err::ParserInfo& info);
+        void                 maybeCastToReservedFunction(err::ParserInfo& info);
+        [[nodiscard]] size_t dimensionOfOperator() const;
 
         AstTokenVariant       m_token = {Error{}};
         std::vector<AstToken> m_children;

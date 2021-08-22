@@ -19,6 +19,10 @@ namespace ast::par {
         return std::visit([](const auto& a) { return std::remove_reference_t<decltype(a)>::ARGUMENT_COUNT; }, reserved);
     }
 
+    size_t GET_DIMENSION(const ReservedToken& reserved) {
+        return std::visit([](const auto& a) { return std::remove_reference_t<decltype(a)>::DIMENSION; }, reserved);
+    }
+
     std::optional<ReservedToken> GET_RESERVED(const std::string& string) {
         const auto trimmed = alg::str::TRIM(string);
         if (auto it = std::find_if(TT_IT(ALL_RESERVED), TT_LAMBDA_REF(a, return GET_NAME(a) == trimmed;)); it != ALL_RESERVED.end()) {

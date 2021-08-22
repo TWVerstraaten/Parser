@@ -34,6 +34,7 @@ namespace ast {
 
     void UnrolledAst::setVariableInPlace(const std::string& variable, const gen::Number& number) {
         m_token.setVariableInPlace(variable, number);
+        m_token.simplify();
     }
 
     void UnrolledAst::setVariablesInPlace(const std::map<std::string, gen::Number>& variableMap) {
@@ -44,11 +45,16 @@ namespace ast {
         }
     }
 
-    std::vector<par::ConstantToken> UnrolledAst::declaredVariables() const {
+    std::vector<ConstantToken> UnrolledAst::declaredVariables() const {
         if (m_header.type() == Header::HEADER_TYPE::FULL_HEADER) {
-            assert(std::holds_alternative<Header::FullHeader>(m_header.headerVariant()));
-            return std::get<Header::FullHeader>(m_header.headerVariant()).m_variables;
+            assert(std::holds_alternative<FullHeader>(m_header));
+            return std::get<FullHeader>(m_header).m_variables;
         }
         return {};
     }
+
+    const par::UnrolledAstToken& UnrolledAst::token() const {
+        return m_token;
+    }
+
 } // namespace ast

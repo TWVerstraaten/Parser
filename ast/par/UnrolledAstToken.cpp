@@ -178,4 +178,5 @@ namespace ast::par {
     const std::vector<UnrolledAstToken>& UnrolledAstToken::children() const {
         return m_children;
     }
+
 } // namespace ast::par

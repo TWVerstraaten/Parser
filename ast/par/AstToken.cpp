@@ -7,6 +7,7 @@
 #include "../../gen/Overloaded.h"
 #include "../../gen/VariantTemplates.h"
 #include "../../gen/defines.h"
+#include "../Dimension.h"
 #include "../err/ParserError.h"
 #include "../err/ParserInfo.h"
 #include "TokenTemplates.h"
@@ -117,7 +118,7 @@ namespace ast::par {
         maybeCastToReservedFunction(info);
     }
 
-    AstToken::AstToken(const ConstantToken& string, Range range, err::ParserInfo& info) : m_token(string), m_range(range) {
+    AstToken::AstToken(const std::string& string, Range range, err::ParserInfo& info) : m_token(string), m_range(range) {
     }
 
     AstToken::AstToken(long long int value, Range range, err::ParserInfo& info) : m_token(value), m_range(range) {
@@ -226,7 +227,7 @@ namespace ast::par {
         return TokenWriter::S_TO_STRING_AS_TREE(*this);
     }
 
-    void AstToken::replaceFunction(const Header::FullHeader& header, const AstToken& functionAst) {
+    void AstToken::replaceFunction(const FullHeader& header, const AstToken& functionAst) {
         for (auto& child : m_children) {
             child.replaceFunction(header, functionAst);
         }
@@ -240,12 +241,12 @@ namespace ast::par {
         }
     }
 
-    void AstToken::replaceConstant(const Header::ConstantHeader& header, const AstToken& constantAst) {
+    void AstToken::replaceConstant(const ConstantHeader& header, const AstToken& constantAst) {
         for (auto& child : m_children) {
             child.replaceConstant(header, constantAst);
         }
         std::visit(Overloaded{[&](const ConstantToken& constant) {
-                                  if (constant == header.m_name) {
+                                  if (constant == header) {
                                       *this = constantAst;
                                   }
                               },
@@ -278,5 +279,103 @@ namespace ast::par {
         } else {
             return std::holds_alternative<Empty>(m_token);
         }
+    }
+
+    size_t AstToken::dimension() const {
+        return std::visit(Overloaded{[](const Error& a) {
+                                         assert(false);
+                                         return DIMENSION_MISMATCH;
+                                     },
+                                     [](const FunctionToken& a) {
+                                         assert(false);
+                                         return DIMENSION_MISMATCH;
+                                     },
+                                     [](const Empty& a) {
+                                         assert(false);
+                                         return DIMENSION_MISMATCH;
+                                     },
+                                     [this](const OPERATOR_TYPE& a) { return dimensionOfOperator(); },
+                                     [](const ReservedToken& a) { return ast::par::GET_DIMENSION(a); },
+                                     [](const VectorToken& a) { return a.m_dimension; },
+                                     [](const ConstantToken& a) { return static_cast<size_t>(1ul); },
+                                     [](const double& a) { return static_cast<size_t>(1ul); },
+                                     [](const long long int& a) { return static_cast<size_t>(1ul); }},
+                          m_token);
+    }
+
+    size_t AstToken::dimensionOfOperator() const {
+        assert(std::holds_alternative<OPERATOR_TYPE>(m_token));
+        const auto& op = std::get<OPERATOR_TYPE>(m_token);
+        switch (op) {
+            case OPERATOR_TYPE::PLUS:
+                assert(m_children.size() >= 2);
+                {
+                    std::vector<size_t> dimensions{};
+                    dimensions.reserve(m_children.size());
+                    std::transform(TT_IT(m_children), std::back_inserter(dimensions), [](const auto& a) { return a.dimension(); });
+                    if (std::find(TT_IT(dimensions), DIMENSION_MISMATCH) != dimensions.end() ||
+                        not std::equal(std::next(dimensions.begin()), dimensions.end(), dimensions.begin())) {
+                        return DIMENSION_MISMATCH;
+                    } else {
+                        return dimensions.front();
+                    }
+                }
+            case OPERATOR_TYPE::MINUS:
+                assert(m_children.size() >= 2);
+                {
+                    std::vector<size_t> dimensions{};
+                    dimensions.reserve(m_children.size());
+                    std::transform(TT_IT(m_children), std::back_inserter(dimensions), [](const auto& a) { return a.dimension(); });
+                    if (std::find(TT_IT(dimensions), DIMENSION_MISMATCH) != dimensions.end() ||
+                        not std::equal(std::next(dimensions.begin()), dimensions.end(), dimensions.begin())) {
+                        return DIMENSION_MISMATCH;
+                    } else {
+                        return dimensions.front();
+                    }
+                }
+            case OPERATOR_TYPE::TIMES: {
+                assert(m_children.size() >= 2);
+                std::vector<size_t> dimensions{};
+                dimensions.reserve(m_children.size());
+                std::transform(TT_IT(m_children), std::back_inserter(dimensions), [](const auto& a) { return a.dimension(); });
+                if (std::find(TT_IT(dimensions), DIMENSION_MISMATCH) != dimensions.end()) {
+                    return DIMENSION_MISMATCH;
+                } else {
+                    auto firstVectorIt = std::find_if(TT_IT(dimensions), [](const size_t d) { return d > 1; });
+                    if (firstVectorIt == dimensions.end()) {
+                        return 1;
+                    }
+                    if (std::find_if(std::next(firstVectorIt), dimensions.end(), [](const size_t d) { return d > 1; }) != dimensions.end()) {
+                        return DIMENSION_MISMATCH;
+                    } else {
+                        return *firstVectorIt;
+                    }
+                }
+            } break;
+            case OPERATOR_TYPE::DIVIDE:
+                assert(m_children.size() == 2);
+                if (m_children.back().dimension() == 1) {
+                    return m_children.front().dimension();
+                } else {
+                    return DIMENSION_MISMATCH;
+                }
+                break;
+            case OPERATOR_TYPE::POWER:
+                assert(m_children.size() == 2);
+                if (m_children.front().dimension() == 1 && m_children.back().dimension() == 1) {
+                    return 1;
+                } else {
+                    return DIMENSION_MISMATCH;
+                }
+                break;
+            case OPERATOR_TYPE::UNARY_MINUS:
+                assert(m_children.size() == 1);
+                return m_children.front().dimension();
+                break;
+            case OPERATOR_TYPE::EQUALS:
+                assert(false);
+                break;
+        }
+        return DIMENSION_MISMATCH;
     }
 } // namespace ast::par

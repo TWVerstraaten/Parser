@@ -21,8 +21,8 @@ namespace ast {
         void                                               remove(size_t index);
         void                                               unrollAll();
         void                                               removeUpdatedFromUnrolled();
-        [[nodiscard]] std::optional<err::DeclarationError> checkForDeclarationError(size_t index) const;
         [[nodiscard]] const UnrolledAst&                   getUnrolledAt(size_t index) const;
+        [[nodiscard]] std::optional<err::DeclarationError> checkForDeclarationError(size_t index) const;
 
       private:
         void unroll(size_t index);

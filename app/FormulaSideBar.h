@@ -17,10 +17,6 @@ class QLabel;
 class QScrollArea;
 class QPushButton;
 
-namespace ast::par {
-    class FunctionToken;
-}
-
 namespace app {
 
     namespace cmd {

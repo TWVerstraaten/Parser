@@ -31,7 +31,7 @@ namespace ast {
         m_vertices.insert({index, {type, dependencies}});
         m_updated.insert(index);
         if (not std::holds_alternative<Vertex::Anonymous>(type)) {
-            std::string addedName = std::holds_alternative<par::ConstantToken>(type) ? std::get<par::ConstantToken>(type) : std::get<par::FunctionToken>(type).name();
+            std::string addedName = std::holds_alternative<ConstantToken>(type) ? std::get<ConstantToken>(type) : std::get<FunctionToken>(type).name();
             addRedeclarations(addedName, index);
         }
         updateAdjacencies();
@@ -65,8 +65,8 @@ namespace ast {
         std::stringstream ss;
         for (const auto& [index, vertex] : m_vertices) {
             ss << index << ": "
-               << std::visit(Overloaded{[](const par::FunctionToken& f) { return f.toString(); },
-                                        [](const par::ConstantToken& c) { return c; },
+               << std::visit(Overloaded{[](const FunctionToken& f) { return f.toString(); },
+                                        [](const ConstantToken& c) { return c; },
                                         [](const auto& a) { return std::string("Anon"); }},
                              vertex.m_type);
             ss << "\tUpdated: " << (m_updated.find(index) != m_updated.end());
@@ -85,7 +85,7 @@ namespace ast {
                 continue;
             } else {
                 const auto&       type  = vertex.m_type;
-                const std::string other = std::holds_alternative<par::ConstantToken>(type) ? std::get<par::ConstantToken>(type) : std::get<par::FunctionToken>(type).name();
+                const std::string other = std::holds_alternative<ConstantToken>(type) ? std::get<ConstantToken>(type) : std::get<FunctionToken>(type).name();
                 if (other == addedName) {
                     vertex.m_redeclarations.insert(addedIndex);
                     m_vertices[addedIndex].m_redeclarations.insert(index);
@@ -230,12 +230,12 @@ namespace ast {
         return {TT_IT(order)};
     }
 
-    size_t DependencyManager::get(const par::FunctionToken& functionToken) {
+    size_t DependencyManager::get(const FunctionToken& functionToken) {
         const auto it = std::find_if(TT_IT(m_vertices), TT_LAMBDA_REF(a, return gen::S_VARIANT_EQUALS(a.second.m_type, functionToken);));
         return it == m_vertices.end() ? std::numeric_limits<size_t>::max() : it->first;
     }
 
-    size_t DependencyManager::get(const par::ConstantToken& constantToken) {
+    size_t DependencyManager::get(const ConstantToken& constantToken) {
         const auto it = std::find_if(TT_IT(m_vertices), TT_LAMBDA_REF(a, return gen::S_VARIANT_EQUALS(a.second.m_type, constantToken);));
         return it == m_vertices.end() ? std::numeric_limits<size_t>::max() : it->first;
     }

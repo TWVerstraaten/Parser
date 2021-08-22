@@ -16,20 +16,20 @@ namespace ast {
 
     Header::Header(const std::string& name) {
         if (S_RESERVED_COORDINATES.find(name) != S_RESERVED_COORDINATES.end()) {
-            m_header = SingleCoordinateHeader{name};
+            static_cast<HeaderVariant&>(*this) = SingleCoordinateHeader{name};
         } else {
-            m_header = ConstantHeader{name};
+            static_cast<HeaderVariant&>(*this) = ConstantHeader{name};
         }
     }
 
-    Header::Header(const par::FunctionToken& customFunction, const ast::par::AstToken& headerToken) {
+    Header::Header(const FunctionToken& customFunction, const ast::par::AstToken& headerToken) {
         std::vector<std::string> variableNames;
         variableNames.reserve(customFunction.argumentCount());
         for (const auto& child : headerToken.children()) {
             assert(std::holds_alternative<std::string>(child.token()));
             variableNames.emplace_back(std::get<std::string>(child.token()));
         }
-        m_header = FullHeader{customFunction.name(), std::move(variableNames)};
+        static_cast<HeaderVariant&>(*this) = FullHeader{customFunction.name(), std::move(variableNames)};
     }
 
     Header::Header(const par::VectorToken& vectorToken, const ast::par::AstToken& headerToken) {
@@ -40,7 +40,7 @@ namespace ast {
             assert(S_RESERVED_COORDINATES.find(std::get<std::string>(child.token())) != S_RESERVED_COORDINATES.end());
             variableNames.emplace_back(std::get<std::string>(child.token()));
         }
-        m_header = CoordinateVectorHeader{std::move(variableNames)};
+        static_cast<HeaderVariant&>(*this) = CoordinateVectorHeader{std::move(variableNames)};
     }
 
     Header::HEADER_TYPE Header::type() const {
@@ -49,19 +49,15 @@ namespace ast {
                                      [](const SingleCoordinateHeader&) { return HEADER_TYPE::SINGLE_COORDINATE; },
                                      [](const CoordinateVectorHeader&) { return HEADER_TYPE::COORDINATE_VECTOR; },
                                      [](const FullHeader&) { return HEADER_TYPE::FULL_HEADER; }},
-                          m_header);
+                          static_cast<const HeaderVariant&>(*this));
     }
 
     std::string Header::toString() const {
         return std::visit(Overloaded{[](EmptyHeader) { return std::string("Empty:"); },
-                                     [](const ConstantHeader& namedHeader) { return "Constant:\t" + namedHeader.m_name; },
+                                     [](const ConstantHeader& namedHeader) { return "Constant:\t" + namedHeader; },
                                      [](const SingleCoordinateHeader& single) { return "Single coord:\t" + single.m_coordinate; },
                                      [](const CoordinateVectorHeader& vector) { return "Coord. vector:\t(" + alg::str::CONCATENATE_STRINGS(vector.m_coordinates) + ")"; },
                                      [](const FullHeader& h) { return std::string("Full:\t") + h.m_name + "(" + alg::str::CONCATENATE_STRINGS(h.m_variables) + ")"; }},
-                          m_header);
-    }
-
-    const Header::HeaderVariant& Header::headerVariant() const {
-        return m_header;
+                          static_cast<const HeaderVariant&>(*this));
     }
 } // namespace ast
